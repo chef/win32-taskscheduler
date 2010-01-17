@@ -1,0 +1,51 @@
+== 0.2.0 - 19-Jun-2009
+* Rewritten in pure Ruby!
+* The TaskScheduler::ONCE constant is now a valid trigger type. Thanks go to
+  Uri Iurgel for the spot and patch.
+* Added the TaskScheduler#exists? method.
+* Added the TaskScheduler#tasks alias for the TaskScheduler#enum method.
+* The TaskScheduler#new_work_item method now accepts symbols as well as
+  strings for hash keys, and ignores case. Also, the keys are now validated.
+* Renamed the example file and test file.
+* Added the 'example' Rake task.
+* Fixed some code in the README synopsis that was incorrect.
+
+== 0.1.0 - 11-May-2008
+* The TaskScheduler#save instance method now accepts an optional file name.
+* Most of the TaskScheduler setter methods now return the value specified
+  instead of true.
+* Removed the RUN_ONLY_IF_DOCKED and RUN_IF_CONNECTED_TO_INTERNET constants.
+  The MSDN docs say that they are unused.
+* Added more documentation. Much more rdoc friendly now.
+* Added many more tests.
+* Better type handling for bad arguments.
+* Added a Rakefile with tasks for building, installation and testing.
+* Added a gemspec.
+* Inlined the rdoc documentation.
+* Internal project reorganization and code cleanup.
+
+== 0.0.3 - 1-Mar-2005
+* Bug fix for the bitFieldToHumanDays() internal function.
+* Moved the 'examples' directory to the toplevel directory.
+* Made the CHANGES and README files rdoc friendly.
+* Minor updates to taskscheduler.h.
+
+== 0.0.2 - 04-Aug-2004
+* Now uses the newer allocation framework and replaced all instances of the
+  deprecated STR2CSTR() function with StringValuePtr().  This means that, as
+  of this release, Ruby 1.8.0 or later is required.
+* Modified the constructor to accept arguments.  This is just some sugar for
+  creating a new task item in one call instead of two.
+* The argument to trigger= now must be a hash.  The same goes for the 'type'
+  sub-hash.
+* Added the add_trigger() method.  Actually, the C code for this method was
+  already in place, I simply forgot to create a corresponding Ruby method
+  for it.
+* Removed the create_trigger() method.  This was really nothing more than an
+  alias for trigger=().  I got confused somehow.
+* Test suite modified and many more tests added.
+* Documentation updates, including docs for a couple of methods that I had
+  accidentally omitted previously.
+
+== 0.0.1 - 24-Apr-2004
+* Initial release

@@ -1,0 +1,419 @@
+= Description
+   This is an interface to the MS Windows task scheduler.
+= Synopsis
+   require 'win32/taskscheduler'
+   include Win32
+   
+   ts = TaskScheduler.new
+   
+   # Create a trigger that starts on April 25, 2014 at 11:05 pm. The trigger
+   # will run on the first and last week of the month, on Monday and Friday,
+   # in the months of April and May.
+   #
+   trigger = {
+      :start_year    => 2014,
+      :start_month   => 4,
+      :start_day     => 25,
+      :start_hour    => 23,
+      :start_minute  => 5,
+      :trigger_type  => TaskScheduler::MONTHLYDOW,
+      :type       => {
+         :weeks         => TaskScheduler::FIRST_WEEK | TaskScheduler::LAST_WEEK,
+         :days_of_week  => TaskScheduler::MONDAY | TaskScheduler::FRIDAY,
+         :months        => TaskScheduler::APRIL | TaskScheduler::MAY
+      }
+   }
+   
+   ts.new_work_item('my_task', trigger)
+   ts.application_name = 'notepad.exe'
+   ts.save
+
+= Constants
+=== VERSION
+   Returns the current version number for this package as a string.
+   
+= Class Methods
+=== TaskScheduler.new(task_name=nil, trigger=nil)
+   Returns a new TaskScheduler object.  If the task name and trigger are
+   passed as arguments, then a new work item is created and associated with
+   that trigger, although you can still activate other tasks with the same
+   object.
+   
+   Passing arguments to the constructor is effectively a shortcut for
+   TaskScheduler.new plus TaskScheduler#new_work_item.
+   
+= Instance Methods
+=== TaskScheduler#account_information
+   Returns the account name associated with the task (but not the password).
+   
+=== TaskScheduler#add_trigger(index, trigger)
+   Adds the given trigger at the specified index.
+   
+=== TaskScheduler#activate(job_name)
+   Activates the given +job_name+.
+
+=== TaskScheduler#application_name
+   Returns the application associated with the task, i.e. the program that's
+   to run at the specified date and time.
+   
+=== TaskScheduler#application_name=(name)
+   Sets the application associated with the task, i.e. the application
+   that runs at the specified date and time.
+   
+=== TaskScheduler#comment
+   Returns the comment associated with the task.
+   
+=== TaskScheduler#comment=
+   Sets the comment associated with the task.
+   
+=== TaskScheduler#creator
+   Returns the name of the user who created the task.
+   
+=== TaskScheduler#creator=(name)
+   Sets the name of the user who created the task.
+   
+=== TaskScheduler#delete(task_name)
+   Deletes the task with the specified name.
+   
+=== TaskScheduler#delete_trigger(index)
+   Deletes the trigger at the specified index.
+   
+=== TaskScheduler#enum
+   Returns an array of task names.
+   
+=== TaskScheduler#exit_code
+   Returns the exit code of from the task scheduler when it last attempted
+   to run the task.
+   
+=== TaskScheduler#flags
+   Returns a list of flags that modify the behavior of the work item.
+
+=== TaskScheduler#flags=(flags)
+   Sets a list of flags that modify the behavior of the work item.  See the
+   'Task Flags' below for a list of valid flags.
+
+=== TaskScheduler#machine=(host)
+   Sets the active host.  If this is not set, then it is assumed you are
+   working on the local host.
+   
+=== TaskScheduler#max_run_time
+   Returns the maximum length of time, in milliseconds, the task can run
+   before terminating.
+
+=== TaskScheduler#max_run_time=(milliseconds)
+   Sets the maximum length of time, in milliseconds, the task can run
+   before terminating.
+
+=== TaskScheduler#most_recent_run_time
+   Returns a Time object indicating the most recent time the task ran.
+   Returns nil if the task has never run.
+
+=== TaskScheduler#new_work_item(task_name, trigger)
+   Creates a new task with the associated trigger.  Note that the application
+   name hasn't been set, nor has it been saved.
+
+=== TaskSchedule#next_run_time
+   Returns a Time object indicating the next time the task will run.
+
+=== TaskScheduler#parameters
+   Returns the parameters that are passed to the scheduled command.
+
+=== TaskScheduler#parameters=(params)
+   Sets the parameters that are passed to the scheduled command.
+
+=== TaskScheduler#priority
+   Returns the priority level for the active task (Fixnum).
+
+=== TaskScheduler#priority=(level)
+   Sets the priority level for the active task. The priority of a task
+   determines the frequency and length of the time slices for a process.
+
+   See the 'Priority Levels' constants for a list of valid priorities.
+
+=== TaskScheduler#run
+   Executes the currently active task.
+ 
+=== TaskScheduler#save
+   Saves the current task. It also releases all information relative to tasks.
+   In order to modify this task again you must call Activate() because there
+   is no active task now.
+
+=== TaskScheduler#set_account_information(account_name, password)
+   Sets the account name and password used to run the task.
+
+=== TaskScheduler#status
+   Returns the status of the current task.  The possible return values are
+   "ready", "running", "not scheduled" or "unknown", though the latter should
+   never occur.
+ 
+   In the case of "not scheduled", it means that one or more of the
+   properties that are needed to run the work item on a schedule
+   have not been set.
+
+=== TaskScheduler#terminate
+   Terminatest the execution of the active task.
+
+=== TaskScheduler#trigger(index)
+   Returns a hash that describes the trigger for the active task at the
+   given index.
+
+=== TaskScheduler#trigger=(trigger_hash){
+   Takes a hash that sets the various trigger values, i.e. when and how often
+   the task will run.  Valid keys are:
+
+   * start_year      # Must be >= current year
+   * start_month     # 1-12
+   * start_day       # 1-31
+   * start_hour      # 0-23
+   * start_minute    # 0-59
+   * end_year
+   * end_month
+   * end_day
+   * minutes_duration
+   * minutes_interval
+   * random_minutes_interval
+   * flags
+   * trigger_type
+   * type            # A sub-hash
+
+   The +trigger_type+ determines what values are valid for the
+   +type+ key.  They are as follows:
+
+   Trigger Type      Valid +type+ keys
+   ============      ========================
+   DAILY             days_interval
+   WEEKLY            weeks_interval, days_of_week
+   MONTHLY_DATE      months, days
+   MONTHLY_DOW       weeks, days_of_week, months
+   
+=== TaskScheduler#trigger_count
+   Returns the number of triggers associated with the active task.
+
+=== TaskScheduler#trigger_string
+   Returns a string that describes the current trigger for the active task.      
+
+=== TaskScheduler#working_directory
+   Returns the current working directory for the active task.
+
+=== TaskScheduler#working_directory=(dir)
+   Sets the working directory for the scheduled command.
+
+= Constants
+== Standard Constants
+=== VERSION
+   Returns the current version number of this package as a String.
+
+== Trigger Types
+=== ONCE
+   Trigger is set to run the task a single time.  If this value is used, any
+   values used in the +type+ trigger key are ignored.
+
+=== DAILY
+   Trigger is set to run the task on a daily interval.
+
+=== WEEKLY
+   Trigger is set to run the work item on specific days of a specific week
+   of a specific month.
+
+=== MONTHLYDATE
+   Trigger is set to run the task on a specific day(s) of the month.
+
+=== MONTHLYDOW
+   Trigger is set to run the task on specific days, weeks, and months.
+
+=== ON_IDLE
+   Trigger is set to run the task if the system remains idle for the amount
+   of time specified by the idle wait time of the task.
+
+=== AT_SYSTEMSTART
+   Trigger is set to run the task at system startup.  If this value is used,
+   any values used in the +type+ trigger key are ignored.
+
+=== AT_LOGON
+   Trigger is set to run the task when a user logs on.  If this value is
+   used, any values used in the +type+ trigger key are ignored.
+
+== Priority Levels
+=== IDLE
+   Typically used for system monitoring applications.
+
+=== BELOW_NORMAL
+   Between IDLE and NORMAL priority classes.
+
+=== NORMAL
+   The default priority class. Recommended for most applications.
+
+=== ABOVE_NORMAL
+   Between NORMAL and HIGH priority classes.
+
+=== HIGH
+   High priority. Use only for applications that need regular focus.
+
+=== REALTIME
+   Extremely high priority. May affect other applications. Not recommended
+   for most applications.
+
+== Dates
+=== SUNDAY
+   The task will run on Sunday.
+
+=== MONDAY
+   The task will run on Monday.
+
+=== TUESDAY
+   The task will run on Tuesday.
+
+=== WEDNESDAY
+   The task will run on Wednesday.
+
+=== THURSDAY
+   The task will run on Thursday.
+
+=== FRIDAY
+   The task will run on Friday.
+
+=== SATURDAY
+   The task will run on Saturday.
+
+=== FIRST_WEEK
+   The task will run between the 1st and 7th day of the month.
+
+=== SECOND_WEEK
+   The task will run between the 8th and 14th day of the month.
+
+=== THIRD_WEEK
+   The task will run between the 15th and the 21st of the month.
+
+=== FOURTH_WEEK
+   The task will run between the 22nd and 28th day of the month.
+
+=== LAST_WEEK
+   The task will run between the last seven days of the month.
+
+=== JANUARAY
+   The task will run in January.
+
+=== FEBRUARY
+   The task will run in Februrary.
+
+=== MARCH
+   The task will run in March.
+
+=== APRIL
+   The task will run in April.
+
+=== MAY
+   The task will run in May.
+
+=== JUNE
+   The task will run in June.
+
+=== JULY
+   The task will run in July.
+
+=== AUGUST
+   The task will run in August.
+
+=== SEPTEMBER
+   The task will run in September.
+
+=== OCTOBER
+   The task will run in October.
+
+=== NOVEMBER
+   The task will run in November.
+
+=== DECEMBER
+   The task will run in December.
+
+== Task Flags
+=== INTERACTIVE
+   This flag is used when converting Windows NT AT service jobs into work
+   items. The Windows NT AT service job refers to At.exe, the Windows NT
+   command-line utility used for creating jobs for the Windows NT Schedule
+   service. The Task Scheduler service replaces the Schedule service and is
+   backwards compatible with it. The conversion occurs when the Task
+   Scheduler is installed on Windows NT/Windows 2000 for example, if you
+   install Internet Explorer 4.0, or upgrade to Windows 2000. During the
+   setup process, the Task Scheduler installation code searches the registry
+   for jobs created for the AT service and creates work items that will
+   accomplish the same operation.
+
+   For such converted jobs, the interactive flag is set if the work item is
+   intended to be displayed to the user. When this flag is not set, no work
+   items are displayed in the Tasks folder, and no user interface associated
+   with the work item is presented to the user when the work item is
+   executed.
+   
+=== DELETE_WHEN_DONE
+   The work item will be deleted when there are no more scheduled run times.
+   
+=== DISABLED
+   The work item is disabled. This is useful to temporarily prevent a work
+   item from running at the scheduled time(s).
+   
+=== HIDDEN
+   The work item created will be hidden.
+
+=== RUN_ONLY_IF_LOGGED_ON
+   The work item runs only if the user specified in +set_account_information+
+   is logged on interactively. This flag has no effect on work items set to
+   run in the local account.
+   
+=== START_ONLY_IF_IDLE
+    The work item begins only if the computer is not in use at the scheduled
+    start time.
+    
+=== SYSTEM_REQUIRED
+    The work item causes the system to be resumed, or awakened, if the system
+    is running on battery power. This flag is supported only on systems that
+    support resume timers.
+    
+=== KILL_ON_IDLE_END
+    The work item terminates if the computer makes an idle to non-idle
+    transition while the work item is running. The computer is not
+    considered idle until the IdleWait triggers' time elapses with no user
+    input.
+    
+=== RESTART_ON_IDLE_RESUME
+    The work item starts again if the computer makes a non-idle to idle
+    transition before all the work item's task triggers elapse.
+    (Use this flag in conjunction with KILL_ON_IDLE_END.)
+    
+=== DONT_START_IF_ON_BATTERIES
+    The work item does not start if its target computer is running on
+    battery power.
+    
+=== KILL_IF_GOING_ON_BATTERIES
+    The work item ends, and the associated application quits if the work
+    item's target computer switches to battery power.
+
+= Notes
+   The terms "work item" and "task" are effectively synonymous for purposes
+   of this documentation.
+   
+= Known Bugs
+   The 'account_information()' method appears to be busted.
+
+   Please log all bug reports on the project page at
+   http://rubyforge.org/projects/win32utils
+   
+= Future Plans
+   Add support for Windows Vista and later.
+   Add support for IDLE, SYSTEMSTART and LOGON.
+   
+= Copyright
+   (C) 2003-2009 Daniel J. Berger, All Rights Reserved
+   
+= License
+   Ruby's
+   
+= Warranty
+   This package is provided "as is" and without any express or
+   implied warranties, including, without limitation, the implied
+   warranties of merchantability and fitness for a particular purpose.
+   
+= Authors and Testers
+   Park Heesob   
+   Daniel J. Berger
+   Shashank Date

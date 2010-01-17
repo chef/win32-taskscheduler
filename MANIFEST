@@ -1,0 +1,11 @@
+* CHANGES
+* MANIFEST
+* README
+* Rakefile
+* win32-taskscheduler.gemspec
+* ext/extconf.rb
+* ext/win32/taskscheduler.c
+* ext/win32/taskscheduler.h
+* doc/taskscheduler.txt
+* examples/taskscheduler_test.rb
+* test/tc_taskscheduler.rb
