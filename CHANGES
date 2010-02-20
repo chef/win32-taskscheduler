@@ -1,3 +1,12 @@
+== 0.2.1 - ???
+* Cleaned up the repo. The C source files have been removed from the main
+  repository (and this gem). They are in a separate branch on github for
+  anyone who misses them.
+* Refactored the Rakefile, removing tasks related to the old C source files,
+  and added tasks for cleaning, building and installing a gem.
+* Updated the README file, eliminating references to anything that was only
+  related to the older C version.
+
 == 0.2.0 - 19-Jun-2009
 * Rewritten in pure Ruby!
 * The TaskScheduler::ONCE constant is now a valid trigger type. Thanks go to
