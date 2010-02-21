@@ -2,76 +2,102 @@ require 'windows/process'
 require 'win32ole'
 include Windows::Process
 
+# The Win32 module serves as a namespace only
 module Win32
-   class TaskScheduler
 
-      # The version of the win32-taskscheduler library
-      VERSION = '0.2.0'
+  # The TaskScheduler class encapsulates a Windows scheduled task
+  class TaskScheduler
 
-      class Error < StandardError; end
+    # The version of the win32-taskscheduler library
+    VERSION = '0.3.0'
 
-      TASK_TIME_TRIGGER_ONCE            = 0
-      TASK_TIME_TRIGGER_DAILY           = 1
-      TASK_TIME_TRIGGER_WEEKLY          = 2
-      TASK_TIME_TRIGGER_MONTHLYDATE     = 3
-      TASK_TIME_TRIGGER_MONTHLYDOW      = 4
-      TASK_EVENT_TRIGGER_ON_IDLE        = 5
-      TASK_EVENT_TRIGGER_AT_SYSTEMSTART = 6
-      TASK_EVENT_TRIGGER_AT_LOGON       = 7
+    # The Error class is typically raised if any TaskScheduler methods fail.
+    class Error < StandardError; end
 
-      TASK_SUNDAY       = 0x1
-      TASK_MONDAY       = 0x2
-      TASK_TUESDAY      = 0x4
-      TASK_WEDNESDAY    = 0x8
-      TASK_THURSDAY     = 0x10
-      TASK_FRIDAY       = 0x20
-      TASK_SATURDAY     = 0x40
-      TASK_FIRST_WEEK   = 1
-      TASK_SECOND_WEEK  = 2
-      TASK_THIRD_WEEK   = 3
-      TASK_FOURTH_WEEK  = 4
-      TASK_LAST_WEEK    = 5
-      TASK_JANUARY      = 0x1
-      TASK_FEBRUARY     = 0x2
-      TASK_MARCH        = 0x4
-      TASK_APRIL        = 0x8
-      TASK_MAY          = 0x10
-      TASK_JUNE         = 0x20
-      TASK_JULY         = 0x40
-      TASK_AUGUST       = 0x80
-      TASK_SEPTEMBER    = 0x100
-      TASK_OCTOBER      = 0x200
-      TASK_NOVEMBER     = 0x400
-      TASK_DECEMBER     = 0x800
+    # Triggers
 
-      TASK_FLAG_INTERACTIVE                  = 0x1
-      TASK_FLAG_DELETE_WHEN_DONE             = 0x2
-      TASK_FLAG_DISABLED                     = 0x4
-      TASK_FLAG_START_ONLY_IF_IDLE           = 0x10
-      TASK_FLAG_KILL_ON_IDLE_END             = 0x20
-      TASK_FLAG_DONT_START_IF_ON_BATTERIES   = 0x40
-      TASK_FLAG_KILL_IF_GOING_ON_BATTERIES   = 0x80
-      TASK_FLAG_RUN_ONLY_IF_DOCKED           = 0x100
-      TASK_FLAG_HIDDEN                       = 0x200
-      TASK_FLAG_RUN_IF_CONNECTED_TO_INTERNET = 0x400
-      TASK_FLAG_RESTART_ON_IDLE_RESUME       = 0x800
-      TASK_FLAG_SYSTEM_REQUIRED              = 0x1000
-      TASK_FLAG_RUN_ONLY_IF_LOGGED_ON        = 0x2000
-      TASK_TRIGGER_FLAG_HAS_END_DATE         = 0x1
-      TASK_TRIGGER_FLAG_KILL_AT_DURATION_END = 0x2
-      TASK_TRIGGER_FLAG_DISABLED             = 0x4
+    # Trigger is set to run the task a single tim
+    TASK_TIME_TRIGGER_ONCE = 0
 
-      TASK_MAX_RUN_TIMES = 1440
-      TASKS_TO_RETRIEVE  = 5
+    # Trigger is set to run the task on a daily interval
+    TASK_TIME_TRIGGER_DAILY = 1
 
-      CLSCTX_INPROC_SERVER  = 0x1
-      CLSID_CTask =  [0x148BD520,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
-      CLSID_CTaskScheduler =  [0x148BD52A,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
-      IID_ITaskScheduler = [0x148BD527,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
-      IID_ITask = [0x148BD524,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
-      IID_IPersistFile = [0x0000010b,0x0000,0x0000,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46].pack('LSSC8')
+    # Trigger is set to run the task on specific days of a specific week & month
+    TASK_TIME_TRIGGER_WEEKLY = 2
 
-      attr_accessor :password
+    # Trigger is set to run the task on specific day(s) of the month
+    TASK_TIME_TRIGGER_MONTHLYDATE = 3
+
+    # Trigger is set to run the task on specific day(s) of the month
+    TASK_TIME_TRIGGER_MONTHLYDOW = 4
+
+    # Trigger is set to run the task if the system remains idle for the amount
+    # of time specified by the idle wait time of the task
+    TASK_EVENT_TRIGGER_ON_IDLE = 5
+
+    # Trigger is set to run the task at system startup
+    TASK_EVENT_TRIGGER_AT_SYSTEMSTART = 6
+
+    # Trigger is set to run the task when a user logs on
+    TASK_EVENT_TRIGGER_AT_LOGON = 7
+
+    TASK_SUNDAY       = 0x1
+    TASK_MONDAY       = 0x2
+    TASK_TUESDAY      = 0x4
+    TASK_WEDNESDAY    = 0x8
+    TASK_THURSDAY     = 0x10
+    TASK_FRIDAY       = 0x20
+    TASK_SATURDAY     = 0x40
+    TASK_FIRST_WEEK   = 1
+    TASK_SECOND_WEEK  = 2
+    TASK_THIRD_WEEK   = 3
+    TASK_FOURTH_WEEK  = 4
+    TASK_LAST_WEEK    = 5
+    TASK_JANUARY      = 0x1
+    TASK_FEBRUARY     = 0x2
+    TASK_MARCH        = 0x4
+    TASK_APRIL        = 0x8
+    TASK_MAY          = 0x10
+    TASK_JUNE         = 0x20
+    TASK_JULY         = 0x40
+    TASK_AUGUST       = 0x80
+    TASK_SEPTEMBER    = 0x100
+    TASK_OCTOBER      = 0x200
+    TASK_NOVEMBER     = 0x400
+    TASK_DECEMBER     = 0x800
+
+    TASK_FLAG_INTERACTIVE                  = 0x1
+    TASK_FLAG_DELETE_WHEN_DONE             = 0x2
+    TASK_FLAG_DISABLED                     = 0x4
+    TASK_FLAG_START_ONLY_IF_IDLE           = 0x10
+    TASK_FLAG_KILL_ON_IDLE_END             = 0x20
+    TASK_FLAG_DONT_START_IF_ON_BATTERIES   = 0x40
+    TASK_FLAG_KILL_IF_GOING_ON_BATTERIES   = 0x80
+    TASK_FLAG_RUN_ONLY_IF_DOCKED           = 0x100
+    TASK_FLAG_HIDDEN                       = 0x200
+    TASK_FLAG_RUN_IF_CONNECTED_TO_INTERNET = 0x400
+    TASK_FLAG_RESTART_ON_IDLE_RESUME       = 0x800
+    TASK_FLAG_SYSTEM_REQUIRED              = 0x1000
+    TASK_FLAG_RUN_ONLY_IF_LOGGED_ON        = 0x2000
+    TASK_TRIGGER_FLAG_HAS_END_DATE         = 0x1
+    TASK_TRIGGER_FLAG_KILL_AT_DURATION_END = 0x2
+    TASK_TRIGGER_FLAG_DISABLED             = 0x4
+
+    # :stopdoc:
+
+    TASK_MAX_RUN_TIMES = 1440
+    TASKS_TO_RETRIEVE  = 5
+
+    CLSCTX_INPROC_SERVER  = 0x1
+    CLSID_CTask =  [0x148BD520,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
+    CLSID_CTaskScheduler =  [0x148BD52A,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
+    IID_ITaskScheduler = [0x148BD527,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
+    IID_ITask = [0x148BD524,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
+    IID_IPersistFile = [0x0000010b,0x0000,0x0000,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46].pack('LSSC8')
+
+    # :startdoc:
+
+    attr_accessor :password
 
       # Returns a new TaskScheduler object. If a work_item (and possibly the
       # the trigger) are passed as arguments then a new work item is created and
