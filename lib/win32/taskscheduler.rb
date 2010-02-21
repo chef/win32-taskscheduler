@@ -41,47 +41,140 @@ module Win32
     # Trigger is set to run the task when a user logs on
     TASK_EVENT_TRIGGER_AT_LOGON = 7
 
-    TASK_SUNDAY       = 0x1
-    TASK_MONDAY       = 0x2
-    TASK_TUESDAY      = 0x4
-    TASK_WEDNESDAY    = 0x8
-    TASK_THURSDAY     = 0x10
-    TASK_FRIDAY       = 0x20
-    TASK_SATURDAY     = 0x40
-    TASK_FIRST_WEEK   = 1
-    TASK_SECOND_WEEK  = 2
-    TASK_THIRD_WEEK   = 3
-    TASK_FOURTH_WEEK  = 4
-    TASK_LAST_WEEK    = 5
-    TASK_JANUARY      = 0x1
-    TASK_FEBRUARY     = 0x2
-    TASK_MARCH        = 0x4
-    TASK_APRIL        = 0x8
-    TASK_MAY          = 0x10
-    TASK_JUNE         = 0x20
-    TASK_JULY         = 0x40
-    TASK_AUGUST       = 0x80
-    TASK_SEPTEMBER    = 0x100
-    TASK_OCTOBER      = 0x200
-    TASK_NOVEMBER     = 0x400
-    TASK_DECEMBER     = 0x800
+    # Daily Tasks
 
-    TASK_FLAG_INTERACTIVE                  = 0x1
-    TASK_FLAG_DELETE_WHEN_DONE             = 0x2
-    TASK_FLAG_DISABLED                     = 0x4
-    TASK_FLAG_START_ONLY_IF_IDLE           = 0x10
-    TASK_FLAG_KILL_ON_IDLE_END             = 0x20
-    TASK_FLAG_DONT_START_IF_ON_BATTERIES   = 0x40
-    TASK_FLAG_KILL_IF_GOING_ON_BATTERIES   = 0x80
-    TASK_FLAG_RUN_ONLY_IF_DOCKED           = 0x100
-    TASK_FLAG_HIDDEN                       = 0x200
+    # The task will run on Sunday
+    TASK_SUNDAY = 0x1
+
+    # The task will run on Monday
+    TASK_MONDAY = 0x2
+
+    # The task will run on Tuesday
+    TASK_TUESDAY = 0x4
+
+    # The task will run on Wednesday
+    TASK_WEDNESDAY = 0x8
+
+    # The task will run on Thursday
+    TASK_THURSDAY = 0x10
+
+    # The task will run on Friday
+    TASK_FRIDAY = 0x20
+
+    # The task will run on Saturday
+    TASK_SATURDAY = 0x40
+
+    # Weekly tasks
+
+    # The task will run between the 1st and 7th day of the month
+    TASK_FIRST_WEEK = 1
+
+    # The task will run between the 8th and 14th day of the month
+    TASK_SECOND_WEEK = 2
+
+    # The task will run between the 15th and 21st day of the month
+    TASK_THIRD_WEEK = 3
+
+    # The task will run between the 22nd and 28th day of the month
+    TASK_FOURTH_WEEK = 4
+
+    # The task will run the last seven days of the month
+    TASK_LAST_WEEK = 5
+
+    # Monthly tasks
+
+    # The task will run in January
+    TASK_JANUARY = 0x1
+
+    # The task will run in February
+    TASK_FEBRUARY = 0x2
+
+    # The task will run in March
+    TASK_MARCH = 0x4
+
+    # The task will run in April
+    TASK_APRIL = 0x8
+
+    # The task will run in May
+    TASK_MAY = 0x10
+
+    # The task will run in June
+    TASK_JUNE = 0x20
+
+    # The task will run in July
+    TASK_JULY = 0x40
+
+    # The task will run in August
+    TASK_AUGUST = 0x80
+
+    # The task will run in September
+    TASK_SEPTEMBER = 0x100
+
+    # The task will run in October
+    TASK_OCTOBER = 0x200
+
+    # The task will run in November
+    TASK_NOVEMBER = 0x400
+
+    # The task will run in December
+    TASK_DECEMBER = 0x800
+
+    # Flags
+ 
+    # Used when converting AT service jobs into work items
+    TASK_FLAG_INTERACTIVE = 0x1
+
+    # The work item will be deleted when there are no more scheduled run times
+    TASK_FLAG_DELETE_WHEN_DONE = 0x2
+
+    # The work item is disabled. Useful for temporarily disabling a task
+    TASK_FLAG_DISABLED = 0x4
+
+    # The work item begins only if the computer is not in use at the scheduled
+    # start time
+    TASK_FLAG_START_ONLY_IF_IDLE = 0x10
+
+    # The work item terminates if the computer makes an idle to non-idle
+    # transition while the work item is running
+    TASK_FLAG_KILL_ON_IDLE_END = 0x20
+
+    # The work item does not start if the computer is running on battery power
+    TASK_FLAG_DONT_START_IF_ON_BATTERIES = 0x40
+
+    # The work item ends, and the associated application quits, if the computer
+    # switches to battery power
+    TASK_FLAG_KILL_IF_GOING_ON_BATTERIES = 0x80
+
+    # The work item starts only if the computer is in a docking station
+    TASK_FLAG_RUN_ONLY_IF_DOCKED = 0x100
+
+    # The work item created will be hidden
+    TASK_FLAG_HIDDEN = 0x200
+
+    # The work item runs only if there is a valid internet connection
     TASK_FLAG_RUN_IF_CONNECTED_TO_INTERNET = 0x400
-    TASK_FLAG_RESTART_ON_IDLE_RESUME       = 0x800
-    TASK_FLAG_SYSTEM_REQUIRED              = 0x1000
-    TASK_FLAG_RUN_ONLY_IF_LOGGED_ON        = 0x2000
-    TASK_TRIGGER_FLAG_HAS_END_DATE         = 0x1
+
+    # The work item starts again if the computer makes a non-idle to idle
+    # transition
+    TASK_FLAG_RESTART_ON_IDLE_RESUME = 0x800
+
+    # The work item causes the system to be resumed, or awakened, if the
+    # system is running on batter power
+    TASK_FLAG_SYSTEM_REQUIRED = 0x1000
+
+    # The work item runs only if a specified account is logged on interactively
+    TASK_FLAG_RUN_ONLY_IF_LOGGED_ON = 0x2000
+
+    # Triggers
+
+    # The task will stop at some point in time
+    TASK_TRIGGER_FLAG_HAS_END_DATE = 0x1
+
+    # The task can be stopped at the end of the repetition period
     TASK_TRIGGER_FLAG_KILL_AT_DURATION_END = 0x2
-    TASK_TRIGGER_FLAG_DISABLED             = 0x4
+
+    # The task trigger is disabled
+    TASK_TRIGGER_FLAG_DISABLED = 0x4
 
     # :stopdoc:
 
@@ -99,36 +192,37 @@ module Win32
 
     attr_accessor :password
 
-      # Returns a new TaskScheduler object. If a work_item (and possibly the
-      # the trigger) are passed as arguments then a new work item is created and
-      # associated with that trigger, although you can still activate other tasks
-      # with the same handle.
-      #
-      # This is really just a bit of convenience. Passing arguments to the
-      # constructor is the same as calling TaskScheduler.new plus
-      # TaskScheduler#new_work_item.
-      #
-      def initialize(work_item=nil, trigger=nil)
-         @task = nil
-         begin
-            @service =  WIN32OLE.new("Schedule.Service")
-         rescue WIN32OLERuntimeError => e
-            raise Error,e.inspect
-         end
+    # Returns a new TaskScheduler object. If a work_item (and possibly the
+    # the trigger) are passed as arguments then a new work item is created and
+    # associated with that trigger, although you can still activate other tasks
+    # with the same handle.
+    #
+    # This is really just a bit of convenience. Passing arguments to the
+    # constructor is the same as calling TaskScheduler.new plus
+    # TaskScheduler#new_work_item.
+    #
+    def initialize(work_item=nil, trigger=nil)
+      @task = nil
 
-         @service.Connect
-         @root = @service.GetFolder("\\")
-         @password = nil
-
-         if work_item
-            if trigger
-               raise TypeError unless trigger.is_a?(Hash)
-               new_work_item(work_item, trigger)
-            end
-         end
-
-         self
+      begin
+        @service =  WIN32OLE.new("Schedule.Service")
+      rescue WIN32OLERuntimeError => e
+        raise Error,e.inspect
       end
+
+      @service.Connect
+      @root = @service.GetFolder("\\")
+      @password = nil
+
+      if work_item
+        if trigger
+          raise TypeError unless trigger.is_a?(Hash)
+          new_work_item(work_item, trigger)
+        end
+      end
+
+      self
+    end
 
       # Returns an array of scheduled task names.
       #
