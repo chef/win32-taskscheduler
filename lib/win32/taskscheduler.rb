@@ -181,6 +181,26 @@ module Win32
     TASK_MAX_RUN_TIMES = 1440
     TASKS_TO_RETRIEVE  = 5
 
+    # Task creation
+
+    TASK_VALIDATE_ONLY = 0x1
+    TASK_CREATE = 0x2
+    TASK_UPDATE = 0x3
+    TASK_CREATE_OR_UPDATE = 0x4
+    TASK_DISABLE = 0x8
+    TASK_DONT_ADD_PRINCIPAL_ACE = 0x10
+    TASK_IGNORE_REGISTRATION_TRIGGERS = 0x20
+
+    # Task logon types
+
+    TASK_LOGON_NONE = 0
+    TASK_LOGON_PASSWORD = 1
+    TASK_LOGON_S4U = 2
+    TASK_LOGON_INTERACTIVE_TOKEN = 3
+    TASK_LOGON_GROUP = 4
+    TASK_LOGON_SERVICE_ACCOUNT = 5
+    TASK_LOGON_INTERACTIVE_TOKEN_OR_PASSWORD = 6
+
     CLSCTX_INPROC_SERVER  = 0x1
     CLSID_CTask =  [0x148BD520,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
     CLSID_CTaskScheduler =  [0x148BD52A,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
@@ -224,238 +244,268 @@ module Win32
       self
     end
 
-      # Returns an array of scheduled task names.
-      #
-      def enum
+    # Returns an array of scheduled task names.
+    #
+    def enum
+      # Get the task folder that contains the tasks.
+      taskCollection = @root.GetTasks(0)
+      array = []
+      taskCollection.each do |registeredTask|
+        array.push(registeredTask.Name)
+      end
+      array
+    end
 
-         # Get the task folder that contains the tasks.
-         taskCollection = @root.GetTasks(0)
-         array = []
-         taskCollection.each do |registeredTask|
-            array.push(registeredTask.Name)
-         end
-         array
+    # Activate the specified task.
+    #
+    def activate(task)
+      raise TypeError unless task.is_a?(String)
+
+      begin
+        registeredTask = @root.GetTask(task)
+        registeredTask.Enabled = 1
+      rescue WIN32OLERuntimeError
+        raise Error, "Access Denied"
+      end
+      @task = registeredTask
+      self
+    end
+
+    # Delete the specified task name.
+    #
+    def delete(task)
+      raise TypeError unless task.is_a?(String)
+
+      begin
+        @root.DeleteTask(task, 0)
+      rescue
+        raise Error,"Access Denied"
       end
 
-      # Activate the specified task.
-      #
-      def activate(task)
-         raise TypeError unless task.is_a?(String)
+      self
+    end
 
-         begin
-            registeredTask = @root.GetTask(task)
-            registeredTask.Enabled = 1
-         rescue WIN32OLERuntimeError
-            raise Error, "Access Denied"
-         end
-         @task = registeredTask
-         self
+    # Execute the current task.
+    #
+    def run
+      raise Error, 'null task' if @task.nil?
+
+      task = @task.run(nil)
+      self
+    end
+
+    # Saves the current task. Tasks must be saved before they can be activated.
+    # The .job file itself is typically stored in the C:\WINDOWS\Tasks folder.
+    #
+    # If +file+ (an absolute path) is specified then the job is saved to that
+    # file instead. A '.job' extension is recommended but not enforced.
+    #
+    # Note that calling TaskScheduler#save also resets the TaskScheduler object
+    # so that there is no currently active task.
+    #
+    def save(file = nil)
+      raise Error, 'null task' if @task.nil?
+      # do nothing
+      self
+    end
+
+    # Terminate the current task.
+    #
+    def terminate
+      raise Error, 'null task' if @task.nil?
+
+      task = @task.stop(nil)
+      self
+    end
+
+    # Set the host on which the various TaskScheduler methods will execute.
+    #
+    def machine=(host)
+      raise TypeError unless host.is_a?(String)
+
+      @service.Connect(host)
+      host
+    end
+
+    alias :host= :machine=
+
+    # Sets the +user+ and +password+ for the given task. If the user and
+    # password are set properly then true is returned.
+    #
+    # In some cases the job may be created, but the account information was
+    # bad. In this case the task is created but a warning is generated and
+    # false is returned.
+    #
+    def set_account_information(user, password)
+      raise Error, 'No currently active task' if @task.nil?
+      @password = password
+
+      @root.RegisterTaskDefinition(
+        @task.Path,
+        @task.Definition,
+        TASK_CREATE_OR_UPDATE,
+        user,
+        password,
+        1
+      )
+
+      true
+    end
+
+    # Returns the user associated with the task or nil if no user has yet
+    # been associated with the task.
+    #
+    def account_information
+      raise Error, 'No currently active task' if @task.nil?
+      user = @task.Definition.Principal.UserId
+    end
+
+    # Returns the name of the application associated with the task.
+    #
+    def application_name
+      raise Error, 'No currently active task' if @task.nil?
+
+      app = nil
+
+      @task.Definition.Actions.each do |action|
+        app = action.Path if action.Type == 0
       end
 
-      # Delete the specified task name.
-      #
-      def delete(task)
-         raise TypeError unless task.is_a?(String)
+      app
+    end
 
-         begin
-            @root.DeleteTask(task,0)
-         rescue
-            raise Error,"Access Denied"
-         end
+    # Returns the command line parameters for the task.
+    #
+    def parameters
+      raise Error, 'No currently active task' if @task.nil?
 
-         self
+      param = nil
+
+      @task.Definition.Actions.each do |action|
+        param = action.Arguments if action.Type == 0
       end
 
-      # Execute the current task.
-      #
-      def run
-         raise Error, 'null task' if @task.nil?
+      param
+    end
 
-         task = @task.run(nil)
-         self
+    # Sets the parameters for the task. These parameters are passed as command
+    # line arguments to the application the task will run. To clear the command
+    # line parameters set it to an empty string.
+    #
+    def parameters=(param)
+      raise Error, 'No currently active task' if @task.nil?
+      raise TypeError unless param.is_a?(String)
+
+      definition = @task.Definition
+      definition.Actions.each do |action|
+        action.Arguments = param if action.Type == 0
+      end
+      user = definition.Principal.UserId
+
+      @root.RegisterTaskDefinition(
+        @task.Path,
+        definition,
+        TASK_CREATE_OR_UPDATE,
+        user,
+        @password,
+        @password ? TASK_LOGON_NONE : TASK_LOGON_INTERACTIVE_TOKEN
+      )
+
+      param
+    end
+
+    # Returns the working directory for the task.
+    #
+    def working_directory
+      raise Error,"No currently active task" if @task.nil?
+
+      dir = nil
+
+      @task.Definition.Actions.each do |action|
+        dir = action.WorkingDirectory if action.Type == 0
       end
 
-      # Saves the current task. Tasks must be saved before they can be activated.
-      # The .job file itself is typically stored in the C:\WINDOWS\Tasks folder.
-      #
-      # If +file+ (an absolute path) is specified then the job is saved to that
-      # file instead. A '.job' extension is recommended but not enforced.
-      #
-      # Note that calling TaskScheduler#save also resets the TaskScheduler object
-      # so that there is no currently active task.
-      #
-      def save(file = nil)
-         raise Error, 'null task' if @task.nil?
-         # do nothing
-         self
+      dir
+    end
+
+    # Sets the working directory for the task.
+    #
+    def working_directory=(dir)
+       raise Error, 'No currently active task' if @task.nil?
+       raise TypeError unless dir.is_a?(String)
+
+       definition = @task.Definition
+
+       definition.Actions.each do |action|
+         action.WorkingDirectory = dir if action.Type == 0
+       end
+
+       user = definition.Principal.UserId
+       @root.RegisterTaskDefinition(@task.Path,definition,
+       0x6,user,@password,@password ? 1 : 3)
+
+       dir
+    end
+
+    # Returns the task's priority level. Possible values are 'idle',
+    # 'normal', 'high', 'realtime', 'below_normal', 'above_normal',
+    # and 'unknown'.
+    #
+    def priority
+      raise Error, 'No currently active task' if @task.nil?
+
+      case @task.Definition.Settings.Priority
+        when 0
+          priority = 'critical'
+        when 1
+          priority = 'highest'
+        when 2
+          priority = 'above_normal'
+        when 3
+          priority = 'above_normal'
+        when 4
+          priority = 'normal'
+        when 5
+          priority = 'normal'
+        when 6
+          priority = 'normal'
+        when 7
+          priority = 'below_normal'
+        when 8
+          priority = 'below_normal'
+        when 9
+          priority = 'lowest'
+        when 10
+          priority = 'idle'
+        else
+          priority = 'unknown'
       end
 
-      # Terminate the current task.
-      #
-      def terminate
-         raise Error, 'null task' if @task.nil?
+      priority
+    end
 
-         task = @task.stop(nil)
-         self
-      end
+    # Sets the priority of the task. The +priority+ should be a numeric
+    # priority constant value.
+    #
+    def priority=(priority)
+      raise Error, 'No currently active task' if @task.nil?
+      raise TypeError unless priority.is_a?(Numeric)
 
-      # Set the host on which the various TaskScheduler methods will execute.
-      #
-      def machine=(host)
-         raise TypeError unless host.is_a?(String)
+      definition = @task.Definition
+      definition.Settings.Priority = priority
+      user = definition.Principal.UserId
 
-         @service.Connect(host)
-         host
-      end
+      @root.RegisterTaskDefinition(
+        @task.Path,
+        definition,
+        0x6,
+        user,
+        @password,
+        @password ? 1 : 3
+      )
 
-      alias :host= :machine=
-
-      # Sets the +user+ and +password+ for the given task. If the user and
-      # password are set properly then true is returned.
-      #
-      # In some cases the job may be created, but the account information was
-      # bad. In this case the task is created but a warning is generated and
-      # false is returned.
-      #
-      def set_account_information(user, password)
-         raise Error, 'No currently active task' if @task.nil?
-         @password = password
-         @root.RegisterTaskDefinition(@task.Path,@task.Definition,
-         0x6,user,password,1)
-
-         true
-      end
-
-      # Returns the user associated with the task or nil if no user has yet
-      # been associated with the task.
-      #
-      def account_information
-         raise Error, 'No currently active task' if @task.nil?
-         user = @task.Definition.Principal.UserId
-      end
-
-      # Returns the name of the application associated with the task.
-      #
-      def application_name
-         raise Error, 'No currently active task' if @task.nil?
-
-         app = nil
-         @task.Definition.Actions.each do |action|
-            app = action.Path if action.Type == 0
-         end
-         app
-      end
-
-      # Returns the command line parameters for the task.
-      #
-      def parameters
-         raise Error, 'No currently active task' if @task.nil?
-
-         param = nil
-         @task.Definition.Actions.each do |action|
-            param = action.Arguments if action.Type == 0
-         end
-         param
-      end
-
-      # Sets the parameters for the task. These parameters are passed as command
-      # line arguments to the application the task will run. To clear the command
-      # line parameters set it to an empty string.
-      #
-      def parameters=(param)
-         raise Error, 'No currently active task' if @task.nil?
-         raise TypeError unless param.is_a?(String)
-
-         definition = @task.Definition
-         definition.Actions.each do |action|
-            action.Arguments = param if action.Type == 0
-         end
-         user = definition.Principal.UserId
-         @root.RegisterTaskDefinition(@task.Path,definition,
-         0x6,user,@password,@password ? 1 : 3)
-         param
-      end
-
-      # Returns the working directory for the task.
-      #
-      def working_directory
-         raise Error,"No currently active task" if @task.nil?
-
-         dir = nil
-         @task.Definition.Actions.each do |action|
-            dir = action.WorkingDirectory if action.Type == 0
-         end
-         dir
-      end
-
-      # Sets the working directory for the task.
-      #
-      def working_directory=(dir)
-         raise Error, 'No currently active task' if @task.nil?
-         raise TypeError unless dir.is_a?(String)
-
-         definition = @task.Definition
-         definition.Actions.each do |action|
-            action.WorkingDirectory = dir if action.Type == 0
-         end
-         user = definition.Principal.UserId
-         @root.RegisterTaskDefinition(@task.Path,definition,
-         0x6,user,@password,@password ? 1 : 3)
-
-         dir
-      end
-
-      # Returns the task's priority level. Possible values are 'idle',
-      # 'normal', 'high', 'realtime', 'below_normal', 'above_normal',
-      # and 'unknown'.
-      #
-      def priority
-         raise Error, 'No currently active task' if @task.nil?
-
-         case @task.Definition.Settings.Priority
-         when 0
-            priority = 'critical'
-         when 1
-            priority = 'highest'
-         when 2
-            priority = 'above_normal'
-         when 3
-            priority = 'above_normal'
-         when 4
-            priority = 'normal'
-         when 5
-            priority = 'normal'
-         when 6
-            priority = 'normal'
-         when 7
-            priority = 'below_normal'
-         when 8
-            priority = 'below_normal'
-         when 9
-            priority = 'lowest'
-         when 10
-            priority = 'idle'
-         else
-            priority = 'unknown'
-         end
-         priority
-      end
-
-      # Sets the priority of the task. The +priority+ should be a numeric
-      # priority constant value.
-      #
-      def priority=(priority)
-         raise Error, 'No currently active task' if @task.nil?
-         raise TypeError unless priority.is_a?(Numeric)
-
-         definition = @task.Definition
-         definition.Settings.Priority = priority
-         user = definition.Principal.UserId
-         @root.RegisterTaskDefinition(@task.Path,definition,
-         0x6,user,@password,@password ? 1 : 3)
-
-         priority
-      end
+      priority
+    end
 
       # Creates a new work item (scheduled job) with the given +trigger+. The
       # trigger variable is a hash of options that define when the scheduled
