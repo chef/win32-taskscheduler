@@ -346,7 +346,7 @@ module Win32
         TASK_CREATE_OR_UPDATE,
         user,
         password,
-        1
+        TASK_LOGON_PASSWORD
       )
 
       true
@@ -408,7 +408,7 @@ module Win32
         TASK_CREATE_OR_UPDATE,
         user,
         @password,
-        @password ? TASK_LOGON_NONE : TASK_LOGON_INTERACTIVE_TOKEN
+        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
       )
 
       param
@@ -431,20 +431,27 @@ module Win32
     # Sets the working directory for the task.
     #
     def working_directory=(dir)
-       raise Error, 'No currently active task' if @task.nil?
-       raise TypeError unless dir.is_a?(String)
+      raise Error, 'No currently active task' if @task.nil?
+      raise TypeError unless dir.is_a?(String)
 
-       definition = @task.Definition
+      definition = @task.Definition
 
-       definition.Actions.each do |action|
-         action.WorkingDirectory = dir if action.Type == 0
-       end
+      definition.Actions.each do |action|
+        action.WorkingDirectory = dir if action.Type == 0
+      end
 
-       user = definition.Principal.UserId
-       @root.RegisterTaskDefinition(@task.Path,definition,
-       0x6,user,@password,@password ? 1 : 3)
+      user = definition.Principal.UserId
 
-       dir
+      @root.RegisterTaskDefinition(
+        @task.Path,
+        definition,
+        0x6,
+        user,
+        @password,
+        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
+      )
+
+      dir
     end
 
     # Returns the task's priority level. Possible values are 'idle',
@@ -498,547 +505,589 @@ module Win32
       @root.RegisterTaskDefinition(
         @task.Path,
         definition,
-        0x6,
+        TASK_CREATE_OR_UPDATE,
         user,
         @password,
-        @password ? 1 : 3
+        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
       )
 
       priority
     end
 
-      # Creates a new work item (scheduled job) with the given +trigger+. The
-      # trigger variable is a hash of options that define when the scheduled
-      # job should run.
-      #
-      def new_work_item(task, trigger)
-         raise TypeError unless trigger.is_a?(Hash)
+    # Creates a new work item (scheduled job) with the given +trigger+. The
+    # trigger variable is a hash of options that define when the scheduled
+    # job should run.
+    #
+    def new_work_item(task, trigger)
+      raise TypeError unless trigger.is_a?(Hash)
 
-         taskDefinition = @service.NewTask(0)
-         taskDefinition.RegistrationInfo.Description = ''
-         taskDefinition.RegistrationInfo.Author  = ''
-         taskDefinition.Settings.StartWhenAvailable = true
-         taskDefinition.Settings.Enabled  = true
-         taskDefinition.Settings.Hidden = false
+      taskDefinition = @service.NewTask(0)
+      taskDefinition.RegistrationInfo.Description = ''
+      taskDefinition.RegistrationInfo.Author  = ''
+      taskDefinition.Settings.StartWhenAvailable = true
+      taskDefinition.Settings.Enabled  = true
+      taskDefinition.Settings.Hidden = false
 
-         case trigger['trigger_type']
-         when TASK_TIME_TRIGGER_DAILY
-            type = 2
-         when TASK_TIME_TRIGGER_WEEKLY
-            type = 3
-         when TASK_TIME_TRIGGER_MONTHLYDATE
-            type = 4
-         when TASK_TIME_TRIGGER_MONTHLYDOW
-            type = 5
-         when TASK_TIME_TRIGGER_ONCE
-            type = 1
-         else
-            raise Error, 'Unknown trigger type'
-         end
-
-         startTime = "%04d-%02d-%02dT%02d:%02d:00" % [trigger['start_year'],trigger['start_month'],trigger['start_day'],trigger['start_hour'], trigger['start_minute']]
-         endTime = "%04d-%02d-%02dT00:00:00" % [trigger['end_year'],trigger['end_month'],trigger['end_day']]
-
-         trig = taskDefinition.Triggers.Create(type)
-         trig.Id = "RegistrationTriggerId"
-         trig.StartBoundary = startTime
-         trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
-         trig.Enabled = true
-
-         repetitionPattern = trig.Repetition
-         repetitionPattern.Duration = "PT#{trigger['minutes_duration']||0}M" if trigger['minutes_duration'].to_i>0
-         repetitionPattern.Interval  = "PT#{trigger['minutes_interval']||0}M" if trigger['minutes_interval'].to_i>0
-
-         tmp = trigger['type']
-         tmp = nil unless tmp.is_a?(Hash)
-
-         case trigger['trigger_type']
-         when TASK_TIME_TRIGGER_DAILY
-            trig.DaysInterval =tmp['days_interval'] if tmp && tmp['days_interval']
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']}M" if trigger['random_minutes_interval'].to_i>0
-         when TASK_TIME_TRIGGER_WEEKLY
-            trig.DaysOfWeek  = tmp['days_of_week'] if tmp && tmp['days_of_week']
-            trig.WeeksInterval  = tmp['weeks_interval'] if tmp && tmp['weeks_interval']
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
-         when TASK_TIME_TRIGGER_MONTHLYDATE
-            trig.MonthsOfYear  = tmp['months'] if tmp && tmp['months']
-            trig.DaysOfMonth  = tmp['days'] if tmp && tmp['days']
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
-         when TASK_TIME_TRIGGER_MONTHLYDOW
-            trig.MonthsOfYear  = tmp['months'] if tmp && tmp['months']
-            trig.DaysOfWeek  = tmp['days_of_week'] if tmp && tmp['days_of_week']
-            trig.WeeksOfMonth  = tmp['weeks'] if tmp && tmp['weeks']
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
-         when TASK_TIME_TRIGGER_ONCE
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
-         end
-
-         act = taskDefinition.Actions.Create(0)
-         act.Path = 'cmd'
-
-         @root.RegisterTaskDefinition(task,taskDefinition, 0x6,nil,nil,3)
-         @task = @root.GetTask(task)
-         self
+      case trigger['trigger_type']
+        when TASK_TIME_TRIGGER_DAILY
+          type = 2
+        when TASK_TIME_TRIGGER_WEEKLY
+          type = 3
+        when TASK_TIME_TRIGGER_MONTHLYDATE
+          type = 4
+        when TASK_TIME_TRIGGER_MONTHLYDOW
+          type = 5
+        when TASK_TIME_TRIGGER_ONCE
+          type = 1
+        else
+          raise Error, 'Unknown trigger type'
       end
 
-      alias :new_task :new_work_item
+      startTime = "%04d-%02d-%02dT%02d:%02d:00" % [trigger['start_year'],trigger['start_month'],trigger['start_day'],trigger['start_hour'], trigger['start_minute']]
+      endTime = "%04d-%02d-%02dT00:00:00" % [trigger['end_year'],trigger['end_month'],trigger['end_day']]
 
-      # Returns the number of triggers associated with the active task.
-      #
-      def trigger_count
-         raise Error, "No currently active task" if @task.nil?
+      trig = taskDefinition.Triggers.Create(type)
+      trig.Id = "RegistrationTriggerId"
+      trig.StartBoundary = startTime
+      trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
+      trig.Enabled = true
 
-         count = @task.Definition.Triggers.Count
+      repetitionPattern = trig.Repetition
+      repetitionPattern.Duration = "PT#{trigger['minutes_duration']||0}M" if trigger['minutes_duration'].to_i>0
+      repetitionPattern.Interval  = "PT#{trigger['minutes_interval']||0}M" if trigger['minutes_interval'].to_i>0
+
+      tmp = trigger['type']
+      tmp = nil unless tmp.is_a?(Hash)
+
+      case trigger['trigger_type']
+        when TASK_TIME_TRIGGER_DAILY
+          trig.DaysInterval =tmp['days_interval'] if tmp && tmp['days_interval']
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']}M" if trigger['random_minutes_interval'].to_i>0
+        when TASK_TIME_TRIGGER_WEEKLY
+          trig.DaysOfWeek  = tmp['days_of_week'] if tmp && tmp['days_of_week']
+          trig.WeeksInterval  = tmp['weeks_interval'] if tmp && tmp['weeks_interval']
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
+        when TASK_TIME_TRIGGER_MONTHLYDATE
+          trig.MonthsOfYear  = tmp['months'] if tmp && tmp['months']
+          trig.DaysOfMonth  = tmp['days'] if tmp && tmp['days']
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
+        when TASK_TIME_TRIGGER_MONTHLYDOW
+          trig.MonthsOfYear  = tmp['months'] if tmp && tmp['months']
+          trig.DaysOfWeek  = tmp['days_of_week'] if tmp && tmp['days_of_week']
+          trig.WeeksOfMonth  = tmp['weeks'] if tmp && tmp['weeks']
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
+        when TASK_TIME_TRIGGER_ONCE
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
       end
 
-      # Returns a string that describes the current trigger at the specified
-      # index for the active task.
-      #
-      # Example: "At 7:14 AM every day, starting 4/11/2009"
-      #
-      # not supported
-      def trigger_string(index)
-         raise Error, 'No currently active task' if @task.nil?
-         raise TypeError unless index.is_a?(Numeric)
+      act = taskDefinition.Actions.Create(0)
+      act.Path = 'cmd'
 
-         begin
-            trigger = @task.Definition.Triggers.Item(index)
-         rescue WIN32OLERuntimeError
-            raise Error, "No trigger found at index '#{index}'"
-         end
+      @root.RegisterTaskDefinition(
+        task,
+        taskDefinition,
+        TASK_CREATE_OR_UPDATE,
+        nil,
+        nil,
+        TASK_LOGON_INTERACTIVE_TOKEN
+      )
+      @task = @root.GetTask(task)
+      self
+    end
 
-         "Starting #{trigger.StartBoundary}"
+    alias :new_task :new_work_item
+
+    # Returns the number of triggers associated with the active task.
+    #
+    def trigger_count
+      raise Error, "No currently active task" if @task.nil?
+
+      count = @task.Definition.Triggers.Count
+    end
+
+    # Returns a string that describes the current trigger at the specified
+    # index for the active task.
+    #
+    # Example: "At 7:14 AM every day, starting 4/11/2009"
+    #
+    def trigger_string(index)
+      raise Error, 'No currently active task' if @task.nil?
+      raise TypeError unless index.is_a?(Numeric)
+
+      begin
+        trigger = @task.Definition.Triggers.Item(index)
+      rescue WIN32OLERuntimeError
+        raise Error, "No trigger found at index '#{index}'"
       end
 
-      # Deletes the trigger at the specified index.
-      #
-      def delete_trigger(index)
-         raise Error, 'No currently active task' if @task.nil?
+      "Starting #{trigger.StartBoundary}"
+    end
 
-         definition = @task.Definition
-         definition.Triggers.Remove(index)
-         user = definition.Principal.UserId
-         @root.RegisterTaskDefinition(@task.Path,definition,
-         0x6,user,@password,@password ? 1 : 3)
+    # Deletes the trigger at the specified index.
+    #
+    def delete_trigger(index)
+      raise Error, 'No currently active task' if @task.nil?
 
-         index
+      definition = @task.Definition
+      definition.Triggers.Remove(index)
+      user = definition.Principal.UserId
+
+      @root.RegisterTaskDefinition(
+        @task.Path,
+        definition,
+        TASK_CREATE_OR_UPDATE,
+        user,
+        @password,
+        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
+      )
+
+      index
+    end
+
+    # Returns a hash that describes the trigger at the given index for the
+    # current task.
+    #
+    def trigger(index)
+      raise Error, 'No currently active task' if @task.nil?
+
+      trig = @task.Definition.Triggers.Item(index)
+      trigger = {}
+      trigger['start_year'],trigger['start_month'],
+      trigger['start_day'],trigger['start_hour'],
+      trigger['start_minute'] = trig.StartBoundary.scan(/(\d+)-(\d+)-(\d+)T(\d+):(\d+)/).first
+
+      trigger['end_year'],trigger['end_month'],
+      trigger['end_day'] = trig.StartBoundary.scan(/(\d+)-(\d+)-(\d+)T/).first
+
+      trigger['minutes_duration'] = trig.Repetition.Duration.scan(/(\d+)M/)[0][0].to_i if trig.Repetition.Duration != ""
+      trigger['minutes_interval'] = trig.Repetition.Interval.scan(/(\d+)M/)[0][0].to_i if trig.Repetition.Interval != ""
+      trigger['random_minutes_interval'] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+
+      case trig.Type
+        when 2
+          trigger['trigger_type'] = TASK_TIME_TRIGGER_DAILY
+          tmp = {}
+          tmp['days_interval'] = trig.DaysInterval
+          trigger['type'] = tmp
+        when 3
+          trigger['trigger_type'] = TASK_TIME_TRIGGER_WEEKLY
+          tmp = {}
+          tmp['weeks_interval'] = trig.WeeksInterval
+          tmp['days_of_week'] =trig.DaysOfWeek
+          trigger['type'] = tmp
+        when 4
+          trigger['trigger_type'] = TASK_TIME_TRIGGER_MONTHLYDATE
+          tmp = {}
+          tmp['months'] = trig.MonthsOfYear
+          tmp['days'] = trig.DaysOfMonth
+          trigger['type'] = tmp
+        when 5
+          trigger['trigger_type'] =TASK_TIME_TRIGGER_MONTHLYDOW
+          tmp = {}
+          tmp['months'] = trig.MonthsOfYear
+          tmp['days_of_week'] = trig.DaysOfWeek
+          tmp['weeks'] = trig.weeks
+          trigger['type'] = tmp
+        when 1
+          trigger['trigger_type'] =TASK_TIME_TRIGGER_ONCE
+          tmp = {}
+          tmp['once'] = nil
+          trigger['type'] = tmp
+        else
+          raise Error, 'Unknown trigger type'
+      end
+      trigger
+    end
+
+    # Sets the trigger for the currently active task.
+    #
+    def trigger=(trigger)
+      raise Error, 'No currently active task' if @task.nil?
+      raise TypeError unless trigger.is_a?(Hash)
+
+      definition = @task.Definition
+      definition.Triggers.Clear()
+
+      case trigger['trigger_type']
+        when TASK_TIME_TRIGGER_DAILY
+          type = 2
+        when TASK_TIME_TRIGGER_WEEKLY
+          type = 3
+        when TASK_TIME_TRIGGER_MONTHLYDATE
+          type = 4
+        when TASK_TIME_TRIGGER_MONTHLYDOW
+          type = 5
+        when TASK_TIME_TRIGGER_ONCE
+          type = 1
+        else
+          raise Error, 'Unknown trigger type'
       end
 
-      # Returns a hash that describes the trigger at the given index for the
-      # current task.
-      #
-      def trigger(index)
-         raise Error, 'No currently active task' if @task.nil?
+      startTime = "%04d-%02d-%02dT%02d:%02d:00" % [trigger['start_year'],trigger['start_month'],trigger['start_day'],trigger['start_hour'], trigger['start_minute']]
+      endTime = "%04d-%02d-%02dT00:00:00" % [trigger['end_year'],trigger['end_month'],trigger['end_day']]
 
-         trig = @task.Definition.Triggers.Item(index)
-         trigger = {}
-         trigger['start_year'],trigger['start_month'],
-         trigger['start_day'],trigger['start_hour'],
-         trigger['start_minute'] = trig.StartBoundary.scan(/(\d+)-(\d+)-(\d+)T(\d+):(\d+)/).first
+      trig = definition.Triggers.Create(type)
+      trig.Id = "RegistrationTriggerId"
+      trig.StartBoundary = startTime
+      trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
+      trig.Enabled = true
 
-         trigger['end_year'],trigger['end_month'],
-         trigger['end_day'] = trig.StartBoundary.scan(/(\d+)-(\d+)-(\d+)T/).first
+      repetitionPattern = trig.Repetition
+      repetitionPattern.Duration = "PT#{trigger['minutes_duration']||0}M" if trigger['minutes_duration'].to_i>0
+      repetitionPattern.Interval  = "PT#{trigger['minutes_interval']||0}M" if trigger['minutes_interval'].to_i>0
 
-         trigger['minutes_duration'] = trig.Repetition.Duration.scan(/(\d+)M/)[0][0].to_i if trig.Repetition.Duration != ""
-         trigger['minutes_interval'] = trig.Repetition.Interval.scan(/(\d+)M/)[0][0].to_i if trig.Repetition.Interval != ""
-         trigger['random_minutes_interval'] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+      tmp = trigger['type']
+      tmp = nil unless tmp.is_a?(Hash)
 
-         case trig.Type
-         when 2
-            trigger['trigger_type'] = TASK_TIME_TRIGGER_DAILY
-            tmp = {}
-            tmp['days_interval'] = trig.DaysInterval
-            trigger['type'] = tmp
-         when 3
-            trigger['trigger_type'] =TASK_TIME_TRIGGER_WEEKLY
-            tmp = {}
-            tmp['weeks_interval'] = trig.WeeksInterval
-            tmp['days_of_week'] =trig.DaysOfWeek
-            trigger['type'] = tmp
-         when 4
-            trigger['trigger_type'] =TASK_TIME_TRIGGER_MONTHLYDATE
-            tmp = {}
-            tmp['months'] = trig.MonthsOfYear
-            tmp['days'] = trig.DaysOfMonth
-            trigger['type'] = tmp
-         when 5
-            trigger['trigger_type'] =TASK_TIME_TRIGGER_MONTHLYDOW
-            tmp = {}
-            tmp['months'] = trig.MonthsOfYear
-            tmp['days_of_week'] = trig.DaysOfWeek
-            tmp['weeks'] = trig.weeks
-            trigger['type'] = tmp
-         when 1
-            trigger['trigger_type'] =TASK_TIME_TRIGGER_ONCE
-            tmp = {}
-            tmp['once'] = nil
-            trigger['type'] = tmp
-         else
-            raise Error, 'Unknown trigger type'
-         end
-         trigger
+      case trigger['trigger_type']
+        when TASK_TIME_TRIGGER_DAILY
+          trig.DaysInterval =tmp['days_interval'] if tmp && tmp['days_interval']
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']}M" if trigger['random_minutes_interval'].to_i>0
+        when TASK_TIME_TRIGGER_WEEKLY
+          trig.DaysOfWeek  = tmp['days_of_week'] if tmp && tmp['days_of_week']
+          trig.WeeksInterval  = tmp['weeks_interval'] if tmp && tmp['weeks_interval']
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
+        when TASK_TIME_TRIGGER_MONTHLYDATE
+          trig.MonthsOfYear  = tmp['months'] if tmp && tmp['months']
+          trig.DaysOfMonth  = tmp['days'] if tmp && tmp['days']
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
+        when TASK_TIME_TRIGGER_MONTHLYDOW
+          trig.MonthsOfYear  = tmp['months'] if tmp && tmp['months']
+          trig.DaysOfWeek  = tmp['days_of_week'] if tmp && tmp['days_of_week']
+          trig.WeeksOfMonth  = tmp['weeks'] if tmp && tmp['weeks']
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
+        when TASK_TIME_TRIGGER_ONCE
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
       end
 
-      # Sets the trigger for the currently active task.
-      #
-      def trigger=(trigger)
-         raise Error, 'No currently active task' if @task.nil?
-         raise TypeError unless trigger.is_a?(Hash)
+      user = definition.Principal.UserId
 
-         definition = @task.Definition
-         definition.Triggers.Clear()
+      @root.RegisterTaskDefinition(
+        @task.Path,
+        definition,
+        TASK_CREATE_OR_UPDATE,
+        user,
+        @password,
+        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
+      )
 
-         case trigger['trigger_type']
-         when TASK_TIME_TRIGGER_DAILY
-            type = 2
-         when TASK_TIME_TRIGGER_WEEKLY
-            type = 3
-         when TASK_TIME_TRIGGER_MONTHLYDATE
-            type = 4
-         when TASK_TIME_TRIGGER_MONTHLYDOW
-            type = 5
-         when TASK_TIME_TRIGGER_ONCE
-            type = 1
-         else
-            raise Error, 'Unknown trigger type'
-         end
+      trigger
+    end
 
-         startTime = "%04d-%02d-%02dT%02d:%02d:00" % [trigger['start_year'],trigger['start_month'],trigger['start_day'],trigger['start_hour'], trigger['start_minute']]
-         endTime = "%04d-%02d-%02dT00:00:00" % [trigger['end_year'],trigger['end_month'],trigger['end_day']]
+    # Adds a trigger at the specified index.
+    #
+    def add_trigger(index, trigger)
+      raise Error, 'No currently active task' if @task.nil?
+      raise TypeError unless trigger.is_a?(Hash)
 
-         trig = definition.Triggers.Create(type)
-         trig.Id = "RegistrationTriggerId"
-         trig.StartBoundary = startTime
-         trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
-         trig.Enabled = true
-
-         repetitionPattern = trig.Repetition
-         repetitionPattern.Duration = "PT#{trigger['minutes_duration']||0}M" if trigger['minutes_duration'].to_i>0
-         repetitionPattern.Interval  = "PT#{trigger['minutes_interval']||0}M" if trigger['minutes_interval'].to_i>0
-
-         tmp = trigger['type']
-         tmp = nil unless tmp.is_a?(Hash)
-
-         case trigger['trigger_type']
-         when TASK_TIME_TRIGGER_DAILY
-            trig.DaysInterval =tmp['days_interval'] if tmp && tmp['days_interval']
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']}M" if trigger['random_minutes_interval'].to_i>0
-         when TASK_TIME_TRIGGER_WEEKLY
-            trig.DaysOfWeek  = tmp['days_of_week'] if tmp && tmp['days_of_week']
-            trig.WeeksInterval  = tmp['weeks_interval'] if tmp && tmp['weeks_interval']
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
-         when TASK_TIME_TRIGGER_MONTHLYDATE
-            trig.MonthsOfYear  = tmp['months'] if tmp && tmp['months']
-            trig.DaysOfMonth  = tmp['days'] if tmp && tmp['days']
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
-         when TASK_TIME_TRIGGER_MONTHLYDOW
-            trig.MonthsOfYear  = tmp['months'] if tmp && tmp['months']
-            trig.DaysOfWeek  = tmp['days_of_week'] if tmp && tmp['days_of_week']
-            trig.WeeksOfMonth  = tmp['weeks'] if tmp && tmp['weeks']
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
-         when TASK_TIME_TRIGGER_ONCE
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M" if trigger['random_minutes_interval'].to_i>0
-         end
-
-         user = definition.Principal.UserId
-         @root.RegisterTaskDefinition(@task.Path, definition,0x6,user,@password,@password ? 1 : 3)
-         trigger
+      definition = @task.Definition
+      case trigger['trigger_type']
+        when TASK_TIME_TRIGGER_DAILY
+          type = 2
+        when TASK_TIME_TRIGGER_WEEKLY
+          type = 3
+        when TASK_TIME_TRIGGER_MONTHLYDATE
+          type = 4
+        when TASK_TIME_TRIGGER_MONTHLYDOW
+          type = 5
+        when TASK_TIME_TRIGGER_ONCE
+          type = 1
+        else
+          raise Error, 'Unknown trigger type'
       end
 
-      # Adds a trigger at the specified index.
-      #
-      def add_trigger(index, trigger)
-         raise Error, 'No currently active task' if @task.nil?
-         raise TypeError unless trigger.is_a?(Hash)
+      startTime = "%04d-%02d-%02dT%02d:%02d:00" % [trigger['start_year'],trigger['start_month'],trigger['start_day'],trigger['start_hour'], trigger['start_minute']]
+      endTime = "%04d-%02d-%02dT00:00:00" % [trigger['end_year'],trigger['end_month'],trigger['end_day']]
 
-         definition = @task.Definition
-         case trigger['trigger_type']
-         when TASK_TIME_TRIGGER_DAILY
-            type = 2
-         when TASK_TIME_TRIGGER_WEEKLY
-            type = 3
-         when TASK_TIME_TRIGGER_MONTHLYDATE
-            type = 4
-         when TASK_TIME_TRIGGER_MONTHLYDOW
-            type = 5
-         when TASK_TIME_TRIGGER_ONCE
-            type = 1
-         else
-            raise Error, 'Unknown trigger type'
-         end
+      trig = definition.Triggers.Create(type)
+      trig.Id = "RegistrationTriggerId"
+      trig.StartBoundary = startTime
+      trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
+      trig.Enabled = true
 
-         startTime = "%04d-%02d-%02dT%02d:%02d:00" % [trigger['start_year'],trigger['start_month'],trigger['start_day'],trigger['start_hour'], trigger['start_minute']]
-         endTime = "%04d-%02d-%02dT00:00:00" % [trigger['end_year'],trigger['end_month'],trigger['end_day']]
+      repetitionPattern = trig.Repetition
+      repetitionPattern.Duration = "PT#{trigger['minutes_duration']||0}M" if trigger['minutes_duration'].to_i>0
+      repetitionPattern.Interval  = "PT#{trigger['minutes_interval']||0}M" if trigger['minutes_interval'].to_i>0
 
-         trig = definition.Triggers.Create(type)
-         trig.Id = "RegistrationTriggerId"
-         trig.StartBoundary = startTime
-         trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
-         trig.Enabled = true
+      tmp = trigger['type']
+      tmp = nil unless tmp.is_a?(Hash)
 
-         repetitionPattern = trig.Repetition
-         repetitionPattern.Duration = "PT#{trigger['minutes_duration']||0}M" if trigger['minutes_duration'].to_i>0
-         repetitionPattern.Interval  = "PT#{trigger['minutes_interval']||0}M" if trigger['minutes_interval'].to_i>0
-
-         tmp = trigger['type']
-         tmp = nil unless tmp.is_a?(Hash)
-
-         case trigger['trigger_type']
-         when TASK_TIME_TRIGGER_DAILY
-            trig.DaysInterval =tmp['days_interval'] if tmp && tmp['days_interval']
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']}M"
-         when TASK_TIME_TRIGGER_WEEKLY
-            trig.DaysOfWeek  = tmp['days_of_week'] if tmp && tmp['days_of_week']
-            trig.WeeksInterval  = tmp['weeks_interval'] if tmp && tmp['weeks_interval']
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M"
-         when TASK_TIME_TRIGGER_MONTHLYDATE
-            trig.MonthsOfYear  = tmp['months'] if tmp && tmp['months']
-            trig.DaysOfMonth  = tmp['days'] if tmp && tmp['days']
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M"
-         when TASK_TIME_TRIGGER_MONTHLYDOW
-            trig.MonthsOfYear  = tmp['months'] if tmp && tmp['months']
-            trig.DaysOfWeek  = tmp['days_of_week'] if tmp && tmp['days_of_week']
-            trig.WeeksOfMonth  = tmp['weeks'] if tmp && tmp['weeks']
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M"
-         when TASK_TIME_TRIGGER_ONCE
-            trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M"
-         end
-
-         user = definition.Principal.UserId
-
-         begin
-            @root.RegisterTaskDefinition(@task.Path, definition,0x6,user,@password,@password ? 1 : 3)
-         rescue
-            raise Error, 'add_trigger failed'
-         end
-
-         true
+      case trigger['trigger_type']
+        when TASK_TIME_TRIGGER_DAILY
+          trig.DaysInterval =tmp['days_interval'] if tmp && tmp['days_interval']
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']}M"
+        when TASK_TIME_TRIGGER_WEEKLY
+          trig.DaysOfWeek  = tmp['days_of_week'] if tmp && tmp['days_of_week']
+          trig.WeeksInterval  = tmp['weeks_interval'] if tmp && tmp['weeks_interval']
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M"
+        when TASK_TIME_TRIGGER_MONTHLYDATE
+          trig.MonthsOfYear  = tmp['months'] if tmp && tmp['months']
+          trig.DaysOfMonth  = tmp['days'] if tmp && tmp['days']
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M"
+        when TASK_TIME_TRIGGER_MONTHLYDOW
+          trig.MonthsOfYear  = tmp['months'] if tmp && tmp['months']
+          trig.DaysOfWeek  = tmp['days_of_week'] if tmp && tmp['days_of_week']
+          trig.WeeksOfMonth  = tmp['weeks'] if tmp && tmp['weeks']
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M"
+        when TASK_TIME_TRIGGER_ONCE
+          trig.RandomDelay = "PT#{trigger['random_minutes_interval']||0}M"
       end
 
-      # Returns the flags (integer) that modify the behavior of the work item. You
-      # must OR the return value to determine the flags yourself.
-      #
-      # not supported
-      def flags
-         raise Error, 'null task' if @task.nil?
+      user = definition.Principal.UserId
 
-         flags = 0
+      begin
+        @root.RegisterTaskDefinition(
+          @task.Path,
+          definition,
+          TASK_CREATE_OR_UPDATE,
+          user,
+          @password,
+          @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
+        )
+      rescue
+        raise Error, 'add_trigger failed'
       end
 
-      # Sets an OR'd value of flags that modify the behavior of the work item.
-      #
-      # not supported
-      def flags=(flags)
-         raise Error, 'No currently active task' if @task.nil?
+      true
+    end
 
-         flags = 0
-      end
+    # Returns the flags (integer) that modify the behavior of the work item. You
+    # must OR the return value to determine the flags yourself.
+    #--
+    # Not supported
+    #
+    def flags
+      raise Error, 'null task' if @task.nil?
 
-      # Returns the status of the currently active task. Possible values are
-      # 'ready', 'running', 'not scheduled' or 'unknown'.
-      #
-      def status
-         raise Error, 'No currently active task' if @task.nil?
+      flags = 0
+    end
 
-         case @task.State
-         when 3
-            status = 'ready'
-         when 4
-            status = 'running'
-         when 1
-            status = 'not scheduled'
-         else
+    # Sets an OR'd value of flags that modify the behavior of the work item.
+    #--
+    # Not supported
+    #
+    def flags=(flags)
+      raise Error, 'No currently active task' if @task.nil?
+
+      flags = 0
+    end
+
+    # Returns the status of the currently active task. Possible values are
+    # 'ready', 'running', 'not scheduled' or 'unknown'.
+    #
+    def status
+      raise Error, 'No currently active task' if @task.nil?
+
+      case @task.State
+        when 3
+          status = 'ready'
+        when 4
+          status = 'running'
+        when 1
+          status = 'not scheduled'
+        else
             status = 'unknown'
-         end
-
-         status
       end
 
-      # Returns the exit code from the last scheduled run.
-      #
-      def exit_code
-         raise Error, 'No currently active task' if @task.nil?
+      status
+    end
 
-         exit_code = @task.LastTaskResult
+    # Returns the exit code from the last scheduled run.
+    #
+    def exit_code
+      raise Error, 'No currently active task' if @task.nil?
+
+      exit_code = @task.LastTaskResult
+    end
+
+    # Returns the comment associated with the task, if any.
+    #
+    def comment
+      raise Error, 'No currently active task' if @task.nil?
+
+      @task.Definition.RegistrationInfo.Description
+    end
+
+    # Sets the comment for the task.
+    #
+    def comment=(comment)
+      raise Error, 'No currently active task' if @task.nil?
+      raise TypeError unless comment.is_a?(String)
+
+      definition = @task.Definition
+      definition.RegistrationInfo.Description = comment
+
+      user = definition.Principal.UserId
+      @root.RegisterTaskDefinition(@task.Path, definition,0x6,user,@password,@password ? 1 : 3)
+
+      comment
+    end
+
+    # Returns the name of the user who created the task.
+    #
+    def creator
+      raise Error, 'No currently active task' if @task.nil?
+
+      @task.Definition.RegistrationInfo.Author
+    end
+
+    # Sets the creator for the task.
+    #
+    def creator=(creator)
+      raise Error, 'No currently active task' if @task.nil?
+      raise TypeError unless creator.is_a?(String)
+
+      definition = @task.Definition
+      definition.RegistrationInfo.Author = creator
+
+      user = definition.Principal.UserId
+      @root.RegisterTaskDefinition(@task.Path, definition,0x6,user,@password,@password ? 1 : 3)
+
+      creator
+    end
+
+    # Returns a Time object that indicates the next time the task will run.
+    #
+    def next_run_time
+      raise Error, 'No currently active task' if @task.nil?
+
+      Time.parse(@task.NextRunTime)
+    end
+
+    # Returns a Time object indicating the most recent time the task ran or
+    # nil if the task has never run.
+    #
+    def most_recent_run_time
+      raise Error, 'No currently active task' if @task.nil?
+
+      time = nil
+
+      begin
+        time = Time.parse(@task.LastRunTime)
+      rescue
+        # Ignore
       end
 
-      # Returns the comment associated with the task, if any.
-      #
-      def comment
-         raise Error, 'No currently active task' if @task.nil?
+      time
+    end
 
-         @task.Definition.RegistrationInfo.Description
-      end
+    # Returns the maximum length of time, in milliseconds, that the task
+    # will run before terminating.
+    #
+    def max_run_time
+      raise Error, 'No currently active task' if @task.nil?
 
-      # Sets the comment for the task.
-      #
-      def comment=(comment)
-         raise Error, 'No currently active task' if @task.nil?
-         raise TypeError unless comment.is_a?(String)
+      t = @task.Definition.Settings.ExecutionTimeLimit
+      year = t.scan(/(\d+?)Y/).flatten.first
+      month = t.scan(/(\d+?)M/).flatten.first
+      day = t.scan(/(\d+?)D/).flatten.first
+      hour = t.scan(/(\d+?)H/).flatten.first
+      min = t.scan(/T.*(\d+?)M/).flatten.first
+      sec = t.scan(/(\d+?)S/).flatten.first
 
-         definition = @task.Definition
-         definition.RegistrationInfo.Description = comment
+      time = 0
+      time += year.to_i * 365 if year
+      time += month.to_i * 30 if month
+      time += day.to_i if day
+      time *= 24
+      time += hour.to_i if hour
+      time *= 60
+      time += min.to_i if min
+      time *= 60
+      time += sec if sec
+      time *= 1000
 
-         user = definition.Principal.UserId
-         @root.RegisterTaskDefinition(@task.Path, definition,0x6,user,@password,@password ? 1 : 3)
+      time
+    end
 
-         comment
-      end
+    # Sets the maximum length of time, in milliseconds, that the task can run
+    # before terminating. Returns the value you specified if successful.
+    #
+    def max_run_time=(max_run_time)
+      raise Error, 'No currently active task' if @task.nil?
+      raise TypeError unless max_run_time.is_a?(Numeric)
 
-      # Returns the name of the user who created the task.
-      #
-      def creator
-         raise Error, 'No currently active task' if @task.nil?
+      t = max_run_time
+      t /= 1000
+      limit ="PT#{t}S"
 
-         @task.Definition.RegistrationInfo.Author
-      end
+      definition = @task.Definition
+      definition.Settings.ExecutionTimeLimit = limit
+      user = definition.Principal.UserId
 
-      # Sets the creator for the task.
-      #
-      def creator=(creator)
-         raise Error, 'No currently active task' if @task.nil?
-         raise TypeError unless creator.is_a?(String)
+      @root.RegisterTaskDefinition(
+        @task.Path,
+        definition,
+        TASK_CREATE_OR_UPDATE,
+        user,
+        @password,
+        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
+      )
 
-         definition = @task.Definition
-         definition.RegistrationInfo.Author = creator
+      max_run_time
+    end
 
-         user = definition.Principal.UserId
-         @root.RegisterTaskDefinition(@task.Path, definition,0x6,user,@password,@password ? 1 : 3)
+    # Shorthand constants
 
-         creator
-      end
+    IDLE = IDLE_PRIORITY_CLASS
+    NORMAL = NORMAL_PRIORITY_CLASS
+    HIGH = HIGH_PRIORITY_CLASS
+    REALTIME = REALTIME_PRIORITY_CLASS
+    BELOW_NORMAL = BELOW_NORMAL_PRIORITY_CLASS
+    ABOVE_NORMAL = ABOVE_NORMAL_PRIORITY_CLASS
 
-      # Returns a Time object that indicates the next time the task will run.
-      #
-      def next_run_time
-         raise Error, 'No currently active task' if @task.nil?
+    ONCE = TASK_TIME_TRIGGER_ONCE
+    DAILY = TASK_TIME_TRIGGER_DAILY
+    WEEKLY = TASK_TIME_TRIGGER_WEEKLY
+    MONTHLYDATE = TASK_TIME_TRIGGER_MONTHLYDATE
+    MONTHLYDOW = TASK_TIME_TRIGGER_MONTHLYDOW
 
-         Time.parse(@task.NextRunTime)
-      end
+    ON_IDLE = TASK_EVENT_TRIGGER_ON_IDLE
+    AT_SYSTEMSTART = TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+    AT_LOGON = TASK_EVENT_TRIGGER_AT_LOGON
+    FIRST_WEEK = TASK_FIRST_WEEK
+    SECOND_WEEK = TASK_SECOND_WEEK
+    THIRD_WEEK = TASK_THIRD_WEEK
+    FOURTH_WEEK = TASK_FOURTH_WEEK
+    LAST_WEEK = TASK_LAST_WEEK
+    SUNDAY = TASK_SUNDAY
+    MONDAY = TASK_MONDAY
+    TUESDAY = TASK_TUESDAY
+    WEDNESDAY = TASK_WEDNESDAY
+    THURSDAY = TASK_THURSDAY
+    FRIDAY = TASK_FRIDAY
+    SATURDAY = TASK_SATURDAY
+    JANUARY = TASK_JANUARY
+    FEBRUARY = TASK_FEBRUARY
+    MARCH = TASK_MARCH
+    APRIL = TASK_APRIL
+    MAY = TASK_MAY
+    JUNE = TASK_JUNE
+    JULY = TASK_JULY
+    AUGUST = TASK_AUGUST
+    SEPTEMBER = TASK_SEPTEMBER
+    OCTOBER = TASK_OCTOBER
+    NOVEMBER = TASK_NOVEMBER
+    DECEMBER = TASK_DECEMBER
 
-      # Returns a Time object indicating the most recent time the task ran or
-      # nil if the task has never run.
-      #
-      def most_recent_run_time
-         raise Error, 'No currently active task' if @task.nil?
+    INTERACTIVE = TASK_FLAG_INTERACTIVE
+    DELETE_WHEN_DONE = TASK_FLAG_DELETE_WHEN_DONE
+    DISABLED = TASK_FLAG_DISABLED
+    START_ONLY_IF_IDLE = TASK_FLAG_START_ONLY_IF_IDLE
+    KILL_ON_IDLE_END = TASK_FLAG_KILL_ON_IDLE_END
+    DONT_START_IF_ON_BATTERIES = TASK_FLAG_DONT_START_IF_ON_BATTERIES
+    KILL_IF_GOING_ON_BATTERIES = TASK_FLAG_KILL_IF_GOING_ON_BATTERIES
+    RUN_ONLY_IF_DOCKED = TASK_FLAG_RUN_ONLY_IF_DOCKED
+    HIDDEN = TASK_FLAG_HIDDEN
+    RUN_IF_CONNECTED_TO_INTERNET = TASK_FLAG_RUN_IF_CONNECTED_TO_INTERNET
+    RESTART_ON_IDLE_RESUME = TASK_FLAG_RESTART_ON_IDLE_RESUME
+    SYSTEM_REQUIRED = TASK_FLAG_SYSTEM_REQUIRED
+    RUN_ONLY_IF_LOGGED_ON = TASK_FLAG_RUN_ONLY_IF_LOGGED_ON
 
-         time = nil
-         begin
-            time = Time.parse(@task.LastRunTime)
-         rescue
-         end
-         time
-      end
+    FLAG_HAS_END_DATE = TASK_TRIGGER_FLAG_HAS_END_DATE
+    FLAG_KILL_AT_DURATION_END = TASK_TRIGGER_FLAG_KILL_AT_DURATION_END
+    FLAG_DISABLED = TASK_TRIGGER_FLAG_DISABLED
 
-      # Returns the maximum length of time, in milliseconds, that the task
-      # will run before terminating.
-      #
-      def max_run_time
-         raise Error, 'No currently active task' if @task.nil?
-
-         t = @task.Definition.Settings.ExecutionTimeLimit
-         year = t.scan(/(\d+?)Y/).flatten.first
-         month = t.scan(/(\d+?)M/).flatten.first
-         day = t.scan(/(\d+?)D/).flatten.first
-         hour = t.scan(/(\d+?)H/).flatten.first
-         min = t.scan(/T.*(\d+?)M/).flatten.first
-         sec = t.scan(/(\d+?)S/).flatten.first
-
-         time = 0
-         time += year.to_i * 365 if year
-         time += month.to_i * 30 if month
-         time += day.to_i if day
-         time *= 24
-         time += hour.to_i if hour
-         time *= 60
-         time += min.to_i if min
-         time *= 60
-         time += sec if sec
-         time *= 1000
-
-         time
-      end
-
-      # Sets the maximum length of time, in milliseconds, that the task can run
-      # before terminating. Returns the value you specified if successful.
-      #
-      def max_run_time=(max_run_time)
-         raise Error, 'No currently active task' if @task.nil?
-         raise TypeError unless max_run_time.is_a?(Numeric)
-
-         t = max_run_time
-         t /= 1000
-         limit ="PT#{t}S"
-
-         definition = @task.Definition
-         definition.Settings.ExecutionTimeLimit = limit
-         user = definition.Principal.UserId
-         @root.RegisterTaskDefinition(@task.Path, definition,0x6,user,@password,@password ? 1 : 3)
-
-         max_run_time
-      end
-
-      # Shorthand constants
-
-      IDLE = IDLE_PRIORITY_CLASS
-      NORMAL = NORMAL_PRIORITY_CLASS
-      HIGH = HIGH_PRIORITY_CLASS
-      REALTIME = REALTIME_PRIORITY_CLASS
-      BELOW_NORMAL = BELOW_NORMAL_PRIORITY_CLASS
-      ABOVE_NORMAL = ABOVE_NORMAL_PRIORITY_CLASS
-
-      ONCE = TASK_TIME_TRIGGER_ONCE
-      DAILY = TASK_TIME_TRIGGER_DAILY
-      WEEKLY = TASK_TIME_TRIGGER_WEEKLY
-      MONTHLYDATE = TASK_TIME_TRIGGER_MONTHLYDATE
-      MONTHLYDOW = TASK_TIME_TRIGGER_MONTHLYDOW
-
-      ON_IDLE = TASK_EVENT_TRIGGER_ON_IDLE
-      AT_SYSTEMSTART = TASK_EVENT_TRIGGER_AT_SYSTEMSTART
-      AT_LOGON = TASK_EVENT_TRIGGER_AT_LOGON
-      FIRST_WEEK = TASK_FIRST_WEEK
-      SECOND_WEEK = TASK_SECOND_WEEK
-      THIRD_WEEK = TASK_THIRD_WEEK
-      FOURTH_WEEK = TASK_FOURTH_WEEK
-      LAST_WEEK = TASK_LAST_WEEK
-      SUNDAY = TASK_SUNDAY
-      MONDAY = TASK_MONDAY
-      TUESDAY = TASK_TUESDAY
-      WEDNESDAY = TASK_WEDNESDAY
-      THURSDAY = TASK_THURSDAY
-      FRIDAY = TASK_FRIDAY
-      SATURDAY = TASK_SATURDAY
-      JANUARY = TASK_JANUARY
-      FEBRUARY = TASK_FEBRUARY
-      MARCH = TASK_MARCH
-      APRIL = TASK_APRIL
-      MAY = TASK_MAY
-      JUNE = TASK_JUNE
-      JULY = TASK_JULY
-      AUGUST = TASK_AUGUST
-      SEPTEMBER = TASK_SEPTEMBER
-      OCTOBER = TASK_OCTOBER
-      NOVEMBER = TASK_NOVEMBER
-      DECEMBER = TASK_DECEMBER
-
-      INTERACTIVE = TASK_FLAG_INTERACTIVE
-      DELETE_WHEN_DONE = TASK_FLAG_DELETE_WHEN_DONE
-      DISABLED = TASK_FLAG_DISABLED
-      START_ONLY_IF_IDLE = TASK_FLAG_START_ONLY_IF_IDLE
-      KILL_ON_IDLE_END = TASK_FLAG_KILL_ON_IDLE_END
-      DONT_START_IF_ON_BATTERIES = TASK_FLAG_DONT_START_IF_ON_BATTERIES
-      KILL_IF_GOING_ON_BATTERIES = TASK_FLAG_KILL_IF_GOING_ON_BATTERIES
-      RUN_ONLY_IF_DOCKED = TASK_FLAG_RUN_ONLY_IF_DOCKED
-      HIDDEN = TASK_FLAG_HIDDEN
-      RUN_IF_CONNECTED_TO_INTERNET = TASK_FLAG_RUN_IF_CONNECTED_TO_INTERNET
-      RESTART_ON_IDLE_RESUME = TASK_FLAG_RESTART_ON_IDLE_RESUME
-      SYSTEM_REQUIRED = TASK_FLAG_SYSTEM_REQUIRED
-      RUN_ONLY_IF_LOGGED_ON = TASK_FLAG_RUN_ONLY_IF_LOGGED_ON
-
-      FLAG_HAS_END_DATE = TASK_TRIGGER_FLAG_HAS_END_DATE
-      FLAG_KILL_AT_DURATION_END = TASK_TRIGGER_FLAG_KILL_AT_DURATION_END
-      FLAG_DISABLED = TASK_TRIGGER_FLAG_DISABLED
-
-      MAX_RUN_TIMES = TASK_MAX_RUN_TIMES
+    MAX_RUN_TIMES = TASK_MAX_RUN_TIMES
    end
 end
