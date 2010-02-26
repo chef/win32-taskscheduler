@@ -1,6 +1,7 @@
-require 'windows/process'
+#require 'windows/process'
 require 'win32ole'
-include Windows::Process
+require 'socket'
+#include Windows::Process
 
 # The Win32 module serves as a namespace only
 module Win32
@@ -217,9 +218,11 @@ module Win32
     # it will be created. Otherwise an error will be raised.
     #
     def initialize(folder = "\\", force = false)
-      @task   = nil
       @folder = folder
       @force  = force
+
+      @task     = nil
+      @password = nil
 
       raise ArgumentError, "invalid folder" unless folder.include?("\\")
 
@@ -233,17 +236,21 @@ module Win32
         raise Error, err.inspect
       end
 
-      unless @service.FolderExists(folder)
-        if force
-          @service.CreateFolder(folder)
-        else
-          raise ArgumentError, "folder '#{folder}' could not be found"
+      @service.Connect
+      @root = @service.GetFolder("\\")
+
+      if folder != "\\"
+        begin
+          @root = @service.GetFolder(folder)
+        rescue WIN32OLERuntimeError => err
+          if force
+            @root.CreateFolder(folder)
+            @root = @service.GetFolder(folder)
+          else
+            raise ArgumentError, "folder '#{folder}' not found"
+          end
         end
       end
-
-      @service.Connect
-      @root = @service.GetFolder(folder)
-      @password = nil
     end
 
     # Returns an array of scheduled task names.
@@ -1030,12 +1037,12 @@ module Win32
 
     # Shorthand constants
 
-    IDLE = IDLE_PRIORITY_CLASS
-    NORMAL = NORMAL_PRIORITY_CLASS
-    HIGH = HIGH_PRIORITY_CLASS
-    REALTIME = REALTIME_PRIORITY_CLASS
-    BELOW_NORMAL = BELOW_NORMAL_PRIORITY_CLASS
-    ABOVE_NORMAL = ABOVE_NORMAL_PRIORITY_CLASS
+    #IDLE = IDLE_PRIORITY_CLASS
+    #NORMAL = NORMAL_PRIORITY_CLASS
+    #HIGH = HIGH_PRIORITY_CLASS
+    #REALTIME = REALTIME_PRIORITY_CLASS
+    #BELOW_NORMAL = BELOW_NORMAL_PRIORITY_CLASS
+    #ABOVE_NORMAL = ABOVE_NORMAL_PRIORITY_CLASS
 
     ONCE = TASK_TIME_TRIGGER_ONCE
     DAILY = TASK_TIME_TRIGGER_DAILY
