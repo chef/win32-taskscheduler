@@ -185,8 +185,8 @@ module Win32
 
     TASK_VALIDATE_ONLY = 0x1
     TASK_CREATE = 0x2
-    TASK_UPDATE = 0x3
-    TASK_CREATE_OR_UPDATE = 0x4
+    TASK_UPDATE = 0x4
+    TASK_CREATE_OR_UPDATE = 0x6
     TASK_DISABLE = 0x8
     TASK_DONT_ADD_PRINCIPAL_ACE = 0x10
     TASK_IGNORE_REGISTRATION_TRIGGERS = 0x20
@@ -212,36 +212,38 @@ module Win32
 
     attr_accessor :password
 
-    # Returns a new TaskScheduler object. If a work_item (and possibly the
-    # the trigger) are passed as arguments then a new work item is created and
-    # associated with that trigger, although you can still activate other tasks
-    # with the same handle.
+    # Returns a new TaskScheduler object, attached to +folder+. If that
+    # folder does not exist, but the +force+ option is set to true, then
+    # it will be created. Otherwise an error will be raised.
     #
-    # This is really just a bit of convenience. Passing arguments to the
-    # constructor is the same as calling TaskScheduler.new plus
-    # TaskScheduler#new_work_item.
-    #
-    def initialize(work_item=nil, trigger=nil)
-      @task = nil
+    def initialize(folder = "\\", force = false)
+      @task   = nil
+      @folder = folder
+      @force  = force
 
-      begin
-        @service =  WIN32OLE.new("Schedule.Service")
-      rescue WIN32OLERuntimeError => e
-        raise Error,e.inspect
+      raise ArgumentError, "invalid folder" unless folder.include?("\\")
+
+      unless [TrueClass, FalseClass].include?(force.class)
+        raise TypeError, "invalid force value" 
       end
 
-      @service.Connect
-      @root = @service.GetFolder("\\")
-      @password = nil
+      begin
+        @service = WIN32OLE.new('Schedule.Service')
+      rescue WIN32OLERuntimeError => err
+        raise Error, err.inspect
+      end
 
-      if work_item
-        if trigger
-          raise TypeError unless trigger.is_a?(Hash)
-          new_work_item(work_item, trigger)
+      unless @service.FolderExists(folder)
+        if force
+          @service.CreateFolder(folder)
+        else
+          raise ArgumentError, "folder '#{folder}' could not be found"
         end
       end
 
-      self
+      @service.Connect
+      @root = @service.GetFolder(folder)
+      @password = nil
     end
 
     # Returns an array of scheduled task names.
@@ -279,7 +281,7 @@ module Win32
       begin
         @root.DeleteTask(task, 0)
       rescue
-        raise Error,"Access Denied"
+        raise Error, "Access Denied"
       end
 
       self
@@ -322,7 +324,6 @@ module Win32
     #
     def machine=(host)
       raise TypeError unless host.is_a?(String)
-
       @service.Connect(host)
       host
     end
