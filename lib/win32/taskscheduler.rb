@@ -1,6 +1,7 @@
-require 'windows/process'
+#require 'windows/process'
 require 'win32ole'
-include Windows::Process
+require 'socket'
+#include Windows::Process
 
 # The Win32 module serves as a namespace only
 module Win32
@@ -212,36 +213,44 @@ module Win32
 
     attr_accessor :password
 
-    # Returns a new TaskScheduler object. If a work_item (and possibly the
-    # the trigger) are passed as arguments then a new work item is created and
-    # associated with that trigger, although you can still activate other tasks
-    # with the same handle.
+    # Returns a new TaskScheduler object, attached to +folder+. If that
+    # folder does not exist, but the +force+ option is set to true, then
+    # it will be created. Otherwise an error will be raised.
     #
-    # This is really just a bit of convenience. Passing arguments to the
-    # constructor is the same as calling TaskScheduler.new plus
-    # TaskScheduler#new_work_item.
-    #
-    def initialize(work_item=nil, trigger=nil)
-      @task = nil
+    def initialize(folder = "\\", force = false)
+      @folder = folder
+      @force  = force
+
+      @task     = nil
+      @password = nil
+
+      raise ArgumentError, "invalid folder" unless folder.include?("\\")
+
+      unless [TrueClass, FalseClass].include?(force.class)
+        raise TypeError, "invalid force value" 
+      end
 
       begin
-        @service =  WIN32OLE.new("Schedule.Service")
-      rescue WIN32OLERuntimeError => e
-        raise Error,e.inspect
+        @service = WIN32OLE.new('Schedule.Service')
+      rescue WIN32OLERuntimeError => err
+        raise Error, err.inspect
       end
 
       @service.Connect
       @root = @service.GetFolder("\\")
-      @password = nil
 
-      if work_item
-        if trigger
-          raise TypeError unless trigger.is_a?(Hash)
-          new_work_item(work_item, trigger)
+      if folder != "\\"
+        begin
+          @root = @service.GetFolder(folder)
+        rescue WIN32OLERuntimeError => err
+          if force
+            @root.CreateFolder(folder)
+            @root = @service.GetFolder(folder)
+          else
+            raise ArgumentError, "folder '#{folder}' not found"
+          end
         end
       end
-
-      self
     end
 
     # Returns an array of scheduled task names.
@@ -279,7 +288,7 @@ module Win32
       begin
         @root.DeleteTask(task, 0)
       rescue
-        raise Error,"Access Denied"
+        raise Error, "Access Denied"
       end
 
       self
@@ -322,7 +331,6 @@ module Win32
     #
     def machine=(host)
       raise TypeError unless host.is_a?(String)
-
       @service.Connect(host)
       host
     end
@@ -1029,12 +1037,12 @@ module Win32
 
     # Shorthand constants
 
-    IDLE = IDLE_PRIORITY_CLASS
-    NORMAL = NORMAL_PRIORITY_CLASS
-    HIGH = HIGH_PRIORITY_CLASS
-    REALTIME = REALTIME_PRIORITY_CLASS
-    BELOW_NORMAL = BELOW_NORMAL_PRIORITY_CLASS
-    ABOVE_NORMAL = ABOVE_NORMAL_PRIORITY_CLASS
+    #IDLE = IDLE_PRIORITY_CLASS
+    #NORMAL = NORMAL_PRIORITY_CLASS
+    #HIGH = HIGH_PRIORITY_CLASS
+    #REALTIME = REALTIME_PRIORITY_CLASS
+    #BELOW_NORMAL = BELOW_NORMAL_PRIORITY_CLASS
+    #ABOVE_NORMAL = ABOVE_NORMAL_PRIORITY_CLASS
 
     ONCE = TASK_TIME_TRIGGER_ONCE
     DAILY = TASK_TIME_TRIGGER_DAILY
