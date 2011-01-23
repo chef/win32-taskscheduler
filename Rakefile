@@ -1,16 +1,14 @@
 require 'rake'
+require 'rake/clean'
 require 'rake/testtask'
 require 'rbconfig'
 include Config
 
-namespace 'gem' do
-  desc 'Remove any existing .gem files'
-  task :clean do
-    Dir['*.gem'].each{ |f| File.delete(f) }
-  end
+CLEAN.include("**/*.gem", "**/*.rbc")
 
+namespace 'gem' do
   desc 'Build the win32-taskscheduler gem'
-  task :build => [:clean] do
+  task :create => [:clean] do
     spec = eval(IO.read('win32-taskscheduler.gemspec'))
     Gem::Builder.new(spec).build
   end
@@ -32,3 +30,5 @@ Rake::TestTask.new do |t|
   t.verbose = true
   t.warning = true
 end
+
+task :default => :test
