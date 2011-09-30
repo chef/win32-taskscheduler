@@ -487,7 +487,7 @@ module Win32
       setAccountInformation = Win32::API::Function.new(table[30],'PPP','L')
 
       if (user.nil? || user=="") && (password.nil? || password=="")
-        hr = setAccountInformation.call(@pITask, "", nil)
+        hr = setAccountInformation.call(@pITask, multi_to_wide(""), nil)
       else
         user = multi_to_wide(user)
         password = multi_to_wide(password)
