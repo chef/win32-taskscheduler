@@ -1,4 +1,6 @@
 == 0.2.1 - ???
+* Fixed a bug that would not allow task to run as SYSTEM. Thanks go to
+  Josh cooper for the spot and patch.
 * Cleaned up the repo. The C source files have been removed from the main
   repository (and this gem). They are in a separate branch on github for
   anyone who misses them.
