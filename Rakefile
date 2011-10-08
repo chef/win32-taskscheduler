@@ -7,14 +7,14 @@ include Config
 CLEAN.include("**/*.gem", "**/*.rbc", ".rbx")
 
 namespace 'gem' do
-  desc 'Build the win32-taskscheduler gem'
-  task :build => [:clean] do
+  desc 'Create the win32-taskscheduler gem'
+  task :create => [:clean] do
     spec = eval(IO.read('win32-taskscheduler.gemspec'))
     Gem::Builder.new(spec).build
   end
 
   desc 'Install the win32-taskscheduler library as a gem'
-  task :install => [:build] do
+  task :install => [:create] do
     file = Dir['win32-taskscheduler*.gem'].first
     sh "gem install #{file}"
   end

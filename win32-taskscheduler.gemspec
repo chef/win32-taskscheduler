@@ -9,7 +9,6 @@ Gem::Specification.new do |spec|
   spec.homepage   = 'http://www.rubyforge.org/projects/win32utils'
   spec.platform   = Gem::Platform::RUBY
   spec.summary    = 'A library for the Windows task scheduler'
-  spec.has_rdoc   = true
   spec.test_files = Dir['test/test*']
   spec.files      = Dir['**/*'].reject{ |f| f.include?('git') }
 

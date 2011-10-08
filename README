@@ -39,7 +39,8 @@
 
 = Documentation
   If you installed this library as a gem then the documentation was built for
-  you and can be viewed if your gem server is running.
+  you and can be viewed if your gem server is running. There is also some
+  documentation on the github wiki page.
 
   Otherwise, you can look at the doc/taskscheduler.txt file which should have
   everything you need.
@@ -64,7 +65,7 @@
   http://www.rubyforge.org/projects/win32utils.
 
 = Copyright
-  (C) 2003-2010 Daniel J. Berger
+  (C) 2003-2011 Daniel J. Berger
   All Rights Reserved
 
 = License
