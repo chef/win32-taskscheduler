@@ -1,4 +1,4 @@
-== 0.2.1 - ???
+== 0.2.1 - 8-Oct-2011
 * Fixed a bug that would not allow task to run as SYSTEM. Thanks go to
   Josh cooper for the spot and patch.
 * Fixed a bug in new_work_item that would cause it to crash if you tried
