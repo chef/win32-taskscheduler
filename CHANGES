@@ -1,6 +1,9 @@
 == 0.2.1 - ???
 * Fixed a bug that would not allow task to run as SYSTEM. Thanks go to
   Josh cooper for the spot and patch.
+* Fixed a bug in new_work_item that would cause it to crash if you tried
+  to create a work item that already existed. An error is now raised instead.
+  Thanks go to Pete Higgins for the spot.
 * Cleaned up the repo. The C source files have been removed from the main
   repository (and this gem). They are in a separate branch on github for
   anyone who misses them.

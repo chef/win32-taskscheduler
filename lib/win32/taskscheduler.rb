@@ -13,13 +13,13 @@ include Windows::MSVCRT::Buffer
 module Win32
   # The TaskScheduler class encapsulates taskscheduler settings and behavior
   class TaskScheduler
-      
+
     # The version of the win32-taskscheduler library
     VERSION = '0.2.1'
-      
+
     # The error class raised if any task scheduler specific calls fail.
     class Error < StandardError; end
-         
+
     private
 
     # :stopdoc:
@@ -79,7 +79,7 @@ module Win32
     TASKS_TO_RETRIEVE  = 5
 
     # COM
- 
+
     CLSCTX_INPROC_SERVER  = 0x1
     CLSID_CTask = [0x148BD520,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
     CLSID_CTaskScheduler = [0x148BD52A,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
@@ -153,12 +153,12 @@ module Win32
     FLAG_DISABLED = TASK_TRIGGER_FLAG_DISABLED
 
     MAX_RUN_TIMES = TASK_MAX_RUN_TIMES
-      
+
     # Returns a new TaskScheduler object. If a work_item (and possibly the
     # the trigger) are passed as arguments then a new work item is created and
     # associated with that trigger, although you can still activate other tasks
     # with the same handle.
-    # 
+    #
     # This is really just a bit of convenience. Passing arguments to the
     # constructor is the same as calling TaskScheduler.new plus
     # TaskScheduler#new_work_item.
@@ -195,8 +195,6 @@ module Win32
           new_work_item(work_item, trigger)
         end
       end
-
-      self
     end
 
     # Returns an array of scheduled task names.
@@ -254,7 +252,7 @@ module Win32
 
       array
     end
-      
+
     alias :tasks :enum
 
     # Activate the specified task.
@@ -282,8 +280,6 @@ module Win32
       end
 
       @pITask = ptr.unpack('L').first
-
-      self
     end
 
     # Delete the specified task name.
@@ -308,8 +304,6 @@ module Win32
       if hr != S_OK
         raise Error, get_last_error
       end
-
-      self
     end
 
     # Execute the current task.
@@ -331,16 +325,14 @@ module Win32
       if hr != S_OK
         raise Error,get_last_error
       end
-
-      self
     end
 
     # Saves the current task. Tasks must be saved before they can be activated.
     # The .job file itself is typically stored in the C:\WINDOWS\Tasks folder.
-    # 
+    #
     # If +file+ (an absolute path) is specified then the job is saved to that
     # file instead. A '.job' extension is recommended but not enforced.
-    # 
+    #
     # Note that calling TaskScheduler#save also resets the TaskScheduler object
     # so that there is no currently active task.
     #
@@ -412,8 +404,6 @@ module Win32
 
       release.call(@pITask)
       @pITask = nil
-
-      self
     end
 
     # Terminate the current task.
@@ -434,8 +424,6 @@ module Win32
       if hr != S_OK
         raise Error,get_last_error
       end
-
-      self
     end
 
     # Set the host on which the various TaskScheduler methods will execute.
@@ -472,7 +460,7 @@ module Win32
     # In some cases the job may be created, but the account information was
     # bad. In this case the task is created but a warning is generated and
     # false is returned.
-    # 
+    #
     def set_account_information(user, password)
       raise Error, 'null pointer' if @pITS.nil?
       raise Error, 'No currently active task' if @pITask.nil?
@@ -543,7 +531,7 @@ module Win32
         str = 0.chr * 256
         wcscpy(str, ptr.unpack('L').first)
         CoTaskMemFree(ptr.unpack('L').first)
-        user = wide_to_multi(str)            
+        user = wide_to_multi(str)
       else
         CoTaskMemFree(p.unpack('L').first)
         raise Error,get_last_error(hr)
@@ -797,6 +785,13 @@ module Win32
       raise TypeError unless trigger.is_a?(Hash)
       raise Error, 'null pointer' if @pITS.nil?
 
+      # I'm working around github issue #1 here.
+      enum.each{ |name|
+        if name.downcase == task.downcase + '.job'
+          raise Error, "task '#{task}' already exists"
+        end
+      }
+
       trigger = transform_and_validate(trigger)
 
       if @pITask
@@ -810,7 +805,7 @@ module Win32
         release = Win32::API::Function.new(table[2], 'P', 'L')
         release.call(@pITask)
 
-         @pITask = nil
+        @pITask = nil
       end
 
       task = multi_to_wide(task)
@@ -834,6 +829,10 @@ module Win32
       @pITask = ptr.unpack('L').first
       lpVtbl = 0.chr * 4
       table  = 0.chr * 16
+
+      # Without the 'enum.include?' check above the code segfaults here if the
+      # task already exists. This should probably be handled properly instead
+      # of simply avoiding the issue.
 
       memcpy(lpVtbl, @pITask, 4)
       memcpy(table, lpVtbl.unpack('L').first, 16)
@@ -859,7 +858,7 @@ module Win32
 
       release = Win32::API::Function.new(table[2], 'P', 'L')
       setTrigger = Win32::API::Function.new(table[3], 'PP', 'L')
-          
+
       type1 = 0
       type2 = 0
       tmp = trigger['type']
@@ -873,17 +872,17 @@ module Win32
         when TASK_TIME_TRIGGER_WEEKLY
           if tmp && tmp['weeks_interval'] && tmp['days_of_week']
             type1 = [tmp['weeks_interval'],tmp['days_of_week']].pack('SS').unpack('L').first
-          end                
+          end
         when TASK_TIME_TRIGGER_MONTHLYDATE
           if tmp && tmp['months'] && tmp['days']
             type2 = [tmp['months'],0].pack('SS').unpack('L').first
             type1 = tmp['days']
-          end                
+          end
         when TASK_TIME_TRIGGER_MONTHLYDOW
           if tmp && tmp['weeks'] && tmp['days_of_week'] && tmp['months']
             type1 = [tmp['weeks'],tmp['days_of_week']].pack('SS').unpack('L').first
             type2 = [tmp['months'],0].pack('SS').unpack('L').first
-          end      
+          end
         when TASK_TIME_TRIGGER_ONCE
           # Do nothing. The Type member of the TASK_TRIGGER struct is ignored.
         else
@@ -918,8 +917,6 @@ module Win32
       end
 
       release.call(pITaskTrigger)
-
-      self
     end
 
     alias :new_task :new_work_item
@@ -954,7 +951,7 @@ module Win32
     # index for the active task.
     #
     # Example: "At 7:14 AM every day, starting 4/11/2009"
-    # 
+    #
     def trigger_string(index)
       raise Error, 'null pointer' if @pITS.nil?
       raise Error, 'No currently active task' if @pITask.nil?
@@ -975,7 +972,7 @@ module Win32
         str = 0.chr * 256
         wcscpy(str, ptr.unpack('L').first)
         trigger = wide_to_multi(str)
-        CoTaskMemFree(ptr.unpack('L').first)                
+        CoTaskMemFree(ptr.unpack('L').first)
       else
         raise Error, get_last_error
       end
@@ -1026,7 +1023,7 @@ module Win32
 
       if hr != S_OK
         raise Error, get_last_error
-      end            
+      end
 
       pITaskTrigger = ptr.unpack('L').first
       lpVtbl = 0.chr * 4
@@ -1062,7 +1059,7 @@ module Win32
       trigger['minutes_duration'] = tr[10]
       trigger['minutes_interval'] = tr[11]
       trigger['flags'] = tr[12]
-      trigger['trigger_type'] = tr[13]            
+      trigger['trigger_type'] = tr[13]
       trigger['random_minutes_interval'] = tr[17]
 
       case tr[13]
@@ -1132,7 +1129,7 @@ module Win32
 
       release = Win32::API::Function.new(table[2], 'P', 'L')
       setTrigger = Win32::API::Function.new(table[3], 'PP', 'L')
-          
+
       type1 = 0
       type2 = 0
       tmp = trigger['type']
@@ -1146,112 +1143,17 @@ module Win32
         when TASK_TIME_TRIGGER_WEEKLY
           if tmp && tmp['weeks_interval'] && tmp['days_of_week']
             type1 = [tmp['weeks_interval'],tmp['days_of_week']].pack('SS').unpack('L').first
-          end                
-        when TASK_TIME_TRIGGER_MONTHLYDATE
-          if tmp && tmp['months'] && tmp['days']
-            type2 = [tmp['months'],0].pack('SS').unpack('L').first
-            type1 = tmp['days']
-          end                
-        when TASK_TIME_TRIGGER_MONTHLYDOW
-          if tmp && tmp['weeks'] && tmp['days_of_week'] && tmp['months']
-            type1 = [tmp['weeks'],tmp['days_of_week']].pack('SS').unpack('L').first
-            type2 = [tmp['months'],0].pack('SS').unpack('L').first
-          end      
-        when TASK_TIME_TRIGGER_ONCE
-          # Do nothing. The Type member of the TASK_TRIGGER struct is ignored.
-        else
-          raise Error, 'Unknown trigger type'
-      end
-
-      pTrigger = [
-        48,
-        0,
-        trigger['start_year'] || 0,
-        trigger['start_month'] || 0,
-        trigger['start_day'] || 0,
-        trigger['end_year'] || 0,
-        trigger['end_month'] || 0,
-        trigger['end_day'] || 0,
-        trigger['start_hour'] || 0,
-        trigger['start_minute'] || 0,
-        trigger['minutes_duration'] || 0,
-        trigger['minutes_interval'] || 0,
-        trigger['flags'] || 0,
-        trigger['trigger_type'] || 0,
-        type1,
-        type2,
-        0,
-        trigger['random_minutes_interval'] || 0
-      ].pack('S10L4LLSS')
-
-      hr = setTrigger.call(pITaskTrigger, pTrigger)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
-
-      release.call(pITaskTrigger)      
-
-      trigger
-    end
-
-    # Adds a trigger at the specified index.
-    #
-    def add_trigger(index, trigger)
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
-      raise TypeError unless trigger.is_a?(Hash)
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 28
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 28)
-      table = table.unpack('L*')
-
-      getTrigger = Win32::API::Function.new(table[6], 'PLP', 'L')
-      ptr = 0.chr * 4
-      hr = getTrigger.call(@pITask, index, ptr)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end            
-
-      pITaskTrigger = ptr.unpack('L').first
-      lpVtbl = 0.chr * 4
-      table = 0.chr * 16
-
-      memcpy(lpVtbl, pITaskTrigger,4)
-      memcpy(table, lpVtbl.unpack('L').first,16)
-      table = table.unpack('L*')
-
-      release = Win32::API::Function.new(table[2], 'P', 'L')
-      setTrigger = Win32::API::Function.new(table[3], 'PP', 'L')
-          
-      type1 = 0
-      type2 = 0
-      tmp = trigger['type']
-      tmp = nil unless tmp.is_a?(Hash)
-
-      case trigger['trigger_type']
-        when TASK_TIME_TRIGGER_DAILY
-          if tmp && tmp['days_interval']
-            type1 = [tmp['days_interval'],0].pack('SS').unpack('L').first
           end
-        when TASK_TIME_TRIGGER_WEEKLY
-          if tmp && tmp['weeks_interval'] && tmp['days_of_week']
-            type1 = [tmp['weeks_interval'],tmp['days_of_week']].pack('SS').unpack('L').first
-          end                
         when TASK_TIME_TRIGGER_MONTHLYDATE
           if tmp && tmp['months'] && tmp['days']
             type2 = [tmp['months'],0].pack('SS').unpack('L').first
             type1 = tmp['days']
-          end                
+          end
         when TASK_TIME_TRIGGER_MONTHLYDOW
           if tmp && tmp['weeks'] && tmp['days_of_week'] && tmp['months']
             type1 = [tmp['weeks'],tmp['days_of_week']].pack('SS').unpack('L').first
             type2 = [tmp['months'],0].pack('SS').unpack('L').first
-          end      
+          end
         when TASK_TIME_TRIGGER_ONCE
           # Do nothing. The Type member of the TASK_TRIGGER struct is ignored.
         else
@@ -1287,7 +1189,100 @@ module Win32
 
       release.call(pITaskTrigger)
 
-      true
+      trigger
+    end
+
+    # Adds a trigger at the specified index.
+    #
+    def add_trigger(index, trigger)
+      raise Error, 'null pointer' if @pITS.nil?
+      raise Error, 'No currently active task' if @pITask.nil?
+      raise TypeError unless trigger.is_a?(Hash)
+
+      lpVtbl = 0.chr * 4
+      table  = 0.chr * 28
+
+      memcpy(lpVtbl, @pITask, 4)
+      memcpy(table, lpVtbl.unpack('L').first, 28)
+      table = table.unpack('L*')
+
+      getTrigger = Win32::API::Function.new(table[6], 'PLP', 'L')
+      ptr = 0.chr * 4
+      hr = getTrigger.call(@pITask, index, ptr)
+
+      if hr != S_OK
+        raise Error, get_last_error
+      end
+
+      pITaskTrigger = ptr.unpack('L').first
+      lpVtbl = 0.chr * 4
+      table = 0.chr * 16
+
+      memcpy(lpVtbl, pITaskTrigger,4)
+      memcpy(table, lpVtbl.unpack('L').first,16)
+      table = table.unpack('L*')
+
+      release = Win32::API::Function.new(table[2], 'P', 'L')
+      setTrigger = Win32::API::Function.new(table[3], 'PP', 'L')
+
+      type1 = 0
+      type2 = 0
+      tmp = trigger['type']
+      tmp = nil unless tmp.is_a?(Hash)
+
+      case trigger['trigger_type']
+        when TASK_TIME_TRIGGER_DAILY
+          if tmp && tmp['days_interval']
+            type1 = [tmp['days_interval'],0].pack('SS').unpack('L').first
+          end
+        when TASK_TIME_TRIGGER_WEEKLY
+          if tmp && tmp['weeks_interval'] && tmp['days_of_week']
+            type1 = [tmp['weeks_interval'],tmp['days_of_week']].pack('SS').unpack('L').first
+          end
+        when TASK_TIME_TRIGGER_MONTHLYDATE
+          if tmp && tmp['months'] && tmp['days']
+            type2 = [tmp['months'],0].pack('SS').unpack('L').first
+            type1 = tmp['days']
+          end
+        when TASK_TIME_TRIGGER_MONTHLYDOW
+          if tmp && tmp['weeks'] && tmp['days_of_week'] && tmp['months']
+            type1 = [tmp['weeks'],tmp['days_of_week']].pack('SS').unpack('L').first
+            type2 = [tmp['months'],0].pack('SS').unpack('L').first
+          end
+        when TASK_TIME_TRIGGER_ONCE
+          # Do nothing. The Type member of the TASK_TRIGGER struct is ignored.
+        else
+          raise Error, 'Unknown trigger type'
+      end
+
+      pTrigger = [
+        48,
+        0,
+        trigger['start_year'] || 0,
+        trigger['start_month'] || 0,
+        trigger['start_day'] || 0,
+        trigger['end_year'] || 0,
+        trigger['end_month'] || 0,
+        trigger['end_day'] || 0,
+        trigger['start_hour'] || 0,
+        trigger['start_minute'] || 0,
+        trigger['minutes_duration'] || 0,
+        trigger['minutes_interval'] || 0,
+        trigger['flags'] || 0,
+        trigger['trigger_type'] || 0,
+        type1,
+        type2,
+        0,
+        trigger['random_minutes_interval'] || 0
+      ].pack('S10L4LLSS')
+
+      hr = setTrigger.call(pITaskTrigger, pTrigger)
+
+      if hr != S_OK
+        raise Error, get_last_error
+      end
+
+      release.call(pITaskTrigger)
    end
 
     # Returns the flags (integer) that modify the behavior of the work item. You
@@ -1396,7 +1391,7 @@ module Win32
         raise Error, get_last_error
       end
 
-      exit_code = ptr.unpack('L').first
+      ptr.unpack('L').first
     end
 
     # Returns the comment associated with the task, if any.
@@ -1441,7 +1436,7 @@ module Win32
       table = table.unpack('L*')
 
       setComment = Win32::API::Function.new(table[18], 'PP', 'L')
-      comment_w = multi_to_wide(comment) 
+      comment_w = multi_to_wide(comment)
       hr = setComment.call(@pITask, comment_w)
 
       if hr != S_OK
@@ -1493,7 +1488,7 @@ module Win32
       table = table.unpack('L*')
 
       setCreator = Win32::API::Function.new(table[20], 'PP', 'L')
-      creator_w = multi_to_wide(creator) 
+      creator_w = multi_to_wide(creator)
       hr = setCreator.call(@pITask, creator_w)
 
       if hr != S_OK
@@ -1553,7 +1548,7 @@ module Win32
       elsif hr == S_OK
         a1, a2, _, a3, a4, a5, a6, a7 = st.unpack('S*')
         a7 *= 1000
-        time = Time.local(a1, a2, a3, a4, a5, a6, a7)     
+        time = Time.local(a1, a2, a3, a4, a5, a6, a7)
       else
         raise Error, get_last_error
       end
@@ -1594,7 +1589,7 @@ module Win32
       raise Error, 'null pointer' if @pITask.nil?
       raise Error, 'No currently active task' if @pITask.nil?
       raise TypeError unless max_run_time.is_a?(Numeric)
-          
+
       lpVtbl = 0.chr * 4
       table  = 0.chr * 172
 
@@ -1611,15 +1606,15 @@ module Win32
 
       max_run_time
     end
-      
+
     # Returns whether or not the scheduled task exists.
     def exists?(job_name)
       bool = false
       Dir.foreach('C:/Windows/Tasks'){ |file|
         if File.basename(file, '.job') == job_name
           bool = true
-          break     
-        end 
+          break
+        end
       }
       bool
     end
@@ -1680,7 +1675,7 @@ module Win32
             new_hash[key] = value
           else
             raise ArgumentError, "Invalid key '#{key}'"
-          end 
+          end
         end
       }
 
