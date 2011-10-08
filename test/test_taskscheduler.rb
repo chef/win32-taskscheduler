@@ -23,11 +23,11 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
     @trigger = {
       'start_year'   => 2009,
-      'start_month'   => 4,
-      'start_day'     => 11,
+      'start_month'  => 4,
+      'start_day'    => 11,
       'start_hour'   => 7,
-      'start_minute'  => 14,
-      'trigger_type'  => TaskScheduler::DAILY,
+      'start_minute' => 14,
+      'trigger_type' => TaskScheduler::DAILY,
       'type'         => { 'days_interval' => 1 }
     }
 
@@ -386,6 +386,12 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_nothing_raised{ @ts.trigger = @trigger }
   end
 
+  def test_set_trigger_transforms_and_validates
+    symbol_trigger = @trigger.dup
+    symbol_trigger[:TriGger_type] = symbol_trigger.delete('trigger_type')
+    assert_nothing_raised{ @ts.trigger = symbol_trigger }
+  end
+
   def test_set_trigger_expected_errors
     assert_raises(TypeError){ @ts.trigger = 'blah' }
   end
@@ -393,6 +399,12 @@ class TC_TaskScheduler < Test::Unit::TestCase
   def test_add_trigger
     assert_respond_to(@ts, :add_trigger)
     assert_nothing_raised{ @ts.add_trigger(0, @trigger) }
+  end
+
+  def test_add_trigger_transforms_and_validates
+    symbol_trigger = @trigger.dup
+    symbol_trigger[:TriGger_type] = symbol_trigger.delete('trigger_type')
+    assert_nothing_raised{ @ts.add_trigger(0, symbol_trigger) }
   end
 
   def test_add_trigger_expected_errors
