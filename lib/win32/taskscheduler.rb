@@ -3,16 +3,16 @@ require 'windows/unicode'
 require 'windows/error'
 require 'windows/process'
 require 'windows/msvcrt/buffer'
-include Windows::COM
-include Windows::Unicode
-include Windows::Process
-include Windows::Error
-include Windows::MSVCRT::Buffer
 
 # The Win32 module serves as a namespace only
 module Win32
   # The TaskScheduler class encapsulates taskscheduler settings and behavior
   class TaskScheduler
+    include Windows::COM
+    include Windows::Unicode
+    include Windows::Process
+    include Windows::Error
+    include Windows::MSVCRT::Buffer
 
     # The version of the win32-taskscheduler library
     VERSION = '0.2.1'
