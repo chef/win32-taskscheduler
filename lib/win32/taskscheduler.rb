@@ -15,7 +15,7 @@ module Win32
     include Windows::MSVCRT::Buffer
 
     # The version of the win32-taskscheduler library
-    VERSION = '0.2.1'
+    VERSION = '0.2.2'
 
     # The error class raised if any task scheduler specific calls fail.
     class Error < StandardError; end
@@ -502,7 +502,8 @@ module Win32
           bool = false
         else
           raise Error, 'unknown error'
-        end
+      end
+
       bool
     end
 
@@ -1287,7 +1288,7 @@ module Win32
       end
 
       release.call(pITaskTrigger)
-   end
+    end
 
     # Returns the flags (integer) that modify the behavior of the work item. You
     # must OR the return value to determine the flags yourself.

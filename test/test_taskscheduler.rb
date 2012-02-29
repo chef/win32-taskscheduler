@@ -37,7 +37,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   def test_version
-    assert_equal('0.2.1', TaskScheduler::VERSION)
+    assert_equal('0.2.2', TaskScheduler::VERSION)
   end
 
   def test_get_account_information

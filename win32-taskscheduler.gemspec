@@ -2,7 +2,7 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name       = 'win32-taskscheduler'
-  spec.version    = '0.2.1'
+  spec.version    = '0.2.2'
   spec.authors    = ['Park Heesob', 'Daniel J. Berger']
   spec.license    = 'Artistic 2.0'
   spec.email      = 'djberg96@gmail.com'
