@@ -1,3 +1,8 @@
+== 0.2.2 - 29-Feb-2012
+* Moved some include statements inside the TaskScheduler class to avoid
+  polluting Object. Thanks go to Josh Cooper for the spot and patch.
+* Minor formatting tweaks to silence 1.9 warnings.
+
 == 0.2.1 - 8-Oct-2011
 * Fixed a bug that would not allow task to run as SYSTEM. Thanks go to
   Josh cooper for the spot and patch.
