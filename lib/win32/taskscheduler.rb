@@ -121,7 +121,7 @@ module Win32
     TASK_DECEMBER = 0x800
 
     # Flags
- 
+
     # Used when converting AT service jobs into work items
     TASK_FLAG_INTERACTIVE = 0x1
 
@@ -227,7 +227,7 @@ module Win32
       raise ArgumentError, "invalid folder" unless folder.include?("\\")
 
       unless [TrueClass, FalseClass].include?(force.class)
-        raise TypeError, "invalid force value" 
+        raise TypeError, "invalid force value"
       end
 
       begin
@@ -237,7 +237,7 @@ module Win32
       end
 
       @service.Connect
-      @root = @service.GetFolder("\\")
+      @root = @service.GetFolder(folder)
 
       if folder != "\\"
         begin
@@ -290,8 +290,6 @@ module Win32
       rescue
         raise Error, "Access Denied"
       end
-
-      self
     end
 
     # Execute the current task.
@@ -299,8 +297,7 @@ module Win32
     def run
       raise Error, 'null task' if @task.nil?
 
-      task = @task.run(nil)
-      self
+      @task.run(nil)
     end
 
     # Saves the current task. Tasks must be saved before they can be activated.
@@ -315,16 +312,13 @@ module Win32
     def save(file = nil)
       raise Error, 'null task' if @task.nil?
       # do nothing
-      self
     end
 
     # Terminate the current task.
     #
     def terminate
       raise Error, 'null task' if @task.nil?
-
-      task = @task.stop(nil)
-      self
+      @task.stop(nil)
     end
 
     # Set the host on which the various TaskScheduler methods will execute.
@@ -365,7 +359,7 @@ module Win32
     #
     def account_information
       raise Error, 'No currently active task' if @task.nil?
-      user = @task.Definition.Principal.UserId
+      @task.Definition.Principal.UserId
     end
 
     # Returns the name of the application associated with the task.
@@ -610,7 +604,7 @@ module Win32
     def trigger_count
       raise Error, "No currently active task" if @task.nil?
 
-      count = @task.Definition.Triggers.Count
+      @task.Definition.Triggers.Count
     end
 
     # Returns a string that describes the current trigger at the specified
@@ -868,6 +862,8 @@ module Win32
       raise Error, 'null task' if @task.nil?
 
       flags = 0
+
+      flags
     end
 
     # Sets an OR'd value of flags that modify the behavior of the work item.
@@ -877,7 +873,9 @@ module Win32
     def flags=(flags)
       raise Error, 'No currently active task' if @task.nil?
 
-      flags = 0
+      @flags = flags
+
+      flags
     end
 
     # Returns the status of the currently active task. Possible values are
@@ -905,7 +903,7 @@ module Win32
     def exit_code
       raise Error, 'No currently active task' if @task.nil?
 
-      exit_code = @task.LastTaskResult
+      @task.LastTaskResult
     end
 
     # Returns the comment associated with the task, if any.
@@ -1097,5 +1095,5 @@ module Win32
     FLAG_DISABLED = TASK_TRIGGER_FLAG_DISABLED
 
     MAX_RUN_TIMES = TASK_MAX_RUN_TIMES
-   end
+  end
 end
