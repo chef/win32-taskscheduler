@@ -58,42 +58,62 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_respond_to(@ts, :set_account_information)
   end
 
-  #test "set_account_information works as expected" do
-  #  assert_nothing_raised{ @ts.set_account_information('test', 'XXXX') }
-  #  assert_equal('test', @ts.account_information)
-  #end
+  test "set_account_information works as expected" do
+    assert_nothing_raised{ @ts.set_account_information('test', 'XXXX') }
+    assert_equal('test', @ts.account_information)
+  end
+
+  test "set_account_information requires two arguments" do
+    assert_raise(ArgumentError){ @ts.set_account_information }
+    assert_raise(ArgumentError){ @ts.set_account_information('x') }
+    assert_raise(ArgumentError){ @ts.set_account_information('x', 'y', 'z') }
+  end
+
+  test "arguments to set_account_information must be strings" do
+    assert_raise(TypeError){ @ts.set_account_information(1, 'XXX') }
+    assert_raise(TypeError){ @ts.set_account_information('x', 1) }
+  end
+
+  test "activate method basic functionality" do
+    assert_respond_to(@ts, :activate)
+  end
+
+  test "activate behaves as expected" do
+      assert_nothing_raised{ @ts.activate(@task) }
+   end
+
+  test "calling activate on the same object multiple times has no effect" do
+    assert_nothing_raised{ @ts.activate(@task) }
+    assert_nothing_raised{ @ts.activate(@task) }
+  end
+
+  test "activate requires a single argument" do
+    assert_raise(ArgumentError){ @ts.activate }
+    assert_raise(ArgumentError){ @ts.activate('foo', 'bar') }
+  end
+
+  test "activate requires a string argument" do
+    assert_raise(TypeError){ @ts.activate(1) }
+  end
+
+  test "attempting to activate a bad task results in an error" do
+    assert_raise(TaskScheduler::Error){ @ts.activate('bogus') }
+  end
+
+  test "application_name basic functionality" do
+    assert_respond_to(@ts, :application_name)
+    assert_nothing_raised{ @ts.application_name }
+  end
+
+  test "application_name returns a string or nil" do
+    assert_kind_of([String, NilClass], @ts.application_name)
+  end
+
+  test "application name does not accept any arguments" do
+    assert_raises(ArgumentError){ @ts.application_name('bogus') }
+  end
 
 =begin
-   def test_set_account_information_expected_errors
-      assert_raise(ArgumentError){ @ts.set_account_information }
-      assert_raise(ArgumentError){ @ts.set_account_information('x') }
-      assert_raise(ArgumentError){ @ts.set_account_information('x', 'y', 'z') }
-      assert_raise(TypeError){ @ts.set_account_information(1, 'XXX') }
-      assert_raise(TypeError){ @ts.set_account_information('x', 1) }
-   end
-
-   def test_activate
-      assert_nothing_raised{ @ts.activate('foo') }
-      assert_nothing_raised{ @ts.activate('foo') } # Intentional duplicate
-   end
-
-   def test_activate_expected_errors
-      assert_raise(ArgumentError){ @ts.activate }
-      assert_raise(ArgumentError){ @ts.activate('foo', 'bar') }
-      assert_raise(TypeError){ @ts.activate(1) }
-      assert_raise(TaskScheduler::Error){ @ts.activate('bogus') }
-   end
-
-   def test_get_application_name
-      assert_respond_to(@ts, :application_name)
-      assert_nothing_raised{ @ts.application_name }
-      assert_kind_of(String, @ts.application_name)
-   end
-
-   def test_get_application_name_expected_errors
-      assert_raises(ArgumentError){ @ts.application_name('bogus') }
-   end
-
    def test_set_application_name
       assert_respond_to(@ts, :application_name=)
       assert_nothing_raised{ @ts.application_name = "notepad.exe" }
@@ -474,8 +494,9 @@ class TC_TaskScheduler < Test::Unit::TestCase
       assert_raise(ArgumentError){ @ts.send(:working_directory=) }
       assert_raise(TypeError){ @ts.working_directory = 1 }
    end
+=end
 
-  def test_constants
+  test "expected constants are defined" do
     assert_not_nil(TaskScheduler::MONDAY)
     assert_not_nil(TaskScheduler::TUESDAY)
     assert_not_nil(TaskScheduler::WEDNESDAY)
@@ -522,14 +543,13 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_not_nil(TaskScheduler::FLAG_DISABLED)
     assert_not_nil(TaskScheduler::MAX_RUN_TIMES)
 
-    assert_not_nil(TaskScheduler::IDLE)
-    assert_not_nil(TaskScheduler::NORMAL)
-    assert_not_nil(TaskScheduler::HIGH)
-    assert_not_nil(TaskScheduler::REALTIME)
-      assert_not_nil(TaskScheduler::ABOVE_NORMAL)
-      assert_not_nil(TaskScheduler::BELOW_NORMAL)
+    #assert_not_nil(TaskScheduler::IDLE)
+    #assert_not_nil(TaskScheduler::NORMAL)
+    #assert_not_nil(TaskScheduler::HIGH)
+    #assert_not_nil(TaskScheduler::REALTIME)
+    #assert_not_nil(TaskScheduler::ABOVE_NORMAL)
+    #assert_not_nil(TaskScheduler::BELOW_NORMAL)
   end
-=end
 
   def teardown
     File.delete(@job_file) if File.exists?(@job_file)
