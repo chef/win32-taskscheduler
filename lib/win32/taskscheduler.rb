@@ -237,7 +237,6 @@ module Win32
       end
 
       @service.Connect
-      @root = @service.GetFolder(folder)
 
       if folder != "\\"
         begin
@@ -250,6 +249,8 @@ module Win32
             raise ArgumentError, "folder '#{folder}' not found"
           end
         end
+      else
+        @root = @service.GetFolder(folder)
       end
     end
 
@@ -258,12 +259,17 @@ module Win32
     def enum
       # Get the task folder that contains the tasks.
       taskCollection = @root.GetTasks(0)
+
       array = []
+
       taskCollection.each do |registeredTask|
-        array.push(registeredTask.Name)
+        array << registeredTask.Name
       end
+
       array
     end
+
+    alias tasks enum
 
     # Activate the specified task.
     #
@@ -273,11 +279,10 @@ module Win32
       begin
         registeredTask = @root.GetTask(task)
         registeredTask.Enabled = 1
+        @task = registeredTask
       rescue WIN32OLERuntimeError
         raise Error, "Access Denied"
       end
-      @task = registeredTask
-      self
     end
 
     # Delete the specified task name.
@@ -334,12 +339,9 @@ module Win32
     # Sets the +user+ and +password+ for the given task. If the user and
     # password are set properly then true is returned.
     #
-    # In some cases the job may be created, but the account information was
-    # bad. In this case the task is created but a warning is generated and
-    # false is returned.
-    #
     def set_account_information(user, password)
       raise Error, 'No currently active task' if @task.nil?
+
       @password = password
 
       @root.RegisterTaskDefinition(
@@ -358,8 +360,7 @@ module Win32
     # been associated with the task.
     #
     def account_information
-      raise Error, 'No currently active task' if @task.nil?
-      @task.Definition.Principal.UserId
+      @task.nil? ? nil : @task.Definition.Principal.UserId
     end
 
     # Returns the name of the application associated with the task.
@@ -1096,4 +1097,11 @@ module Win32
 
     MAX_RUN_TIMES = TASK_MAX_RUN_TIMES
   end
+end
+
+if $0 == __FILE__
+  ts = Win32::TaskScheduler.new
+  ts.activate("Castle Age")
+  p ts.account_information
+  ts.set_account_information("bogus", 'xxxx')
 end
