@@ -1,59 +1,69 @@
 ##########################################################################
-# tc_taskscheduler.rb
+# test_taskscheduler.rb
 #
 # Test suite for the win32-taskscheduler package. You should run this
 # via the 'rake test' task.
 ##########################################################################
-require 'rubygems'
-gem 'test-unit'
-
-require 'test/unit'
 require 'win32/taskscheduler'
 require 'socket'
+require 'test-unit'
+require 'etc'
 include Win32
 
 class TC_TaskScheduler < Test::Unit::TestCase
-   def self.startup
-      @@host = Socket.gethostname
-   end
+  def self.startup
+    @@host = Socket.gethostname
+    @@user = Etc.getlogin
+  end
 
-   def setup
-      @task     = 'foo'
-      @job_file = "C:\\WINDOWS\\Tasks\\test.job"
+  def setup
+    @task     = 'foo'
+    @job_file = "C:\\WINDOWS\\Tasks\\test.job"
 
-      @trigger = {
-         'start_year'   => 2009,
-         'start_month' 	=> 4,
-         'start_day'   	=> 11,
-         'start_hour'   => 7,
-         'start_minute'	=> 14,
-         'trigger_type'	=> TaskScheduler::DAILY,
-         'type'         => { 'days_interval' => 1 }
-      }
+    @trigger = {
+      'start_year'   => 2009,
+      'start_month'  => 4,
+      'start_day'    => 11,
+      'start_hour'   => 7,
+      'start_minute' => 14,
+      'trigger_type' => TaskScheduler::DAILY,
+      'type'         => { 'days_interval' => 1 }
+    }
 
-      @ts = TaskScheduler.new(@task, @trigger)
-      @ts.save
-      @ts.activate(@task)
-   end
+    @ts = TaskScheduler.new
+  end
 
-   def test_version
-      assert_equal('0.2.0', TaskScheduler::VERSION)
-   end
+  test "version constant is set to expected value" do
+    assert_equal('0.3.0', TaskScheduler::VERSION)
+  end
 
-   def test_get_account_information
-      assert_respond_to(@ts, :account_information)
-      assert_equal(nil, @ts.account_information)
-   end
+  test "account_information method basic functionality" do
+    assert_respond_to(@ts, :account_information)
+  end
 
-   def test_get_account_information_expected_errors
-      assert_raise(ArgumentError){ @ts.account_information('foo') }
-   end
+  test "account_information returns the task owner" do
+    @ts.activate(@task)
+    assert_equal("#{@@host}\\#{@@user}", @ts.account_information)
+  end
 
-   def test_set_account_information
-      assert_nothing_raised{ @ts.set_account_information('test', 'XXXX') }
-      assert_equal('test', @ts.account_information)
-   end
+  test "account_information returns nil if no task has been activated" do
+    assert_nil(@ts.account_information)
+  end
 
+  test "account_information does not accept any arguments" do
+    assert_raise(ArgumentError){ @ts.account_information('foo') }
+  end
+
+  test "set_account_information basic functionality" do
+    assert_respond_to(@ts, :set_account_information)
+  end
+
+  #test "set_account_information works as expected" do
+  #  assert_nothing_raised{ @ts.set_account_information('test', 'XXXX') }
+  #  assert_equal('test', @ts.account_information)
+  #end
+
+=begin
    def test_set_account_information_expected_errors
       assert_raise(ArgumentError){ @ts.set_account_information }
       assert_raise(ArgumentError){ @ts.set_account_information('x') }
@@ -98,7 +108,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
       assert_respond_to(@ts, :comment)
       assert_nothing_raised{ @ts.comment }
       assert_kind_of(String, @ts.comment)
-	end
+  end
 
    def test_get_comment_expected_errors
       assert_raise(ArgumentError){ @ts.comment('test') }
@@ -133,7 +143,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
       assert_raise(ArgumentError){ @ts.send(:creator=) }
       assert_raise(TypeError){ @ts.creator = 1 }
    end
-	
+
    def test_delete
       assert_respond_to(@ts, :delete)
       assert_nothing_raised{ @ts.delete(@task) }
@@ -147,7 +157,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
    def test_delete_trigger
       assert_respond_to(@ts, :delete_trigger)
       assert_equal(0, @ts.delete_trigger(0))
-	end
+  end
 
    # TODO: Figure out why the last two fail
    def test_delete_trigger_expected_errors
@@ -155,18 +165,28 @@ class TC_TaskScheduler < Test::Unit::TestCase
       #assert_raise(TypeError){ @ts.delete('test') }
       #assert_raise(TaskScheduler::Error){ @ts.delete(-1) }
    end
+=end
 
-   def test_enum
-      assert_respond_to(@ts, :enum)
-      assert_kind_of(Array, @ts.enum)
-      assert_nothing_raised{ @ts.enum }
+   test "enum basic functionality" do
+     assert_respond_to(@ts, :enum)
+     assert_nothing_raised{ @ts.enum }
    end
 
-   def test_enum_expected_errors
-      assert_raise(ArgumentError){ @ts.enum(1) }
-      assert_raise(NoMethodError){ @ts.enum = true }
+   test "enum method returns an array of strings" do
+     assert_kind_of(Array, @ts.enum)
+     assert_kind_of(String, @ts.enum.first)
    end
 
+   test "tasks is an alias for enum" do
+     assert_respond_to(@ts, :tasks)
+     assert_alias_method(@ts, :tasks, :enum)
+   end
+
+   test "enum method does not accept any arguments" do
+     assert_raise(ArgumentError){ @ts.enum(1) }
+   end
+
+=begin
    def test_exists_basic
       assert_respond_to(@ts, :exists?)
       assert_boolean(@ts.exists?(@task))
@@ -359,7 +379,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
       assert_raise(ArgumentError){ @ts.status(true) }
       assert_raise(NoMethodError){ @ts.status = true }
    end
-	
+
    def test_terminate
       assert_respond_to(@ts, :terminate)
    end
@@ -369,7 +389,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
       assert_raise(NoMethodError){ @ts.terminate = true }
       assert_raise(TaskScheduler::Error){ @ts.terminate } # It's not running
    end
-	
+
    def test_get_trigger
       assert_respond_to(@ts, :trigger)
       assert_nothing_raised{ @ts.trigger(0) }
@@ -389,7 +409,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
    def test_set_trigger_expected_errors
       assert_raises(TypeError){ @ts.trigger = 'blah' }
    end
-	
+
    def test_add_trigger
       assert_respond_to(@ts, :add_trigger)
       assert_nothing_raised{ @ts.add_trigger(0, @trigger) }
@@ -415,13 +435,13 @@ class TC_TaskScheduler < Test::Unit::TestCase
    def test_trigger_delete
       assert_respond_to(@ts, :delete_trigger)
       assert_nothing_raised{ @ts.delete_trigger(0) }
-	end
+  end
 
    def test_trigger_delete_expected_errors
       assert_raise(ArgumentError){ @ts.delete_trigger }
       assert_raise(TaskScheduler::Error){ @ts.delete_trigger(9999) }
    end
-	
+
    def test_trigger_string
       assert_respond_to(@ts, :trigger_string)
       assert_nothing_raised{ @ts.trigger_string(0) }
@@ -454,71 +474,73 @@ class TC_TaskScheduler < Test::Unit::TestCase
       assert_raise(ArgumentError){ @ts.send(:working_directory=) }
       assert_raise(TypeError){ @ts.working_directory = 1 }
    end
-	
-	def test_constants
-		assert_not_nil(TaskScheduler::MONDAY)
-		assert_not_nil(TaskScheduler::TUESDAY)
-		assert_not_nil(TaskScheduler::WEDNESDAY)
-		assert_not_nil(TaskScheduler::THURSDAY)
-		assert_not_nil(TaskScheduler::FRIDAY)
-		assert_not_nil(TaskScheduler::SATURDAY)
-		assert_not_nil(TaskScheduler::SUNDAY)
-		
-		assert_not_nil(TaskScheduler::JANUARY)
-		assert_not_nil(TaskScheduler::FEBRUARY)
-		assert_not_nil(TaskScheduler::MARCH)
-		assert_not_nil(TaskScheduler::APRIL)
-		assert_not_nil(TaskScheduler::MAY)
-		assert_not_nil(TaskScheduler::JUNE)
-		assert_not_nil(TaskScheduler::JULY)
-		assert_not_nil(TaskScheduler::AUGUST)
-		assert_not_nil(TaskScheduler::SEPTEMBER)
-		assert_not_nil(TaskScheduler::OCTOBER)
-		assert_not_nil(TaskScheduler::NOVEMBER)
-		assert_not_nil(TaskScheduler::DECEMBER)
-		
-		assert_not_nil(TaskScheduler::ONCE)
-		assert_not_nil(TaskScheduler::DAILY)
-		assert_not_nil(TaskScheduler::WEEKLY)
-		assert_not_nil(TaskScheduler::MONTHLYDATE)
-		assert_not_nil(TaskScheduler::MONTHLYDOW)
-		
-		assert_not_nil(TaskScheduler::ON_IDLE)
-		assert_not_nil(TaskScheduler::AT_SYSTEMSTART)
-		assert_not_nil(TaskScheduler::AT_LOGON)
-		
-		assert_not_nil(TaskScheduler::INTERACTIVE)
-		assert_not_nil(TaskScheduler::DELETE_WHEN_DONE)
-		assert_not_nil(TaskScheduler::DISABLED)
-		assert_not_nil(TaskScheduler::START_ONLY_IF_IDLE)
-		assert_not_nil(TaskScheduler::KILL_ON_IDLE_END)
-		assert_not_nil(TaskScheduler::DONT_START_IF_ON_BATTERIES)
-		assert_not_nil(TaskScheduler::KILL_IF_GOING_ON_BATTERIES)
-		assert_not_nil(TaskScheduler::HIDDEN)
-		assert_not_nil(TaskScheduler::RESTART_ON_IDLE_RESUME)
-		assert_not_nil(TaskScheduler::SYSTEM_REQUIRED)
-		assert_not_nil(TaskScheduler::FLAG_HAS_END_DATE)
-		assert_not_nil(TaskScheduler::FLAG_KILL_AT_DURATION_END)
-		assert_not_nil(TaskScheduler::FLAG_DISABLED)
-		assert_not_nil(TaskScheduler::MAX_RUN_TIMES)
-		
-		assert_not_nil(TaskScheduler::IDLE)
-		assert_not_nil(TaskScheduler::NORMAL)
-		assert_not_nil(TaskScheduler::HIGH)
-		assert_not_nil(TaskScheduler::REALTIME)
+
+  def test_constants
+    assert_not_nil(TaskScheduler::MONDAY)
+    assert_not_nil(TaskScheduler::TUESDAY)
+    assert_not_nil(TaskScheduler::WEDNESDAY)
+    assert_not_nil(TaskScheduler::THURSDAY)
+    assert_not_nil(TaskScheduler::FRIDAY)
+    assert_not_nil(TaskScheduler::SATURDAY)
+    assert_not_nil(TaskScheduler::SUNDAY)
+
+    assert_not_nil(TaskScheduler::JANUARY)
+    assert_not_nil(TaskScheduler::FEBRUARY)
+    assert_not_nil(TaskScheduler::MARCH)
+    assert_not_nil(TaskScheduler::APRIL)
+    assert_not_nil(TaskScheduler::MAY)
+    assert_not_nil(TaskScheduler::JUNE)
+    assert_not_nil(TaskScheduler::JULY)
+    assert_not_nil(TaskScheduler::AUGUST)
+    assert_not_nil(TaskScheduler::SEPTEMBER)
+    assert_not_nil(TaskScheduler::OCTOBER)
+    assert_not_nil(TaskScheduler::NOVEMBER)
+    assert_not_nil(TaskScheduler::DECEMBER)
+
+    assert_not_nil(TaskScheduler::ONCE)
+    assert_not_nil(TaskScheduler::DAILY)
+    assert_not_nil(TaskScheduler::WEEKLY)
+    assert_not_nil(TaskScheduler::MONTHLYDATE)
+    assert_not_nil(TaskScheduler::MONTHLYDOW)
+
+    assert_not_nil(TaskScheduler::ON_IDLE)
+    assert_not_nil(TaskScheduler::AT_SYSTEMSTART)
+    assert_not_nil(TaskScheduler::AT_LOGON)
+
+    assert_not_nil(TaskScheduler::INTERACTIVE)
+    assert_not_nil(TaskScheduler::DELETE_WHEN_DONE)
+    assert_not_nil(TaskScheduler::DISABLED)
+    assert_not_nil(TaskScheduler::START_ONLY_IF_IDLE)
+    assert_not_nil(TaskScheduler::KILL_ON_IDLE_END)
+    assert_not_nil(TaskScheduler::DONT_START_IF_ON_BATTERIES)
+    assert_not_nil(TaskScheduler::KILL_IF_GOING_ON_BATTERIES)
+    assert_not_nil(TaskScheduler::HIDDEN)
+    assert_not_nil(TaskScheduler::RESTART_ON_IDLE_RESUME)
+    assert_not_nil(TaskScheduler::SYSTEM_REQUIRED)
+    assert_not_nil(TaskScheduler::FLAG_HAS_END_DATE)
+    assert_not_nil(TaskScheduler::FLAG_KILL_AT_DURATION_END)
+    assert_not_nil(TaskScheduler::FLAG_DISABLED)
+    assert_not_nil(TaskScheduler::MAX_RUN_TIMES)
+
+    assert_not_nil(TaskScheduler::IDLE)
+    assert_not_nil(TaskScheduler::NORMAL)
+    assert_not_nil(TaskScheduler::HIGH)
+    assert_not_nil(TaskScheduler::REALTIME)
       assert_not_nil(TaskScheduler::ABOVE_NORMAL)
       assert_not_nil(TaskScheduler::BELOW_NORMAL)
-	end
-	
-	def teardown
-      File.delete(@job_file) if File.exists?(@job_file)
-      @ts.delete('foo') rescue nil
-      @ts = nil
-      @trigger = nil
-      @job_file = nil
-	end
+  end
+=end
 
-   def self.shutdown
-      @@host = nil
-   end
+  def teardown
+    File.delete(@job_file) if File.exists?(@job_file)
+    @ts.delete('foo') rescue nil
+    @ts = nil
+    @trigger = nil
+    @job_file = nil
+  end
+
+  def self.shutdown
+    @@host = nil
+    @@user = nil
+  end
 end
