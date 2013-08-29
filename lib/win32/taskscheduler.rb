@@ -1,13 +1,13 @@
-#require 'windows/process'
+require File.join(File.dirname(__FILE__), 'windows', 'helper')
 require 'win32ole'
 require 'socket'
-#include Windows::Process
 
 # The Win32 module serves as a namespace only
 module Win32
 
   # The TaskScheduler class encapsulates a Windows scheduled task
   class TaskScheduler
+    include Windows::Helper
 
     # The version of the win32-taskscheduler library
     VERSION = '0.3.0'
@@ -280,8 +280,8 @@ module Win32
         registeredTask = @root.GetTask(task)
         registeredTask.Enabled = 1
         @task = registeredTask
-      rescue WIN32OLERuntimeError
-        raise Error, "Access Denied"
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('GetTask', err)
       end
     end
 
@@ -344,14 +344,18 @@ module Win32
 
       @password = password
 
-      @root.RegisterTaskDefinition(
-        @task.Path,
-        @task.Definition,
-        TASK_CREATE_OR_UPDATE,
-        user,
-        password,
-        TASK_LOGON_PASSWORD
-      )
+      begin
+        @root.RegisterTaskDefinition(
+          @task.Path,
+          @task.Definition,
+          TASK_CREATE_OR_UPDATE,
+          user,
+          password,
+          TASK_LOGON_PASSWORD
+        )
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('RegisterTaskDefinition', err)
+      end
 
       true
     end
@@ -363,7 +367,8 @@ module Win32
       @task.nil? ? nil : @task.Definition.Principal.UserId
     end
 
-    # Returns the name of the application associated with the task.
+    # Returns the name of the application associated with the task. If
+    # no application is associated with the task then nil is returned.
     #
     def application_name
       raise Error, 'No currently active task' if @task.nil?
@@ -371,7 +376,10 @@ module Win32
       app = nil
 
       @task.Definition.Actions.each do |action|
-        app = action.Path if action.Type == 0
+        if action.Type == 0
+          app = action.Path
+          break
+        end
       end
 
       app
@@ -1101,7 +1109,11 @@ end
 
 if $0 == __FILE__
   ts = Win32::TaskScheduler.new
+  p ts.enum
   ts.activate("Castle Age")
-  p ts.account_information
-  ts.set_account_information("bogus", 'xxxx')
+  p ts.application_name
+  ts.application_name = "notepad.exe"
+  p ts.application_name
+  #p ts.account_information
+  #ts.set_account_information("bogus", 'xxxx')
 end
