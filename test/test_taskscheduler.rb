@@ -109,75 +109,94 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_kind_of([String, NilClass], @ts.application_name)
   end
 
-  test "application name does not accept any arguments" do
+  test "application_name does not accept any arguments" do
     assert_raises(ArgumentError){ @ts.application_name('bogus') }
   end
 
-=begin
-   def test_set_application_name
-      assert_respond_to(@ts, :application_name=)
-      assert_nothing_raised{ @ts.application_name = "notepad.exe" }
-   end
-
-   def test_set_application_name_expected_errors
-      assert_raise(ArgumentError){ @ts.send(:application_name=) }
-      assert_raise(TypeError){ @ts.application_name = 1 }
-   end
-
-   def test_get_comment
-      assert_respond_to(@ts, :comment)
-      assert_nothing_raised{ @ts.comment }
-      assert_kind_of(String, @ts.comment)
+  test "application_name= basic functionality" do
+    assert_respond_to(@ts, :application_name=)
   end
 
-   def test_get_comment_expected_errors
-      assert_raise(ArgumentError){ @ts.comment('test') }
-   end
+  test "application_name= works as expected" do
+    assert_nothing_raised{ @ts.application_name = "notepad.exe" }
+    assert_equal("notepad.exe", @ts.application_name)
+  end
 
-   def test_set_comment
-      assert_respond_to(@ts, :comment=)
-      assert_nothing_raised{ @ts.comment = "test" }
-   end
+  test "application_name= requires a string argument" do
+    assert_raise(TypeError){ @ts.application_name = 1 }
+  end
 
-   def test_set_comment_expected_errors
-      assert_raise(ArgumentError){ @ts.send(:comment=) }
-      assert_raise(TypeError){ @ts.comment = 1 }
-   end
+  test "comment method basic functionality" do
+    assert_respond_to(@ts, :comment)
+    assert_nothing_raised{ @ts.comment }
+  end
 
-   def test_get_creator
-      assert_respond_to(@ts, :creator)
-      assert_nothing_raised{ @ts.creator }
-      assert_kind_of(String, @ts.creator)
-   end
+  test "comment method returns a string" do
+    assert_kind_of(String, @ts.comment)
+  end
 
-   def test_get_creator_expected_errors
-      assert_raise(ArgumentError){ @ts.creator('foo') }
-   end
+  test "comment method does not accept any arguments" do
+    assert_raise(ArgumentError){ @ts.comment('test') }
+  end
 
-   def test_set_creator
-      assert_respond_to(@ts, :creator=)
-      assert_nothing_raised{ @ts.creator = "Test Creator" }
-   end
+  test "comment= method basic functionality" do
+    assert_respond_to(@ts, :comment=)
+    assert_nothing_raised{ @ts.comment = "test" }
+  end
 
-   def test_set_creator_expected_errors
-      assert_raise(ArgumentError){ @ts.send(:creator=) }
-      assert_raise(TypeError){ @ts.creator = 1 }
-   end
+  test "comment= method requires a string argument" do
+    assert_raise(TypeError){ @ts.comment = 1 }
+  end
 
-   def test_delete
-      assert_respond_to(@ts, :delete)
-      assert_nothing_raised{ @ts.delete(@task) }
-   end
+  test "creator method basic functionality" do
+    assert_respond_to(@ts, :creator)
+    assert_nothing_raised{ @ts.creator }
+    assert_kind_of(String, @ts.creator)
+  end
 
-   def test_delete_expected_errors
-      assert_raise(ArgumentError){ @ts.delete }
-      assert_raise(TaskScheduler::Error){ @ts.delete("foofoo") }
-   end
+  test "creator method returns expected value" do
+    assert_equal(@user, @ts.creator)
+  end
 
+  test "creator method does not accept any arguments" do
+    assert_raise(ArgumentError){ @ts.creator('foo') }
+  end
+
+  test "creator= method basic functionality" do
+    assert_respond_to(@ts, :creator=)
+  end
+
+  test "creator= method works as expected" do
+    assert_nothing_raised{ @ts.creator = "Test Creator" }
+    assert_equal("Test Creator", @ts.creator)
+  end
+
+  test "creator= method requires a string argument" do
+    assert_raise(TypeError){ @ts.creator = 1 }
+  end
+
+  test "delete method basic functionality" do
+    assert_respond_to(@ts, :delete)
+  end
+
+  test "delete method works as expected" do
+    assert_nothing_raised{ @ts.delete(@task) }
+    assert_false(@ts.exists?(@task))
+  end
+
+  test "delete method requires a single argument" do
+    assert_raise(ArgumentError){ @ts.delete }
+  end
+
+  test "delete method raises an error if the task does not exist" do
+    assert_raise(TaskScheduler::Error){ @ts.delete("foofoo") }
+  end
+
+=begin
    def test_delete_trigger
       assert_respond_to(@ts, :delete_trigger)
       assert_equal(0, @ts.delete_trigger(0))
-  end
+   end
 
    # TODO: Figure out why the last two fail
    def test_delete_trigger_expected_errors
