@@ -192,20 +192,6 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_raise(TaskScheduler::Error){ @ts.delete("foofoo") }
   end
 
-=begin
-   def test_delete_trigger
-      assert_respond_to(@ts, :delete_trigger)
-      assert_equal(0, @ts.delete_trigger(0))
-   end
-
-   # TODO: Figure out why the last two fail
-   def test_delete_trigger_expected_errors
-      assert_raise(ArgumentError){ @ts.delete }
-      #assert_raise(TypeError){ @ts.delete('test') }
-      #assert_raise(TaskScheduler::Error){ @ts.delete(-1) }
-   end
-=end
-
   test "enum basic functionality" do
     assert_respond_to(@ts, :enum)
     assert_nothing_raised{ @ts.enum }
@@ -250,28 +236,6 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_raise(ArgumentError){ @ts.exit_code(true) }
     assert_raise(NoMethodError){ @ts.exit_code = 1 }
   end
-
-=begin
-   def test_get_flags
-      assert_respond_to(@ts, :flags)
-      assert_nothing_raised{ @ts.flags }
-      assert_kind_of(Fixnum, @ts.flags)
-   end
-
-   def test_get_flags_expected_errors
-      assert_raise(ArgumentError){ @ts.flags(1) }
-   end
-
-   def test_set_flags
-      assert_respond_to(@ts, :flags=)
-      assert_nothing_raised{ @ts.flags = TaskScheduler::DELETE_WHEN_DONE }
-   end
-
-   def test_set_flags_expected_errors
-      assert_raise(ArgumentError){ @ts.send(:flags=) }
-      assert_raise(TypeError){ @ts.flags = 'test' }
-   end
-=end
 
   test "machine= basic functionality" do
     assert_respond_to(@ts, :machine=)

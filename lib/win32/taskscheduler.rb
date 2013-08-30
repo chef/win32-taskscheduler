@@ -895,31 +895,6 @@ module Win32
       true
     end
 
-    # Returns the flags (integer) that modify the behavior of the work item. You
-    # must OR the return value to determine the flags yourself.
-    #--
-    # Not supported
-    #
-    def flags
-      raise Error, 'null task' if @task.nil?
-
-      flags = 0
-
-      flags
-    end
-
-    # Sets an OR'd value of flags that modify the behavior of the work item.
-    #--
-    # Not supported
-    #
-    def flags=(flags)
-      raise Error, 'No currently active task' if @task.nil?
-
-      @flags = flags
-
-      flags
-    end
-
     # Returns the status of the currently active task. Possible values are
     # 'ready', 'running', 'not scheduled' or 'unknown'.
     #
