@@ -206,52 +206,52 @@ class TC_TaskScheduler < Test::Unit::TestCase
    end
 =end
 
-   test "enum basic functionality" do
-     assert_respond_to(@ts, :enum)
-     assert_nothing_raised{ @ts.enum }
-   end
+  test "enum basic functionality" do
+    assert_respond_to(@ts, :enum)
+    assert_nothing_raised{ @ts.enum }
+  end
 
-   test "enum method returns an array of strings" do
-     assert_kind_of(Array, @ts.enum)
-     assert_kind_of(String, @ts.enum.first)
-   end
+  test "enum method returns an array of strings" do
+    assert_kind_of(Array, @ts.enum)
+    assert_kind_of(String, @ts.enum.first)
+  end
 
-   test "tasks is an alias for enum" do
-     assert_respond_to(@ts, :tasks)
-     assert_alias_method(@ts, :tasks, :enum)
-   end
+  test "tasks is an alias for enum" do
+    assert_respond_to(@ts, :tasks)
+    assert_alias_method(@ts, :tasks, :enum)
+  end
 
-   test "enum method does not accept any arguments" do
-     assert_raise(ArgumentError){ @ts.enum(1) }
-   end
+  test "enum method does not accept any arguments" do
+    assert_raise(ArgumentError){ @ts.enum(1) }
+  end
+
+  test "exists? basic functionality" do
+    assert_respond_to(@ts, :exists?)
+    assert_boolean(@ts.exists?(@task))
+  end
+
+  test "exists? returns expected value" do
+    assert_true(@ts.exists?(@task))
+    assert_false(@ts.exists?('bogusXYZ'))
+  end
+
+  test "exists? method requires a single argument" do
+    assert_raise(ArgumentError){ @ts.exists? }
+    assert_raise(ArgumentError){ @ts.exists?('foo', 'bar') }
+  end
+
+  test "exit_code basic functionality" do
+    assert_respond_to(@ts, :exit_code)
+    assert_nothing_raised{ @ts.exit_code }
+    assert_kind_of(Fixnum, @ts.exit_code)
+  end
+
+  test "exit_code takes no arguments" do
+    assert_raise(ArgumentError){ @ts.exit_code(true) }
+    assert_raise(NoMethodError){ @ts.exit_code = 1 }
+  end
 
 =begin
-   def test_exists_basic
-      assert_respond_to(@ts, :exists?)
-      assert_boolean(@ts.exists?(@task))
-   end
-
-   def test_exists
-      assert_true(@ts.exists?(@task))
-      assert_false(@ts.exists?('bogusXYZ'))
-   end
-
-   def test_exists_expected_errors
-      assert_raise(ArgumentError){ @ts.exists? }
-      assert_raise(ArgumentError){ @ts.exists?('foo', 'bar') }
-   end
-
-   def test_exit_code
-      assert_respond_to(@ts, :exit_code)
-      assert_nothing_raised{ @ts.exit_code }
-      assert_kind_of(Fixnum, @ts.exit_code)
-   end
-
-   def test_exit_code_expected_errors
-      assert_raise(ArgumentError){ @ts.exit_code(true) }
-      assert_raise(NoMethodError){ @ts.exit_code = 1 }
-   end
-
    def test_get_flags
       assert_respond_to(@ts, :flags)
       assert_nothing_raised{ @ts.flags }
@@ -271,45 +271,59 @@ class TC_TaskScheduler < Test::Unit::TestCase
       assert_raise(ArgumentError){ @ts.send(:flags=) }
       assert_raise(TypeError){ @ts.flags = 'test' }
    end
+=end
 
-   # TODO: Why does setting the host fail?
-   def test_set_machine
-      assert_respond_to(@ts, :host=)
-      assert_respond_to(@ts, :machine=)
-      #assert_nothing_raised{ @ts.machine = @@host }
-   end
+  test "machine= basic functionality" do
+    assert_respond_to(@ts, :machine=)
+  end
 
-   def test_get_max_run_time
-      assert_respond_to(@ts, :max_run_time)
-      assert_nothing_raised{ @ts.max_run_time }
-      assert_kind_of(Fixnum, @ts.max_run_time)
-   end
+  test "machine= works as expected" do
+    assert_nothing_raised{ @ts.machine = @@host }
+    assert_equal(@@host, @ts.machine)
+  end
 
-   def test_get_max_run_time_expected_errors
-      assert_raise(ArgumentError){ @ts.max_run_time(true) }
-   end
+  test "host= is an alias for machine=" do
+    assert_alias_method(@ts, :machine=, :host=)
+  end
 
-   def test_set_max_run_time
-      assert_respond_to(@ts, :max_run_time=)
-      assert_nothing_raised{ @ts.max_run_time = 20000 }
-   end
+  test "max_run_time basic functionality" do
+    assert_respond_to(@ts, :max_run_time)
+    assert_nothing_raised{ @ts.max_run_time }
+    assert_kind_of(Fixnum, @ts.max_run_time)
+  end
 
-   def test_set_max_run_time_expected_errors
-      assert_raise(ArgumentError){ @ts.send(:max_run_time=) }
-      assert_raise(TypeError){ @ts.max_run_time = true }
-   end
+  test "max_run_time accepts no arguments" do
+    assert_raise(ArgumentError){ @ts.max_run_time(true) }
+  end
 
-   def test_most_recent_run_time
-      assert_respond_to(@ts, :most_recent_run_time)
-      assert_nothing_raised{ @ts.most_recent_run_time }
-      assert_nil(@ts.most_recent_run_time)
-   end
+  test "max_run_time= basic functionality" do
+    assert_respond_to(@ts, :max_run_time=)
+  end
 
-   def test_most_recent_run_time_expected_errors
-      assert_raise(ArgumentError){ @ts.most_recent_run_time(true) }
-      assert_raise(NoMethodError){ @ts.most_recent_run_time = Time.now }
-   end
+  test "max_run_time= works as expected" do
+    assert_nothing_raised{ @ts.max_run_time = 20000 }
+    assert_equal(20000, @ts.max_run_time)
+  end
 
+  test "max_run_time= requires a numeric argument" do
+    assert_raise(TypeError){ @ts.max_run_time = true }
+  end
+
+  test "most_recent_run_time basic functionality" do
+    assert_respond_to(@ts, :most_recent_run_time)
+    assert_nothing_raised{ @ts.most_recent_run_time }
+  end
+
+  test "most_recent_run_time is nil if task hasn't run" do
+    assert_nil(@ts.most_recent_run_time)
+  end
+
+  test "most_recent_run_time does not accept any arguments" do
+    assert_raise(ArgumentError){ @ts.most_recent_run_time(true) }
+    assert_raise(NoMethodError){ @ts.most_recent_run_time = Time.now }
+  end
+
+=begin
    def test_new_work_item
       assert_respond_to(@ts, :new_work_item)
       assert_nothing_raised{ @ts.new_work_item('bar', @trigger) }
@@ -330,56 +344,71 @@ class TC_TaskScheduler < Test::Unit::TestCase
       assert_raise(TypeError){ @ts.new_work_item(1, 'bar') }
       assert_raise(TypeError){ @ts.new_work_item('bar', 1) }
    end
+=end
 
-   def test_next_run_time
-      assert_respond_to(@ts, :next_run_time)
-      assert_nothing_raised{ @ts.next_run_time }
-      assert_kind_of(Time, @ts.next_run_time)
-   end
+  test "next_run_time basic functionality" do
+    assert_respond_to(@ts, :next_run_time)
+    assert_nothing_raised{ @ts.next_run_time }
+  end
 
-   def test_next_run_time_expected_errors
-      assert_raise(ArgumentError){ @ts.next_run_time(true) }
-      assert_raise(NoMethodError){ @ts.next_run_time = Time.now }
-   end
+  test "next_run_time returns a Time object" do
+    assert_kind_of(Time, @ts.next_run_time)
+  end
 
-   def test_get_parameters
-      assert_respond_to(@ts, :parameters)
-      assert_nothing_raised{ @ts.parameters }
-   end
+  test "next_run_time does not take any arguments" do
+    assert_raise(ArgumentError){ @ts.next_run_time(true) }
+    assert_raise(NoMethodError){ @ts.next_run_time = Time.now }
+  end
 
-   def test_get_parameters_expected_errors
-      assert_raise(ArgumentError){ @ts.parameters('test') }
-   end
+  test "parameters basic functionality" do
+    assert_respond_to(@ts, :parameters)
+    assert_nothing_raised{ @ts.parameters }
+  end
 
-   def set_parameters
-      assert_respond_to(@ts, :parameters=)
-      assert_nothing_raised{ @ts.parameters = "somefile.txt" }
-   end
+  test "parameters method does not take any arguments" do
+    assert_raise(ArgumentError){ @ts.parameters('test') }
+  end
 
-   def set_parameters_expected_errors
-      assert_raise(ArgumentError){ @ts.send(:parameters=) }
-      assert_raise(TypeError){ @ts.parameters = 1 }
-   end
+  test "parameters= basic functionality" do
+    assert_respond_to(@ts, :parameters=)
+  end
 
-   def test_get_priority
-      assert_respond_to(@ts, :priority)
-      assert_nothing_raised{ @ts.priority }
-      assert_kind_of(String, @ts.priority)
-   end
+  test "parameters= works as expected" do
+    assert_nothing_raised{ @ts.parameters = "somefile.txt" }
+    assert_equal("somefile.txt", @ts.parameters)
+  end
 
-   def test_get_priority_expected_errors
-      assert_raise(ArgumentError){ @ts.priority(true) }
-   end
+  test "parameters= requires a string argument" do
+    assert_raise(ArgumentError){ @ts.send(:parameters=) }
+    assert_raise(TypeError){ @ts.parameters = 1 }
+  end
 
-   def test_set_priority
-      assert_respond_to(@ts, :priority=)
-      assert_nothing_raised{ @ts.priority = TaskScheduler::NORMAL }
-   end
+  test "priority basic functionality" do
+    assert_respond_to(@ts, :priority)
+    assert_nothing_raised{ @ts.priority }
+  end
 
-   def test_set_priority_expected_errors
-      assert_raise(ArgumentError){ @ts.send(:priority=) }
-      assert_raise(TypeError){ @ts.priority = 'alpha' }
-   end
+  test "priority returns the expected value" do
+    assert_kind_of(String, @ts.priority)
+  end
+
+  test "priority method does not accept any arguments" do
+    assert_raise(ArgumentError){ @ts.priority(true) }
+  end
+
+  test "priority= basic functionality" do
+    assert_respond_to(@ts, :priority=)
+  end
+
+  test "priority= works as expected" do
+    assert_nothing_raised{ @ts.priority = TaskScheduler::NORMAL }
+    assert_equal('normal', @ts.priority)
+  end
+
+  test "priority= requires a numeric argument" do
+    assert_raise(TypeError){ @ts.priority = 'alpha' }
+  end
+=begin
 
    # TODO: Find a harmless way to test this.
    def test_run
@@ -407,28 +436,36 @@ class TC_TaskScheduler < Test::Unit::TestCase
       assert_raise(NoMethodError){ @ts.save = true }
       assert_raise(TaskScheduler::Error){ @ts.save; @ts.save }
    end
+=end
 
-   def test_status
-      assert_respond_to(@ts, :status)
-      assert_nothing_raised{ @ts.status }
-      assert_equal('not scheduled', @ts.status)
-   end
+  test "status basic functionality" do
+    assert_respond_to(@ts, :status)
+    assert_nothing_raised{ @ts.status }
+    assert_kind_of(String, @ts.status)
+  end
 
-   def test_status_expected_errors
-      assert_raise(ArgumentError){ @ts.status(true) }
-      assert_raise(NoMethodError){ @ts.status = true }
-   end
+  test "status returns the expected value" do
+    assert_equal('not scheduled', @ts.status)
+  end
 
-   def test_terminate
-      assert_respond_to(@ts, :terminate)
-   end
+  test "status does not accept any arguments" do
+    assert_raise(ArgumentError){ @ts.status(true) }
+  end
 
-   def test_terminate_expected_errors
-      assert_raise(ArgumentError){ @ts.terminate(true) }
-      assert_raise(NoMethodError){ @ts.terminate = true }
-      assert_raise(TaskScheduler::Error){ @ts.terminate } # It's not running
-   end
+  test "terminate basic functionality" do
+    assert_respond_to(@ts, :terminate)
+  end
 
+  test "terminate does not accept any arguments" do
+    assert_raise(ArgumentError){ @ts.terminate(true) }
+    assert_raise(NoMethodError){ @ts.terminate = true }
+  end
+
+  test "calling terminate on a task that isn't running raises an error" do
+    assert_raise(TaskScheduler::Error){ @ts.terminate }
+  end
+
+=begin
    def test_get_trigger
       assert_respond_to(@ts, :trigger)
       assert_nothing_raised{ @ts.trigger(0) }
@@ -459,61 +496,79 @@ class TC_TaskScheduler < Test::Unit::TestCase
       assert_raises(ArgumentError){ @ts.add_trigger(0) }
       assert_raises(TypeError){ @ts.add_trigger(0, 'foo') }
    end
-
-   def test_trigger_count
-      assert_respond_to(@ts, :trigger_count)
-      assert_nothing_raised{ @ts.trigger_count }
-      assert_kind_of(Fixnum, @ts.trigger_count)
-   end
-
-   def test_trigger_count_expected_errors
-      assert_raise(ArgumentError){ @ts.trigger_count(true) }
-      assert_raise(NoMethodError){ @ts.trigger_count = 1 }
-   end
-
-   def test_trigger_delete
-      assert_respond_to(@ts, :delete_trigger)
-      assert_nothing_raised{ @ts.delete_trigger(0) }
+=end
+  test "trigger_count basic functionality" do
+    assert_respond_to(@ts, :trigger_count)
+    assert_nothing_raised{ @ts.trigger_count }
+    assert_kind_of(Fixnum, @ts.trigger_count)
   end
 
-   def test_trigger_delete_expected_errors
-      assert_raise(ArgumentError){ @ts.delete_trigger }
-      assert_raise(TaskScheduler::Error){ @ts.delete_trigger(9999) }
-   end
+  test "trigger_count returns the expected value" do
+    assert_equal(1, @ts.trigger_count)
+  end
 
-   def test_trigger_string
-      assert_respond_to(@ts, :trigger_string)
-      assert_nothing_raised{ @ts.trigger_string(0) }
-      assert_equal('At 7:14 AM every day, starting 4/11/2009', @ts.trigger_string(0))
-   end
+  test "trigger_count does not accept any arguments" do
+    assert_raise(ArgumentError){ @ts.trigger_count(true) }
+    assert_raise(NoMethodError){ @ts.trigger_count = 1 }
+  end
 
-   def test_trigger_string_expected_errors
-      assert_raise(ArgumentError){ @ts.trigger_string }
-      assert_raise(ArgumentError){ @ts.trigger_string(0, 0) }
-      assert_raise(TypeError){ @ts.trigger_string('alpha') }
-      assert_raise(TaskScheduler::Error){ @ts.trigger_string(9999) }
-   end
+  test "delete_trigger basic functionality" do
+    assert_respond_to(@ts, :delete_trigger)
+  end
 
-   def test_get_working_directory
-      assert_respond_to(@ts, :working_directory)
-      assert_nothing_raised{ @ts.working_directory }
-      assert_kind_of(String, @ts.working_directory)
-   end
+  test "delete_trigger works as expected" do
+    assert_nothing_raised{ @ts.delete_trigger(0) }
+    assert_equal(0, @ts.trigger_count)
+  end
 
-   def test_get_working_directory_expected_errors
-      assert_raise(ArgumentError){ @ts.working_directory(true) }
-   end
+  test "passing a bad index to delete_trigger will raise an error" do
+    assert_raise(TaskScheduler::Error){ @ts.delete_trigger(9999) }
+  end
 
-   def test_set_working_directory
-      assert_respond_to(@ts, :working_directory=)
-      assert_nothing_raised{ @ts.working_directory = "C:\\" }
-   end
+  test "delete_trigger requires at least one argument" do
+    assert_raise(ArgumentError){ @ts.delete_trigger }
+  end
 
-   def test_set_working_directory_expected_errors
-      assert_raise(ArgumentError){ @ts.send(:working_directory=) }
-      assert_raise(TypeError){ @ts.working_directory = 1 }
-   end
-=end
+  test "trigger_string basic functionality" do
+    assert_respond_to(@ts, :trigger_string)
+    assert_nothing_raised{ @ts.trigger_string(0) }
+  end
+
+  test "trigger_string returns the expected value" do
+    assert_equal('At 7:14 AM every day, starting 4/11/2009', @ts.trigger_string(0))
+  end
+
+  test "trigger_string requires a single argument" do
+    assert_raise(ArgumentError){ @ts.trigger_string }
+    assert_raise(ArgumentError){ @ts.trigger_string(0, 0) }
+  end
+
+  test "trigger_string requires a numeric argument" do
+    assert_raise(TypeError){ @ts.trigger_string('alpha') }
+  end
+
+  test "trigger_string raises an error if the index is invalid" do
+    assert_raise(TaskScheduler::Error){ @ts.trigger_string(9999) }
+  end
+
+  test "working_directory basic functionality" do
+    assert_respond_to(@ts, :working_directory)
+    assert_nothing_raised{ @ts.working_directory }
+    assert_kind_of(String, @ts.working_directory)
+  end
+
+  test "working_directory takes no arguments" do
+    assert_raise(ArgumentError){ @ts.working_directory(true) }
+  end
+
+  test "working_directory= basic functionality" do
+    assert_respond_to(@ts, :working_directory=)
+    assert_nothing_raised{ @ts.working_directory = "C:\\" }
+  end
+
+  test "working_directory= requires a string argument" do
+    assert_raise(TypeError){ @ts.working_directory = 1 }
+  end
 
   test "expected constants are defined" do
     assert_not_nil(TaskScheduler::MONDAY)
@@ -562,12 +617,12 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_not_nil(TaskScheduler::FLAG_DISABLED)
     assert_not_nil(TaskScheduler::MAX_RUN_TIMES)
 
-    #assert_not_nil(TaskScheduler::IDLE)
-    #assert_not_nil(TaskScheduler::NORMAL)
-    #assert_not_nil(TaskScheduler::HIGH)
-    #assert_not_nil(TaskScheduler::REALTIME)
-    #assert_not_nil(TaskScheduler::ABOVE_NORMAL)
-    #assert_not_nil(TaskScheduler::BELOW_NORMAL)
+    assert_not_nil(TaskScheduler::IDLE)
+    assert_not_nil(TaskScheduler::NORMAL)
+    assert_not_nil(TaskScheduler::HIGH)
+    assert_not_nil(TaskScheduler::REALTIME)
+    assert_not_nil(TaskScheduler::ABOVE_NORMAL)
+    assert_not_nil(TaskScheduler::BELOW_NORMAL)
   end
 
   def teardown

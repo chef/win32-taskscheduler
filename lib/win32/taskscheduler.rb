@@ -202,6 +202,15 @@ module Win32
     TASK_LOGON_SERVICE_ACCOUNT = 5
     TASK_LOGON_INTERACTIVE_TOKEN_OR_PASSWORD = 6
 
+    # Priority classes
+
+    REALTIME_PRIORITY_CLASS     = 0
+    HIGH_PRIORITY_CLASS         = 1
+    ABOVE_NORMAL_PRIORITY_CLASS = 2 # Or 3
+    NORMAL_PRIORITY_CLASS       = 4 # Or 5, 6
+    BELOW_NORMAL_PRIORITY_CLASS = 7 # Or 8
+    IDLE_PRIORITY_CLASS         = 9 # Or 10
+
     CLSCTX_INPROC_SERVER  = 0x1
     CLSID_CTask =  [0x148BD520,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
     CLSID_CTaskScheduler =  [0x148BD52A,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
@@ -324,12 +333,14 @@ module Win32
       # do nothing
     end
 
-    # Terminate the current task.
+    # Terminate (stop) the current task.
     #
     def terminate
       raise Error, 'null task' if @task.nil?
       @task.stop(nil)
     end
+
+    alias stop terminate
 
     # Set the host on which the various TaskScheduler methods will execute.
     #
@@ -339,7 +350,7 @@ module Win32
       host
     end
 
-    alias :host= :machine=
+    alias host= machine=
 
     # Sets the +user+ and +password+ for the given task. If the user and
     # password are set properly then true is returned.
@@ -413,6 +424,8 @@ module Win32
     # Sets the parameters for the task. These parameters are passed as command
     # line arguments to the application the task will run. To clear the command
     # line parameters set it to an empty string.
+    #--
+    # NOTE: Again, it seems the task must be reactivated to be picked up.
     #
     def parameters=(param)
       raise Error, 'No currently active task' if @task.nil?
@@ -451,6 +464,8 @@ module Win32
     end
 
     # Sets the working directory for the task.
+    #--
+    # TODO: Why do I have to reactivate the task to see the change?
     #
     def working_directory=(dir)
       raise Error, 'No currently active task' if @task.nil?
@@ -467,7 +482,7 @@ module Win32
       @root.RegisterTaskDefinition(
         @task.Path,
         definition,
-        0x6,
+        TASK_CREATE_OR_UPDATE,
         user,
         @password,
         @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
@@ -521,8 +536,13 @@ module Win32
       raise TypeError unless priority.is_a?(Numeric)
 
       definition = @task.Definition
-      definition.Settings.Priority = priority
-      user = definition.Principal.UserId
+
+      begin
+        definition.Settings.Priority = priority
+        user = definition.Principal.UserId
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('Priority', err)
+      end
 
       @root.RegisterTaskDefinition(
         @task.Path,
@@ -646,6 +666,8 @@ module Win32
     end
 
     # Deletes the trigger at the specified index.
+    #--
+    # TODO: Fix.
     #
     def delete_trigger(index)
       raise Error, 'No currently active task' if @task.nil?
@@ -912,7 +934,7 @@ module Win32
         when 1
           status = 'not scheduled'
         else
-            status = 'unknown'
+          status = 'unknown'
       end
 
       status
@@ -944,7 +966,15 @@ module Win32
       definition.RegistrationInfo.Description = comment
 
       user = definition.Principal.UserId
-      @root.RegisterTaskDefinition(@task.Path, definition,0x6,user,@password,@password ? 1 : 3)
+
+      @root.RegisterTaskDefinition(
+        @task.Path,
+        definition,
+        TASK_CREATE_OR_UPDATE,
+        user,
+        @password,
+        @password ? 1 : 3
+      )
 
       comment
     end
@@ -957,7 +987,7 @@ module Win32
       @task.Definition.RegistrationInfo.Author
     end
 
-    alias creator author
+    alias author creator
 
     # Sets the creator for the task.
     #
@@ -969,7 +999,15 @@ module Win32
       definition.RegistrationInfo.Author = creator
 
       user = definition.Principal.UserId
-      @root.RegisterTaskDefinition(@task.Path, definition,0x6,user,@password,@password ? 1 : 3)
+
+      @root.RegisterTaskDefinition(
+        @task.Path,
+        definition,
+        TASK_CREATE_OR_UPDATE,
+        user,
+        @password,
+        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
+      )
 
       creator
     end
@@ -1022,7 +1060,7 @@ module Win32
       time *= 60
       time += min.to_i if min
       time *= 60
-      time += sec if sec
+      time += sec.to_i if sec
       time *= 1000
 
       time
@@ -1057,12 +1095,12 @@ module Win32
 
     # Shorthand constants
 
-    #IDLE = IDLE_PRIORITY_CLASS
-    #NORMAL = NORMAL_PRIORITY_CLASS
-    #HIGH = HIGH_PRIORITY_CLASS
-    #REALTIME = REALTIME_PRIORITY_CLASS
-    #BELOW_NORMAL = BELOW_NORMAL_PRIORITY_CLASS
-    #ABOVE_NORMAL = ABOVE_NORMAL_PRIORITY_CLASS
+    IDLE = IDLE_PRIORITY_CLASS
+    NORMAL = NORMAL_PRIORITY_CLASS
+    HIGH = HIGH_PRIORITY_CLASS
+    REALTIME = REALTIME_PRIORITY_CLASS
+    BELOW_NORMAL = BELOW_NORMAL_PRIORITY_CLASS
+    ABOVE_NORMAL = ABOVE_NORMAL_PRIORITY_CLASS
 
     ONCE = TASK_TIME_TRIGGER_ONCE
     DAILY = TASK_TIME_TRIGGER_DAILY
@@ -1122,10 +1160,10 @@ end
 
 if $0 == __FILE__
   ts = Win32::TaskScheduler.new
-  p ts.enum
-  ts.activate("Castle Age")
-  p ts.application_name
-  p ts.comment
-  #p ts.account_information
-  #ts.set_account_information("bogus", 'xxxx')
+  ts.activate("foo")
+  #p ts.most_recent_run_time
+  #p ts.parameters
+  p ts.trigger_count
+  ts.delete_trigger(0)
+  p ts.trigger_count
 end
