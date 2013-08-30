@@ -21,13 +21,13 @@ class TC_TaskScheduler < Test::Unit::TestCase
     @job_file = "C:\\WINDOWS\\Tasks\\test.job"
 
     @trigger = {
-      'start_year'   => 2009,
-      'start_month'  => 4,
-      'start_day'    => 11,
-      'start_hour'   => 7,
-      'start_minute' => 14,
-      'trigger_type' => TaskScheduler::DAILY,
-      'type'         => { 'days_interval' => 1 }
+      :start_year   => 2009,
+      :start_month  => 4,
+      :start_day    => 11,
+      :start_hour   => 7,
+      :start_minute => 14,
+      :trigger_type => TaskScheduler::DAILY,
+      :type         => { :days_interval => 1 }
     }
 
     @ts = TaskScheduler.new
@@ -287,28 +287,35 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_raise(NoMethodError){ @ts.most_recent_run_time = Time.now }
   end
 
-=begin
-   def test_new_work_item
-      assert_respond_to(@ts, :new_work_item)
-      assert_nothing_raised{ @ts.new_work_item('bar', @trigger) }
-   end
+  test "new_work_item basic functionality" do
+    assert_respond_to(@ts, :new_work_item)
+  end
 
-   def test_new_work_item_expected_errors
-      assert_raise(ArgumentError){ @ts.new_work_item('test', {:bogus => 1}) }
-   end
+  test "new_work_item accepts a trigger/hash" do
+    assert_nothing_raised{ @ts.new_work_item('bar', @trigger) }
+  end
 
-   def test_new_task_alias
-      assert_respond_to(@ts, :new_task)
-      assert_equal(true, @ts.method(:new_task) == @ts.method(:new_work_item))
-   end
+  test "new_work_item fails if a bogus trigger key is present" do
+    assert_raise(ArgumentError){ @ts.new_work_item('test', {:bogus => 1}) }
+  end
 
-   def test_new_work_item_expected_errors
-      assert_raise(ArgumentError){ @ts.new_work_item }
-      assert_raise(ArgumentError){ @ts.new_work_item('bar') }
-      assert_raise(TypeError){ @ts.new_work_item(1, 'bar') }
-      assert_raise(TypeError){ @ts.new_work_item('bar', 1) }
-   end
-=end
+  test "new_task is an alias for new_work_item" do
+    assert_respond_to(@ts, :new_task)
+    assert_alias_method(@ts, :new_task, :new_work_item)
+  end
+
+  test "new_work_item requires a task name and a trigger" do
+    assert_raise(ArgumentError){ @ts.new_work_item }
+    assert_raise(ArgumentError){ @ts.new_work_item('bar') }
+  end
+
+  test "new_work_item expects a string for the first argument" do
+    assert_raise(TypeError){ @ts.new_work_item(1, @trigger) }
+  end
+
+  test "new_work_item expects a hash for the second argument" do
+    assert_raise(TypeError){ @ts.new_work_item(@task, 1) }
+  end
 
   test "next_run_time basic functionality" do
     assert_respond_to(@ts, :next_run_time)
@@ -372,35 +379,38 @@ class TC_TaskScheduler < Test::Unit::TestCase
   test "priority= requires a numeric argument" do
     assert_raise(TypeError){ @ts.priority = 'alpha' }
   end
-=begin
 
-   # TODO: Find a harmless way to test this.
-   def test_run
-      assert_respond_to(@ts, :run)
-   end
+  # TODO: Find a harmless way to test this.
+  test "run basic functionality" do
+    assert_respond_to(@ts, :run)
+  end
 
-   def test_run_expected_errors
-      assert_raise(ArgumentError){ @ts.run(true) }
-      assert_raise(NoMethodError){ @ts.run = true }
-   end
+  test "run does not accept any arguments" do
+    assert_raise(ArgumentError){ @ts.run(true) }
+    assert_raise(NoMethodError){ @ts.run = true }
+  end
 
-   def test_save
-      assert_respond_to(@ts, :save)
-      assert_nothing_raised{ @ts.save }
-   end
+  test "save basic functionality" do
+    assert_respond_to(@ts, :save)
+  end
 
-   def test_save_custom_file
-      assert_nothing_raised{ @ts.save(@job_file) }
-      assert_equal(true, File.exists?(@job_file))
-   end
+  test "save works as expected" do
+    assert_nothing_raised{ @ts.save }
+  end
 
-   def test_save_expected_errors
-      assert_raise(TypeError){ @ts.save(true) }
-      assert_raise(ArgumentError){ @ts.save(@job_file, true) }
-      assert_raise(NoMethodError){ @ts.save = true }
-      assert_raise(TaskScheduler::Error){ @ts.save; @ts.save }
-   end
-=end
+  test "save accepts a custom job file" do
+    assert_nothing_raised{ @ts.save(@job_file) }
+    assert_true(File.exists?(@job_file))
+  end
+
+  test "save requires a string argument if present" do
+    assert_raise(TypeError){ @ts.save(true) }
+    assert_raise(TypeError){ @ts.save(1) }
+  end
+
+  test "an error is raised if save is called more than once" do
+    assert_raise(TaskScheduler::Error){ @ts.save; @ts.save }
+  end
 
   test "status basic functionality" do
     assert_respond_to(@ts, :status)
@@ -429,38 +439,53 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_raise(TaskScheduler::Error){ @ts.terminate }
   end
 
-=begin
-   def test_get_trigger
-      assert_respond_to(@ts, :trigger)
-      assert_nothing_raised{ @ts.trigger(0) }
-      assert_kind_of(Hash, @ts.trigger(0))
-   end
+  test "trigger expected value" do
+    assert_respond_to(@ts, :trigger)
+    assert_nothing_raised{ @ts.trigger(0) }
+  end
 
-   def test_get_trigger_expected_errors
-      assert_raises(ArgumentError){ @ts.trigger }
-      assert_raises(TaskScheduler::Error){ @ts.trigger(9999) }
-   end
+  test "trigger returns a hash object" do
+    assert_kind_of(Hash, @ts.trigger(0))
+  end
 
-   def test_set_trigger
-      assert_respond_to(@ts, :trigger=)
-      assert_nothing_raised{ @ts.trigger = @trigger }
-   end
+  test "trigger requires an index" do
+    assert_raises(ArgumentError){ @ts.trigger }
+  end
 
-   def test_set_trigger_expected_errors
-      assert_raises(TypeError){ @ts.trigger = 'blah' }
-   end
+  test "trigger raises an error if the index is invalid" do
+    assert_raises(TaskScheduler::Error){ @ts.trigger(9999) }
+  end
 
-   def test_add_trigger
-      assert_respond_to(@ts, :add_trigger)
-      assert_nothing_raised{ @ts.add_trigger(0, @trigger) }
-   end
+  test "trigger= basic functionality" do
+    assert_respond_to(@ts, :trigger=)
+    assert_nothing_raised{ @ts.trigger = @trigger }
+  end
 
-   def test_add_trigger_expected_errors
-      assert_raises(ArgumentError){ @ts.add_trigger }
-      assert_raises(ArgumentError){ @ts.add_trigger(0) }
-      assert_raises(TypeError){ @ts.add_trigger(0, 'foo') }
-   end
-=end
+  test "trigger= requires a hash argument" do
+    assert_raises(TypeError){ @ts.trigger = 'blah' }
+  end
+
+  test "add_trigger basic functionality" do
+    assert_respond_to(@ts, :add_trigger)
+  end
+
+  test "add_trigger works as expected" do
+    assert_nothing_raised{ @ts.add_trigger(0, @trigger) }
+  end
+
+  test "add_trigger requires two arguments" do
+    assert_raises(ArgumentError){ @ts.add_trigger }
+    assert_raises(ArgumentError){ @ts.add_trigger(0) }
+  end
+
+  test "add_trigger reqiuires an integer for the first argument" do
+    assert_raises(TypeError){ @ts.add_trigger('foo', @trigger) }
+  end
+
+  test "add_trigger reqiuires a hash for the second argument" do
+    assert_raises(TypeError){ @ts.add_trigger(0, 'foo') }
+  end
+
   test "trigger_count basic functionality" do
     assert_respond_to(@ts, :trigger_count)
     assert_nothing_raised{ @ts.trigger_count }
