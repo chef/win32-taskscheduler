@@ -271,6 +271,11 @@ module Win32
 
     alias tasks enum
 
+    # Returns whether or not the specified task exists.
+    def exists?(task)
+      enum.include?(task)
+    end
+
     # Activate the specified task.
     #
     def activate(task)
@@ -376,13 +381,19 @@ module Win32
       app = nil
 
       @task.Definition.Actions.each do |action|
-        if action.Type == 0
+        if action.Type == 0 # TASK_ACTION_EXEC
           app = action.Path
           break
         end
       end
 
       app
+    end
+
+    # TODO: Implement
+    def application_name=(app)
+      raise Error, 'No currently active task' if @task.nil?
+      raise NoMethodError
     end
 
     # Returns the command line parameters for the task.
@@ -946,6 +957,8 @@ module Win32
       @task.Definition.RegistrationInfo.Author
     end
 
+    alias creator author
+
     # Sets the creator for the task.
     #
     def creator=(creator)
@@ -1112,8 +1125,7 @@ if $0 == __FILE__
   p ts.enum
   ts.activate("Castle Age")
   p ts.application_name
-  ts.application_name = "notepad.exe"
-  p ts.application_name
+  p ts.comment
   #p ts.account_information
   #ts.set_account_information("bogus", 'xxxx')
 end
