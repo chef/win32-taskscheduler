@@ -23,7 +23,6 @@ module Windows
       match = regex.match(err.to_s)
 
       if match
-        p match.captures.first
         error = match.captures.first.hex
         win_error(function, error)
       else
