@@ -281,6 +281,7 @@ module Win32
     alias tasks enum
 
     # Returns whether or not the specified task exists.
+    #
     def exists?(task)
       enum.include?(task)
     end
@@ -306,8 +307,8 @@ module Win32
 
       begin
         @root.DeleteTask(task, 0)
-      rescue
-        raise Error, "Access Denied"
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('DeleteTask', err)
       end
     end
 
@@ -327,6 +328,8 @@ module Win32
     #
     # Note that calling TaskScheduler#save also resets the TaskScheduler object
     # so that there is no currently active task.
+    #--
+    # TODO: Should we just remove this method?
     #
     def save(file = nil)
       raise Error, 'null task' if @task.nil?
@@ -1214,12 +1217,9 @@ end
 if $0 == __FILE__
   include Win32
   ts = TaskScheduler.new
-  ts.activate('Castle Age')
-  p ts.trigger(0)
 
-=begin
   trigger = {
-    :start_year   => 2014,
+    :start_year   => 2015,
     :start_month  => 4,
     :start_day    => 25,
     :start_hour   => 23,
@@ -1233,7 +1233,4 @@ if $0 == __FILE__
   }
 
   ts.new_task('foo', trigger)
-  ts.application_name = "notepad.exe"
-  ts.save
-=end
 end
