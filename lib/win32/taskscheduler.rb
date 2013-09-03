@@ -594,9 +594,9 @@ module Win32
       ]
 
       # Set defaults
-      trigger[:end_year]  ||= trigger[:start_year]
-      trigger[:end_month] ||= trigger[:start_month]
-      trigger[:end_day]   ||= trigger[:start_day]
+      trigger[:end_year]  ||= '0000'
+      trigger[:end_month] ||= '00'
+      trigger[:end_day]   ||= '00'
 
       endTime = "%04d-%02d-%02dT00:00:00" % [
         trigger[:end_year], trigger[:end_month], trigger[:end_day]
