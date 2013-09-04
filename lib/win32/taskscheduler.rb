@@ -1,6 +1,7 @@
 require File.join(File.dirname(__FILE__), 'windows', 'helper')
 require 'win32ole'
 require 'socket'
+require 'time'
 
 # The Win32 module serves as a namespace only
 module Win32
@@ -221,6 +222,7 @@ module Win32
     # :startdoc:
 
     attr_accessor :password
+    attr_reader :host
 
     # Returns a new TaskScheduler object, attached to +folder+. If that
     # folder does not exist, but the +force+ option is set to true, then
@@ -230,6 +232,7 @@ module Win32
       @folder = folder
       @force  = force
 
+      @host     = Socket.gethostname
       @task     = nil
       @password = nil
 
@@ -296,7 +299,7 @@ module Win32
         registeredTask.Enabled = 1
         @task = registeredTask
       rescue WIN32OLERuntimeError => err
-        raise Error, ole_error('GetTask', err)
+        raise Error, ole_error('activate', err)
       end
     end
 
@@ -350,16 +353,21 @@ module Win32
     def machine=(host)
       raise TypeError unless host.is_a?(String)
       @service.Connect(host)
+      @host = host
       host
     end
 
     alias host= machine=
+    alias machine host
 
     # Sets the +user+ and +password+ for the given task. If the user and
     # password are set properly then true is returned.
     #
     def set_account_information(user, password)
       raise Error, 'No currently active task' if @task.nil?
+
+      raise TypeError unless user.is_a?(String)
+      raise TypeError unless password.is_a?(String)
 
       @password = password
 
@@ -431,8 +439,8 @@ module Win32
     # NOTE: Again, it seems the task must be reactivated to be picked up.
     #
     def parameters=(param)
-      raise Error, 'No currently active task' if @task.nil?
       raise TypeError unless param.is_a?(String)
+      raise Error, 'No currently active task' if @task.nil?
 
       definition = @task.Definition
       definition.Actions.each do |action|
@@ -535,8 +543,8 @@ module Win32
     # priority constant value.
     #
     def priority=(priority)
-      raise Error, 'No currently active task' if @task.nil?
       raise TypeError unless priority.is_a?(Numeric)
+      raise Error, 'No currently active task' if @task.nil?
 
       definition = @task.Definition
 
@@ -564,6 +572,7 @@ module Win32
     # job should run.
     #
     def new_work_item(task, trigger)
+      raise TypeError unless task.is_a?(String)
       raise TypeError unless trigger.is_a?(Hash)
 
       taskDefinition = @service.NewTask(0)
@@ -585,7 +594,7 @@ module Win32
         when TASK_TIME_TRIGGER_ONCE
           type = 1
         else
-          raise Error, 'Unknown trigger type'
+          raise ArgumentError, 'Unknown trigger type'
       end
 
       startTime = "%04d-%02d-%02dT%02d:%02d:00" % [
@@ -684,11 +693,11 @@ module Win32
     # Returns a string that describes the current trigger at the specified
     # index for the active task.
     #
-    # Example: "At 7:14 AM every day, starting 4/11/2009"
+    # Example: "At 7:14 AM every day, starting 4/11/2015"
     #
     def trigger_string(index)
-      raise Error, 'No currently active task' if @task.nil?
       raise TypeError unless index.is_a?(Numeric)
+      raise Error, 'No currently active task' if @task.nil?
 
       begin
         trigger = @task.Definition.Triggers.Item(index)
@@ -704,6 +713,7 @@ module Win32
     # TODO: Fix.
     #
     def delete_trigger(index)
+      raise TypeError unless index.is_a?(Numeric)
       raise Error, 'No currently active task' if @task.nil?
 
       definition = @task.Definition
@@ -764,7 +774,7 @@ module Win32
           trigger[:trigger_type] = TASK_TIME_TRIGGER_WEEKLY
           tmp = {}
           tmp[:weeks_interval] = trig.WeeksInterval
-          tmp[:days_of_week] =trig.DaysOfWeek
+          tmp[:days_of_week] = trig.DaysOfWeek
           trigger[:type] = tmp
         when 4
           trigger[:trigger_type] = TASK_TIME_TRIGGER_MONTHLYDATE
@@ -773,28 +783,29 @@ module Win32
           tmp[:days] = trig.DaysOfMonth
           trigger[:type] = tmp
         when 5
-          trigger[:trigger_type] =TASK_TIME_TRIGGER_MONTHLYDOW
+          trigger[:trigger_type] = TASK_TIME_TRIGGER_MONTHLYDOW
           tmp = {}
           tmp[:months] = trig.MonthsOfYear
           tmp[:days_of_week] = trig.DaysOfWeek
           tmp[:weeks] = trig.weeks
           trigger[:type] = tmp
         when 1
-          trigger[:trigger_type] =TASK_TIME_TRIGGER_ONCE
+          trigger[:trigger_type] = TASK_TIME_TRIGGER_ONCE
           tmp = {}
           tmp[:once] = nil
           trigger[:type] = tmp
         else
           raise Error, 'Unknown trigger type'
       end
+
       trigger
     end
 
     # Sets the trigger for the currently active task.
     #
     def trigger=(trigger)
-      raise Error, 'No currently active task' if @task.nil?
       raise TypeError unless trigger.is_a?(Hash)
+      raise Error, 'No currently active task' if @task.nil?
 
       definition = @task.Definition
       definition.Triggers.Clear()
@@ -890,8 +901,9 @@ module Win32
     # Adds a trigger at the specified index.
     #
     def add_trigger(index, trigger)
-      raise Error, 'No currently active task' if @task.nil?
+      raise TypeError unless index.is_a?(Numeric)
       raise TypeError unless trigger.is_a?(Hash)
+      raise Error, 'No currently active task' if @task.nil?
 
       definition = @task.Definition
       case trigger['trigger_type']
@@ -1015,8 +1027,8 @@ module Win32
     # Sets the comment for the task.
     #
     def comment=(comment)
-      raise Error, 'No currently active task' if @task.nil?
       raise TypeError unless comment.is_a?(String)
+      raise Error, 'No currently active task' if @task.nil?
 
       definition = @task.Definition
       definition.RegistrationInfo.Description = comment
@@ -1048,8 +1060,8 @@ module Win32
     # Sets the creator for the task.
     #
     def creator=(creator)
-      raise Error, 'No currently active task' if @task.nil?
       raise TypeError unless creator.is_a?(String)
+      raise Error, 'No currently active task' if @task.nil?
 
       definition = @task.Definition
       definition.RegistrationInfo.Author = creator
@@ -1073,7 +1085,7 @@ module Win32
     def next_run_time
       raise Error, 'No currently active task' if @task.nil?
 
-      Time.parse(@task.NextRunTime)
+      @task.NextRunTime
     end
 
     # Returns a Time object indicating the most recent time the task ran or
@@ -1126,8 +1138,8 @@ module Win32
     # before terminating. Returns the value you specified if successful.
     #
     def max_run_time=(max_run_time)
-      raise Error, 'No currently active task' if @task.nil?
       raise TypeError unless max_run_time.is_a?(Numeric)
+      raise Error, 'No currently active task' if @task.nil?
 
       t = max_run_time
       t /= 1000
@@ -1216,6 +1228,8 @@ end
 
 if $0 == __FILE__
   include Win32
+
+  task = 'foo'
   ts = TaskScheduler.new
 
   trigger = {
@@ -1232,5 +1246,7 @@ if $0 == __FILE__
     }
   }
 
-  ts.new_task('foo', trigger)
+  ts.new_task(task, trigger)
+  ts.activate(task)
+  p ts.account_information
 end
