@@ -17,11 +17,10 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   def setup
-    @task     = 'foo'
-    @job_file = "C:\\WINDOWS\\Tasks\\test.job"
+    @task = 'foo'
 
     @trigger = {
-      :start_year   => 2009,
+      :start_year   => 2015,
       :start_month  => 4,
       :start_day    => 11,
       :start_hour   => 7,
@@ -33,6 +32,12 @@ class TC_TaskScheduler < Test::Unit::TestCase
     @ts = TaskScheduler.new
   end
 
+  # Helper method
+  def setup_task
+    @ts.new_work_item(@task, @trigger)
+    @ts.activate(@task)
+  end
+
   test "version constant is set to expected value" do
     assert_equal('0.3.0', TaskScheduler::VERSION)
   end
@@ -42,7 +47,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "account_information returns the task owner" do
-    @ts.activate(@task)
+    setup_task
     assert_equal("#{@@host}\\#{@@user}", @ts.account_information)
   end
 
@@ -59,17 +64,20 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "set_account_information works as expected" do
-    assert_nothing_raised{ @ts.set_account_information('test', 'XXXX') }
+    setup_task
+    assert_nothing_raised{ @ts.set_account_information(@@user, 'XXXX') }
     assert_equal('test', @ts.account_information)
   end
 
   test "set_account_information requires two arguments" do
+    setup_task
     assert_raise(ArgumentError){ @ts.set_account_information }
     assert_raise(ArgumentError){ @ts.set_account_information('x') }
     assert_raise(ArgumentError){ @ts.set_account_information('x', 'y', 'z') }
   end
 
   test "arguments to set_account_information must be strings" do
+    setup_task
     assert_raise(TypeError){ @ts.set_account_information(1, 'XXX') }
     assert_raise(TypeError){ @ts.set_account_information('x', 1) }
   end
@@ -79,10 +87,12 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "activate behaves as expected" do
-      assert_nothing_raised{ @ts.activate(@task) }
-   end
+    @ts.new_work_item(@task, @trigger)
+    assert_nothing_raised{ @ts.activate(@task) }
+  end
 
   test "calling activate on the same object multiple times has no effect" do
+    @ts.new_work_item(@task, @trigger)
     assert_nothing_raised{ @ts.activate(@task) }
     assert_nothing_raised{ @ts.activate(@task) }
   end
@@ -102,10 +112,11 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
   test "application_name basic functionality" do
     assert_respond_to(@ts, :application_name)
-    assert_nothing_raised{ @ts.application_name }
   end
 
   test "application_name returns a string or nil" do
+    setup_task
+    assert_nothing_raised{ @ts.application_name }
     assert_kind_of([String, NilClass], @ts.application_name)
   end
 
@@ -114,24 +125,28 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "application_name= basic functionality" do
+    omit("Not yet implemented")
     assert_respond_to(@ts, :application_name=)
   end
 
   test "application_name= works as expected" do
+    omit("Not yet implemented")
     assert_nothing_raised{ @ts.application_name = "notepad.exe" }
     assert_equal("notepad.exe", @ts.application_name)
   end
 
   test "application_name= requires a string argument" do
+    omit("Not yet implemented")
     assert_raise(TypeError){ @ts.application_name = 1 }
   end
 
   test "comment method basic functionality" do
     assert_respond_to(@ts, :comment)
-    assert_nothing_raised{ @ts.comment }
   end
 
   test "comment method returns a string" do
+    setup_task
+    assert_nothing_raised{ @ts.comment }
     assert_kind_of(String, @ts.comment)
   end
 
@@ -141,7 +156,12 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
   test "comment= method basic functionality" do
     assert_respond_to(@ts, :comment=)
+  end
+
+  test "comment= works as expected" do
+    setup_task
     assert_nothing_raised{ @ts.comment = "test" }
+    assert_equal("test", @ts.comment)
   end
 
   test "comment= method requires a string argument" do
@@ -149,13 +169,15 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "creator method basic functionality" do
+    setup_task
     assert_respond_to(@ts, :creator)
     assert_nothing_raised{ @ts.creator }
     assert_kind_of(String, @ts.creator)
   end
 
   test "creator method returns expected value" do
-    assert_equal(@user, @ts.creator)
+    setup_task
+    assert_equal(@@user, @ts.creator)
   end
 
   test "creator method does not accept any arguments" do
@@ -167,6 +189,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "creator= method works as expected" do
+    setup_task
     assert_nothing_raised{ @ts.creator = "Test Creator" }
     assert_equal("Test Creator", @ts.creator)
   end
@@ -180,6 +203,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "delete method works as expected" do
+    setup_task
     assert_nothing_raised{ @ts.delete(@task) }
     assert_false(@ts.exists?(@task))
   end
@@ -217,6 +241,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "exists? returns expected value" do
+    setup_task
     assert_true(@ts.exists?(@task))
     assert_false(@ts.exists?('bogusXYZ'))
   end
@@ -227,6 +252,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "exit_code basic functionality" do
+    setup_task
     assert_respond_to(@ts, :exit_code)
     assert_nothing_raised{ @ts.exit_code }
     assert_kind_of(Fixnum, @ts.exit_code)
@@ -242,6 +268,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "machine= works as expected" do
+    setup_task
     assert_nothing_raised{ @ts.machine = @@host }
     assert_equal(@@host, @ts.machine)
   end
@@ -252,6 +279,10 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
   test "max_run_time basic functionality" do
     assert_respond_to(@ts, :max_run_time)
+  end
+
+  test "max_run_time works as expected" do
+    setup_task
     assert_nothing_raised{ @ts.max_run_time }
     assert_kind_of(Fixnum, @ts.max_run_time)
   end
@@ -265,6 +296,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "max_run_time= works as expected" do
+    setup_task
     assert_nothing_raised{ @ts.max_run_time = 20000 }
     assert_equal(20000, @ts.max_run_time)
   end
@@ -274,11 +306,13 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "most_recent_run_time basic functionality" do
+    setup_task
     assert_respond_to(@ts, :most_recent_run_time)
     assert_nothing_raised{ @ts.most_recent_run_time }
   end
 
   test "most_recent_run_time is nil if task hasn't run" do
+    setup_task
     assert_nil(@ts.most_recent_run_time)
   end
 
@@ -319,10 +353,11 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
   test "next_run_time basic functionality" do
     assert_respond_to(@ts, :next_run_time)
-    assert_nothing_raised{ @ts.next_run_time }
   end
 
   test "next_run_time returns a Time object" do
+    setup_task
+    assert_nothing_raised{ @ts.next_run_time }
     assert_kind_of(Time, @ts.next_run_time)
   end
 
@@ -332,6 +367,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "parameters basic functionality" do
+    setup_task
     assert_respond_to(@ts, :parameters)
     assert_nothing_raised{ @ts.parameters }
   end
@@ -345,6 +381,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "parameters= works as expected" do
+    setup_task
     assert_nothing_raised{ @ts.parameters = "somefile.txt" }
     assert_equal("somefile.txt", @ts.parameters)
   end
@@ -356,10 +393,11 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
   test "priority basic functionality" do
     assert_respond_to(@ts, :priority)
-    assert_nothing_raised{ @ts.priority }
   end
 
   test "priority returns the expected value" do
+    setup_task
+    assert_nothing_raised{ @ts.priority }
     assert_kind_of(String, @ts.priority)
   end
 
@@ -372,6 +410,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "priority= works as expected" do
+    setup_task
     assert_nothing_raised{ @ts.priority = TaskScheduler::NORMAL }
     assert_equal('normal', @ts.priority)
   end
@@ -390,6 +429,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_raise(NoMethodError){ @ts.run = true }
   end
 
+=begin
   test "save basic functionality" do
     assert_respond_to(@ts, :save)
   end
@@ -411,15 +451,18 @@ class TC_TaskScheduler < Test::Unit::TestCase
   test "an error is raised if save is called more than once" do
     assert_raise(TaskScheduler::Error){ @ts.save; @ts.save }
   end
+=end
 
   test "status basic functionality" do
+    setup_task
     assert_respond_to(@ts, :status)
     assert_nothing_raised{ @ts.status }
     assert_kind_of(String, @ts.status)
   end
 
   test "status returns the expected value" do
-    assert_equal('not scheduled', @ts.status)
+    setup_task
+    assert_equal('ready', @ts.status)
   end
 
   test "status does not accept any arguments" do
@@ -439,12 +482,14 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_raise(TaskScheduler::Error){ @ts.terminate }
   end
 
-  test "trigger expected value" do
+  test "trigger basic functionality" do
+    setup_task
     assert_respond_to(@ts, :trigger)
     assert_nothing_raised{ @ts.trigger(0) }
   end
 
   test "trigger returns a hash object" do
+    setup_task
     assert_kind_of(Hash, @ts.trigger(0))
   end
 
@@ -458,6 +503,10 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
   test "trigger= basic functionality" do
     assert_respond_to(@ts, :trigger=)
+  end
+
+  test "trigger= works as expected" do
+    setup_task
     assert_nothing_raised{ @ts.trigger = @trigger }
   end
 
@@ -470,6 +519,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "add_trigger works as expected" do
+    setup_task
     assert_nothing_raised{ @ts.add_trigger(0, @trigger) }
   end
 
@@ -487,12 +537,14 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "trigger_count basic functionality" do
+    setup_task
     assert_respond_to(@ts, :trigger_count)
     assert_nothing_raised{ @ts.trigger_count }
     assert_kind_of(Fixnum, @ts.trigger_count)
   end
 
   test "trigger_count returns the expected value" do
+    setup_task
     assert_equal(1, @ts.trigger_count)
   end
 
@@ -506,6 +558,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "delete_trigger works as expected" do
+    setup_task
     assert_nothing_raised{ @ts.delete_trigger(0) }
     assert_equal(0, @ts.trigger_count)
   end
@@ -519,11 +572,13 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "trigger_string basic functionality" do
+    setup_task
     assert_respond_to(@ts, :trigger_string)
     assert_nothing_raised{ @ts.trigger_string(0) }
   end
 
   test "trigger_string returns the expected value" do
+    setup_task
     assert_equal('At 7:14 AM every day, starting 4/11/2009', @ts.trigger_string(0))
   end
 
@@ -541,6 +596,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "working_directory basic functionality" do
+    setup_task
     assert_respond_to(@ts, :working_directory)
     assert_nothing_raised{ @ts.working_directory }
     assert_kind_of(String, @ts.working_directory)
@@ -552,10 +608,15 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
   test "working_directory= basic functionality" do
     assert_respond_to(@ts, :working_directory=)
+  end
+
+  test "working_directory= works as expected" do
+    setup_task
     assert_nothing_raised{ @ts.working_directory = "C:\\" }
   end
 
   test "working_directory= requires a string argument" do
+    setup_task
     assert_raise(TypeError){ @ts.working_directory = 1 }
   end
 
@@ -615,11 +676,10 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   def teardown
-    File.delete(@job_file) if File.exists?(@job_file)
-    @ts.delete('foo') rescue nil
+    @ts.delete(@task) if @ts.exists?(@task)
     @ts = nil
+    @task = nil
     @trigger = nil
-    @job_file = nil
   end
 
   def self.shutdown
