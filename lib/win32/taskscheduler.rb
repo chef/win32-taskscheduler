@@ -372,7 +372,7 @@ module Win32
       @password = password
 
       begin
-        @root.RegisterTaskDefinition(
+        @task = @root.RegisterTaskDefinition(
           @task.Path,
           @task.Definition,
           TASK_CREATE_OR_UPDATE,
@@ -448,7 +448,7 @@ module Win32
       end
       user = definition.Principal.UserId
 
-      @root.RegisterTaskDefinition(
+      @task = @root.RegisterTaskDefinition(
         @task.Path,
         definition,
         TASK_CREATE_OR_UPDATE,
@@ -490,7 +490,7 @@ module Win32
 
       user = definition.Principal.UserId
 
-      @root.RegisterTaskDefinition(
+      @task = @root.RegisterTaskDefinition(
         @task.Path,
         definition,
         TASK_CREATE_OR_UPDATE,
@@ -555,7 +555,7 @@ module Win32
         raise Error, ole_error('Priority', err)
       end
 
-      @root.RegisterTaskDefinition(
+      @task = @root.RegisterTaskDefinition(
         @task.Path,
         definition,
         TASK_CREATE_OR_UPDATE,
@@ -603,16 +603,16 @@ module Win32
       ]
 
       # Set defaults
-      trigger[:end_year]  ||= '0000'
-      trigger[:end_month] ||= '00'
-      trigger[:end_day]   ||= '00'
+      trigger[:end_year]  ||= 0
+      trigger[:end_month] ||= 0
+      trigger[:end_day]   ||= 0
 
       endTime = "%04d-%02d-%02dT00:00:00" % [
         trigger[:end_year], trigger[:end_month], trigger[:end_day]
       ]
 
       trig = taskDefinition.Triggers.Create(type)
-      trig.Id = "RegistrationTriggerId"
+      trig.Id = "RegistrationTriggerId#{taskDefinition.Triggers.Count}"
       trig.StartBoundary = startTime
       trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
       trig.Enabled = true
@@ -665,7 +665,7 @@ module Win32
       act.Path = 'cmd'
 
       begin
-        @root.RegisterTaskDefinition(
+        @task = @root.RegisterTaskDefinition(
           task,
           taskDefinition,
           TASK_CREATE_OR_UPDATE,
@@ -698,6 +698,7 @@ module Win32
     def trigger_string(index)
       raise TypeError unless index.is_a?(Numeric)
       raise Error, 'No currently active task' if @task.nil?
+      index += 1  # first item index is 1
 
       begin
         trigger = @task.Definition.Triggers.Item(index)
@@ -715,12 +716,13 @@ module Win32
     def delete_trigger(index)
       raise TypeError unless index.is_a?(Numeric)
       raise Error, 'No currently active task' if @task.nil?
+      index += 1  # first item index is 1
 
       definition = @task.Definition
       definition.Triggers.Remove(index)
       user = definition.Principal.UserId
 
-      @root.RegisterTaskDefinition(
+      @task = @root.RegisterTaskDefinition(
         @task.Path,
         definition,
         TASK_CREATE_OR_UPDATE,
@@ -736,7 +738,9 @@ module Win32
     # current task.
     #
     def trigger(index)
+      raise TypeError unless index.is_a?(Numeric)
       raise Error, 'No currently active task' if @task.nil?
+      index += 1  # first item index is 1
 
       begin
         trig = @task.Definition.Triggers.Item(index)
@@ -835,7 +839,7 @@ module Win32
       ]
 
       trig = definition.Triggers.Create(type)
-      trig.Id = "RegistrationTriggerId"
+      trig.Id = "RegistrationTriggerId#{definition.Triggers.Count}"
       trig.StartBoundary = startTime
       trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
       trig.Enabled = true
@@ -856,7 +860,7 @@ module Win32
       case trigger[:trigger_type]
         when TASK_TIME_TRIGGER_DAILY
           trig.DaysInterval =tmp[:days_interval] if tmp && tmp[:days_interval]
-          if trigger['random_minutes_interval'].to_i > 0
+          if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]}M"
           end
         when TASK_TIME_TRIGGER_WEEKLY
@@ -886,7 +890,7 @@ module Win32
 
       user = definition.Principal.UserId
 
-      @root.RegisterTaskDefinition(
+      @task = @root.RegisterTaskDefinition(
         @task.Path,
         definition,
         TASK_CREATE_OR_UPDATE,
@@ -906,7 +910,7 @@ module Win32
       raise Error, 'No currently active task' if @task.nil?
 
       definition = @task.Definition
-      case trigger['trigger_type']
+      case trigger[:trigger_type]
         when TASK_TIME_TRIGGER_DAILY
           type = 2
         when TASK_TIME_TRIGGER_WEEKLY
@@ -926,12 +930,17 @@ module Win32
         trigger[:start_hour], trigger[:start_minute]
       ]
 
+      # Set defaults
+      trigger[:end_year]  ||= 0
+      trigger[:end_month] ||= 0
+      trigger[:end_day]   ||= 0
+
       endTime = "%04d-%02d-%02dT00:00:00" % [
         trigger[:end_year], trigger[:end_month], trigger[:end_day]
       ]
 
       trig = definition.Triggers.Create(type)
-      trig.Id = "RegistrationTriggerId"
+      trig.Id = "RegistrationTriggerId#{definition.Triggers.Count}"
       trig.StartBoundary = startTime
       trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
       trig.Enabled = true
@@ -952,28 +961,39 @@ module Win32
       case trigger[:trigger_type]
         when TASK_TIME_TRIGGER_DAILY
           trig.DaysInterval = tmp[:days_interval] if tmp && tmp[:days_interval]
+          if trigger[:random_minutes_interval].to_i > 0
           trig.RandomDelay = "PT#{trigger[:random_minutes_interval]}M"
+          end
         when TASK_TIME_TRIGGER_WEEKLY
           trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
           trig.WeeksInterval = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
+          if trigger[:random_minutes_interval].to_i > 0
           trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+          end
         when TASK_TIME_TRIGGER_MONTHLYDATE
           trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
           trig.DaysOfMonth = tmp[:days] if tmp && tmp[:days]
+          if trigger[:random_minutes_interval].to_i > 0
           trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+          end
         when TASK_TIME_TRIGGER_MONTHLYDOW
           trig.MonthsOfYear  = tmp[:months] if tmp && tmp[:months]
           trig.DaysOfWeek  = tmp[:days_of_week] if tmp && tmp[:days_of_week]
           trig.WeeksOfMonth  = tmp[:weeks] if tmp && tmp[:weeks]
+          if trigger[:random_minutes_interval].to_i > 0
           trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+          end
         when TASK_TIME_TRIGGER_ONCE
+          if trigger[:random_minutes_interval].to_i > 0
           trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+          end
       end
 
       user = definition.Principal.UserId
 
       begin
-        @root.RegisterTaskDefinition(
+
+        @task = @root.RegisterTaskDefinition(
           @task.Path,
           definition,
           TASK_CREATE_OR_UPDATE,
@@ -1035,7 +1055,7 @@ module Win32
 
       user = definition.Principal.UserId
 
-      @root.RegisterTaskDefinition(
+      @task = @root.RegisterTaskDefinition(
         @task.Path,
         definition,
         TASK_CREATE_OR_UPDATE,
@@ -1068,7 +1088,7 @@ module Win32
 
       user = definition.Principal.UserId
 
-      @root.RegisterTaskDefinition(
+      @task = @root.RegisterTaskDefinition(
         @task.Path,
         definition,
         TASK_CREATE_OR_UPDATE,
@@ -1149,7 +1169,7 @@ module Win32
       definition.Settings.ExecutionTimeLimit = limit
       user = definition.Principal.UserId
 
-      @root.RegisterTaskDefinition(
+      @task = @root.RegisterTaskDefinition(
         @task.Path,
         definition,
         TASK_CREATE_OR_UPDATE,
