@@ -412,10 +412,28 @@ module Win32
       app
     end
 
-    # TODO: Implement
+    # Sets the name of the application associated with the task.
+    #
     def application_name=(app)
+      raise TypeError unless app.is_a?(String)
       raise Error, 'No currently active task' if @task.nil?
-      raise NoMethodError
+
+      definition = @task.Definition
+      definition.Actions.each do |action|
+        action.Path = app if action.Type == 0
+      end
+      user = definition.Principal.UserId
+
+      @task = @root.RegisterTaskDefinition(
+        @task.Path,
+        definition,
+        TASK_CREATE_OR_UPDATE,
+        user,
+        @password,
+        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
+      )
+
+      app      
     end
 
     # Returns the command line parameters for the task.
