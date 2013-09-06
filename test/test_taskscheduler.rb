@@ -125,21 +125,19 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "application_name= basic functionality" do
-    omit("Not yet implemented")
     assert_respond_to(@ts, :application_name=)
   end
 
   test "application_name= works as expected" do
-    omit("Not yet implemented")
+    setup_task
     assert_nothing_raised{ @ts.application_name = "notepad.exe" }
     assert_equal("notepad.exe", @ts.application_name)
   end
 
   test "application_name= requires a string argument" do
-    omit("Not yet implemented")
     assert_raise(TypeError){ @ts.application_name = 1 }
   end
-
+  
   test "comment method basic functionality" do
     assert_respond_to(@ts, :comment)
   end
