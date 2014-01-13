@@ -137,7 +137,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   test "application_name= requires a string argument" do
     assert_raise(TypeError){ @ts.application_name = 1 }
   end
-  
+
   test "comment method basic functionality" do
     assert_respond_to(@ts, :comment)
   end
@@ -618,7 +618,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_raise(TypeError){ @ts.working_directory = 1 }
   end
 
-  test "expected constants are defined" do
+  test "expected day constants are defined" do
     assert_not_nil(TaskScheduler::MONDAY)
     assert_not_nil(TaskScheduler::TUESDAY)
     assert_not_nil(TaskScheduler::WEDNESDAY)
@@ -626,7 +626,9 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_not_nil(TaskScheduler::FRIDAY)
     assert_not_nil(TaskScheduler::SATURDAY)
     assert_not_nil(TaskScheduler::SUNDAY)
+  end
 
+  test "expected month constants are defined" do
     assert_not_nil(TaskScheduler::JANUARY)
     assert_not_nil(TaskScheduler::FEBRUARY)
     assert_not_nil(TaskScheduler::MARCH)
@@ -639,17 +641,23 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_not_nil(TaskScheduler::OCTOBER)
     assert_not_nil(TaskScheduler::NOVEMBER)
     assert_not_nil(TaskScheduler::DECEMBER)
+  end
 
+  test "expected repeat constants are defined" do
     assert_not_nil(TaskScheduler::ONCE)
     assert_not_nil(TaskScheduler::DAILY)
     assert_not_nil(TaskScheduler::WEEKLY)
     assert_not_nil(TaskScheduler::MONTHLYDATE)
     assert_not_nil(TaskScheduler::MONTHLYDOW)
+  end
 
+  test "expected start constants are defined" do
     assert_not_nil(TaskScheduler::ON_IDLE)
     assert_not_nil(TaskScheduler::AT_SYSTEMSTART)
     assert_not_nil(TaskScheduler::AT_LOGON)
+  end
 
+  test "expected flag constants are defined" do
     assert_not_nil(TaskScheduler::INTERACTIVE)
     assert_not_nil(TaskScheduler::DELETE_WHEN_DONE)
     assert_not_nil(TaskScheduler::DISABLED)
@@ -664,7 +672,9 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_not_nil(TaskScheduler::FLAG_KILL_AT_DURATION_END)
     assert_not_nil(TaskScheduler::FLAG_DISABLED)
     assert_not_nil(TaskScheduler::MAX_RUN_TIMES)
+  end
 
+  test "expected priority constants are defined" do
     assert_not_nil(TaskScheduler::IDLE)
     assert_not_nil(TaskScheduler::NORMAL)
     assert_not_nil(TaskScheduler::HIGH)
