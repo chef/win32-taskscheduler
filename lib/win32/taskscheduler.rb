@@ -2,6 +2,7 @@ require File.join(File.dirname(__FILE__), 'windows', 'helper')
 require 'win32ole'
 require 'socket'
 require 'time'
+require 'structured_warnings'
 
 # The Win32 module serves as a namespace only
 module Win32
@@ -228,7 +229,10 @@ module Win32
     # folder does not exist, but the +force+ option is set to true, then
     # it will be created. Otherwise an error will be raised.
     #
-    def initialize(folder = "\\", force = false)
+    # If +task+ and +trigger+ are present, then a new task is generated
+    # as well. This is effectively the same as .new + #new_work_item.
+    #
+    def initialize(task = nil, trigger = nil, folder = "\\", force = false)
       @folder = folder
       @force  = force
 
@@ -263,6 +267,10 @@ module Win32
         end
       else
         @root = @service.GetFolder(folder)
+      end
+
+      if task && trigger
+        new_work_item(task, trigger)
       end
     end
 
@@ -323,20 +331,13 @@ module Win32
       @task.run(nil)
     end
 
-    # Saves the current task. Tasks must be saved before they can be activated.
-    # The .job file itself is typically stored in the C:\WINDOWS\Tasks folder.
-    #
-    # If +file+ (an absolute path) is specified then the job is saved to that
-    # file instead. A '.job' extension is recommended but not enforced.
-    #
-    # Note that calling TaskScheduler#save also resets the TaskScheduler object
-    # so that there is no currently active task.
-    #--
-    # TODO: Should we just remove this method?
+    # This method no longer has any effect. It is a no-op that remains for
+    # backwards compatibility. It will be removed in 0.4.0.
     #
     def save(file = nil)
+      warn DeprecatedMethodWarning, "this method is no longer necessary"
       raise Error, 'null task' if @task.nil?
-      # do nothing
+      # Do nothing, deprecated.
     end
 
     # Terminate (stop) the current task.
@@ -419,9 +420,11 @@ module Win32
       raise Error, 'No currently active task' if @task.nil?
 
       definition = @task.Definition
+
       definition.Actions.each do |action|
         action.Path = app if action.Type == 0
       end
+
       user = definition.Principal.UserId
 
       @task = @root.RegisterTaskDefinition(
@@ -433,7 +436,7 @@ module Win32
         @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
       )
 
-      app      
+      app
     end
 
     # Returns the command line parameters for the task.
@@ -595,7 +598,7 @@ module Win32
 
       taskDefinition = @service.NewTask(0)
       taskDefinition.RegistrationInfo.Description = ''
-      taskDefinition.RegistrationInfo.Author  = ''
+      taskDefinition.RegistrationInfo.Author = ''
       taskDefinition.Settings.StartWhenAvailable = true
       taskDefinition.Settings.Enabled  = true
       taskDefinition.Settings.Hidden = false
@@ -1287,4 +1290,5 @@ if $0 == __FILE__
   ts.new_task(task, trigger)
   ts.activate(task)
   p ts.account_information
+  ts.save
 end
