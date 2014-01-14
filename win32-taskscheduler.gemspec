@@ -7,19 +7,20 @@ Gem::Specification.new do |spec|
   spec.license    = 'Artistic 2.0'
   spec.email      = 'djberg96@gmail.com'
   spec.homepage   = 'http://www.rubyforge.org/projects/win32utils'
-  spec.platform   = Gem::Platform::RUBY
   spec.summary    = 'A library for the Windows task scheduler'
-  spec.has_rdoc   = true
   spec.test_files = Dir['test/test*']
   spec.files      = Dir['**/*'].reject{ |f| f.include?('git') }
 
   spec.rubyforge_project = 'win32utils'
 
+  spec.add_development_dependency('test-unit')
+  spec.add_development_dependency('rake')
+  spec.add_development_dependency('win32-security')
+
   spec.extra_rdoc_files = [
     'README',
     'CHANGES',
     'MANIFEST',
-    'doc/taskscheduler.txt'
   ]
 
   spec.description = <<-EOF
