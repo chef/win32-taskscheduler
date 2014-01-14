@@ -3,9 +3,7 @@
 * README
 * Rakefile
 * win32-taskscheduler.gemspec
-* ext/extconf.rb
-* ext/win32/taskscheduler.c
-* ext/win32/taskscheduler.h
-* doc/taskscheduler.txt
+* lib/win32/taskscheduler.rb
+* lib/win32/windows/helper.rb
 * examples/taskscheduler_test.rb
-* test/tc_taskscheduler.rb
+* test/test_taskscheduler.rb
