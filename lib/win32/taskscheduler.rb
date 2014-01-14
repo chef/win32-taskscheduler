@@ -351,6 +351,7 @@ module Win32
     alias stop terminate
 
     # Set the host on which the various TaskScheduler methods will execute.
+    # This method may require administrative privileges.
     #
     def machine=(host)
       raise TypeError unless host.is_a?(String)
@@ -365,8 +366,26 @@ module Win32
       host
     end
 
+    # Similar to the TaskScheduler#machine= method, this method also allows
+    # you to pass a user, domain and password as needed. This method may
+    # require administrative privileges.
+    #
+    def set_machine(host, user = nil, domain = nil, password = nil)
+      raise TypeError unless host.is_a?(String)
+
+      begin
+        @service.Connect(host, user, domain, password)
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('Connect', err)
+      end
+
+      @host = host
+      host
+    end
+
     alias host= machine=
     alias machine host
+    alias set_host set_machine
 
     # Sets the +user+ and +password+ for the given task. If the user and
     # password are set properly then true is returned.
@@ -1275,6 +1294,7 @@ module Win32
 end
 
 if $0 == __FILE__
+  require 'socket'
   include Win32
 
   task = 'foo'
@@ -1296,6 +1316,8 @@ if $0 == __FILE__
 
   ts.new_task(task, trigger)
   ts.activate(task)
-  p ts.account_information
-  ts.save
+  #p ts.account_information
+  #ts.save
+  ts.machine = Socket.gethostname
+  #ts.set_machine(Socket.gethostname, 'djberge', 'hannibal', '***REMOVED***')
 end
