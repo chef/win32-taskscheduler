@@ -1,6 +1,6 @@
 = Description
-The win32-taskscheduler library is a Ruby interface to the MS Windows Task
-Scheduler. It is analogous to the Unix cron daemon.
+  The win32-taskscheduler library is a Ruby interface to the MS Windows Task
+  Scheduler. It is analogous to the Unix cron daemon.
 
 = Synopsis
    require 'win32/taskscheduler'
@@ -28,41 +28,33 @@ Scheduler. It is analogous to the Unix cron daemon.
 
    ts.new_work_item('foo', trigger)
    ts.application_name = 'notepad.exe'
-   ts.save
 
 = Prerequisites
-Ruby 1.8.2 or later.
-Building from source requires VC++ 6.0 or later.
-Windows XP or earlier. Vista and later not currently supported.
+  Ruby 1.9.1 or later.
 
 = Installation
-rake install (non-gem) OR rake install_gem (gem)
-
-For most of you 'gem install win32-taskscheduler' will work.
-
-= Documentation
-If you installed this library as a gem then the documentation was built for
-you and can be viewed if your gem server is running.
-
-Otherwise, you can look at the doc/taskscheduler.txt file which should have
-everything you need.
+  gem install win32-taskscheduler
 
 = Acknowledgements
-This library was modeled to some degree on the Win32::TaskScheduler Perl
-module by Umberto Nicoletti. However, there are some differences. Please see
-the documentation for details.
+  This library was originally modeled to some degree on the Win32::TaskScheduler
+  Perl module by Umberto Nicoletti. However, there are some differences. Please
+  see the documentation for details.
 
-= On using OLE + WMI + Win32_ScheduledJob
-I will probably include a pure Ruby version of this library at some point,
-and you can find what I have so far in CVS under lib/win32. Note, however,
-that there are some significant differences in behavior between the C
-library and WMI, along with limitations regarding modification to existing
-tasks.
+== Known Issues
+  None known.
 
-You can find a list of differences here: http://tinyurl.com/2l3yau
+  Please file any bug reports on the project page at
+  http://github.com/djberg96/win32-taskscheduler or
+  http://www.rubyforge.org/projects/win32utils.
 
-= Developer's Notes
-The CoInitialize() function is used internally instead of CoInitializeEx()
-function intentionally. The CoInitialize() function merely calls the
-CoInitializeEx() function with NULL and COINIT_APARTMENTTHREADED arguments,
-which is what we would do in any case.
+== License
+  Artistic 2.0
+
+== Warranty
+  This package is provided "as is" and without any express or
+  implied warranties, including, without limitation, the implied
+  warranties of merchantability and fitness for a particular purpose.
+
+= Authors
+  * Park Heesob
+  * Daniel Berger
