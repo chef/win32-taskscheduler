@@ -5,6 +5,7 @@
 # via the 'rake test' task.
 ##########################################################################
 require 'win32/taskscheduler'
+require 'win32/security'
 require 'socket'
 require 'test-unit'
 require 'etc'
@@ -14,6 +15,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   def self.startup
     @@host = Socket.gethostname
     @@user = Etc.getlogin
+    @@elevated = Win32::Security.elevated_security?
   end
 
   def setup
@@ -266,6 +268,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "machine= works as expected" do
+    omit_unless(@@elevated)
     setup_task
     assert_nothing_raised{ @ts.machine = @@host }
     assert_equal(@@host, @ts.machine)
@@ -273,6 +276,14 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
   test "host= is an alias for machine=" do
     assert_alias_method(@ts, :machine=, :host=)
+  end
+
+  test "set_machine basic functionality" do
+    assert_respond_to(@ts, :set_machine)
+  end
+
+  test "set_host is an alias for set_machine" do
+    assert_alias_method(@ts, :set_machine, :set_host)
   end
 
   test "max_run_time basic functionality" do
@@ -427,29 +438,9 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_raise(NoMethodError){ @ts.run = true }
   end
 
-=begin
   test "save basic functionality" do
     assert_respond_to(@ts, :save)
   end
-
-  test "save works as expected" do
-    assert_nothing_raised{ @ts.save }
-  end
-
-  test "save accepts a custom job file" do
-    assert_nothing_raised{ @ts.save(@job_file) }
-    assert_true(File.exists?(@job_file))
-  end
-
-  test "save requires a string argument if present" do
-    assert_raise(TypeError){ @ts.save(true) }
-    assert_raise(TypeError){ @ts.save(1) }
-  end
-
-  test "an error is raised if save is called more than once" do
-    assert_raise(TaskScheduler::Error){ @ts.save; @ts.save }
-  end
-=end
 
   test "status basic functionality" do
     setup_task
@@ -693,5 +684,6 @@ class TC_TaskScheduler < Test::Unit::TestCase
   def self.shutdown
     @@host = nil
     @@user = nil
+    @@elevated = nil
   end
 end
