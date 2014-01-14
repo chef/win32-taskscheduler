@@ -852,7 +852,29 @@ module Win32
       trigger
     end
 
-    # Sets the trigger for the currently active task.
+    # Sets the trigger for the currently active task. The +trigger+ is a hash
+    # with the following possible options:
+    #
+    # * days
+    # * days_interval
+    # * days_of_week
+    # * end_day
+    # * end_month
+    # * end_year
+    # * flags
+    # * minutes_duration
+    # * minutes_interval
+    # * months
+    # * random_minutes_interval
+    # * start_day
+    # * start_hour
+    # * start_minute
+    # * start_month
+    # * start_year
+    # * trigger_type
+    # * type
+    # * weeks
+    # * weeks_interval
     #
     def trigger=(trigger)
       raise TypeError unless trigger.is_a?(Hash)
