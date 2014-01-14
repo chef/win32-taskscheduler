@@ -622,6 +622,8 @@ module Win32
       raise TypeError unless task.is_a?(String)
       raise TypeError unless trigger.is_a?(Hash)
 
+      validate_trigger(trigger)
+
       taskDefinition = @service.NewTask(0)
       taskDefinition.RegistrationInfo.Description = ''
       taskDefinition.RegistrationInfo.Author = ''
@@ -671,7 +673,7 @@ module Win32
       end
 
       if trigger[:minutes_interval].to_i > 0
-        repetitionPattern.Interval  = "PT#{trigger[:minutes_interval]||0}M"
+        repetitionPattern.Interval = "PT#{trigger[:minutes_interval]||0}M"
       end
 
       tmp = trigger[:type]
@@ -679,26 +681,26 @@ module Win32
 
       case trigger[:trigger_type]
         when TASK_TIME_TRIGGER_DAILY
-          trig.DaysInterval =tmp[:days_interval] if tmp && tmp[:days_interval]
+          trig.DaysInterval = tmp[:days_interval] if tmp && tmp[:days_interval]
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]}M"
           end
         when TASK_TIME_TRIGGER_WEEKLY
-          trig.DaysOfWeek  = tmp[:days_of_week] if tmp && tmp[:days_of_week]
-          trig.WeeksInterval  = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
+          trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+          trig.WeeksInterval = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
         when TASK_TIME_TRIGGER_MONTHLYDATE
-          trig.MonthsOfYear  = tmp[:months] if tmp && tmp[:months]
-          trig.DaysOfMonth  = tmp[:days] if tmp && tmp[:days]
+          trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
+          trig.DaysOfMonth = tmp[:days] if tmp && tmp[:days]
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
         when TASK_TIME_TRIGGER_MONTHLYDOW
-          trig.MonthsOfYear  = tmp[:months] if tmp && tmp[:months]
-          trig.DaysOfWeek  = tmp[:days_of_week] if tmp && tmp[:days_of_week]
-          trig.WeeksOfMonth  = tmp[:weeks] if tmp && tmp[:weeks]
+          trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
+          trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+          trig.WeeksOfMonth = tmp[:weeks] if tmp && tmp[:weeks]
           if trigger[:random_minutes_interval].to_i>0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
@@ -880,6 +882,8 @@ module Win32
       raise TypeError unless trigger.is_a?(Hash)
       raise Error, 'No currently active task' if @task.nil?
 
+      validate_trigger(trigger)
+
       definition = @task.Definition
       definition.Triggers.Clear()
 
@@ -928,26 +932,26 @@ module Win32
 
       case trigger[:trigger_type]
         when TASK_TIME_TRIGGER_DAILY
-          trig.DaysInterval =tmp[:days_interval] if tmp && tmp[:days_interval]
+          trig.DaysInterval = tmp[:days_interval] if tmp && tmp[:days_interval]
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]}M"
           end
         when TASK_TIME_TRIGGER_WEEKLY
-          trig.DaysOfWeek  = tmp[:days_of_week] if tmp && tmp[:days_of_week]
-          trig.WeeksInterval  = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
+          trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+          trig.WeeksInterval = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
         when TASK_TIME_TRIGGER_MONTHLYDATE
-          trig.MonthsOfYear  = tmp[:months] if tmp && tmp[:months]
-          trig.DaysOfMonth  = tmp[:days] if tmp && tmp[:days]
+          trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
+          trig.DaysOfMonth = tmp[:days] if tmp && tmp[:days]
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
         when TASK_TIME_TRIGGER_MONTHLYDOW
-          trig.MonthsOfYear  = tmp[:months] if tmp && tmp[:months]
-          trig.DaysOfWeek  = tmp[:days_of_week] if tmp && tmp[:days_of_week]
-          trig.WeeksOfMonth  = tmp[:weeks] if tmp && tmp[:weeks]
+          trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
+          trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+          trig.WeeksOfMonth = tmp[:weeks] if tmp && tmp[:weeks]
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
@@ -1312,6 +1316,14 @@ module Win32
     FLAG_DISABLED = TASK_TRIGGER_FLAG_DISABLED
 
     MAX_RUN_TIMES = TASK_MAX_RUN_TIMES
+
+    private
+
+    def validate_trigger(hash)
+      [:start_year, :start_month, :start_day].each{ |key|
+        raise ArgumentError, "#{key} must be set" unless hash[key]
+      }
+    end
   end
 end
 
@@ -1340,6 +1352,5 @@ if $0 == __FILE__
   ts.activate(task)
   #p ts.account_information
   #ts.save
-  ts.machine = Socket.gethostname
-  #ts.set_machine(Socket.gethostname, 'djberge', 'hannibal', '***REMOVED***')
+  #ts.machine = Socket.gethostname
 end
