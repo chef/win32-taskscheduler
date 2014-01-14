@@ -1,3 +1,35 @@
+== 0.3.0 - ???
+* Rewritten to use Win32OLE instead of using wrapping the C API. Benefits
+  include working on Windows Vista or later, and working with JRuby.
+* Modified the constructor to accept 3rd and 4th arguments. These indicate
+  which folder to use, and whether or not to create it if it doesn't exist.
+* The TaskScheduler#save method is now no longer necessary. It is retained
+  for backwards compatibility, but will raise a deprecation warning. In this
+  version simply calling TaskScheduler#activate will implement the task.
+* Now requires structured_warnings gem.
+
+== 0.2.2 - 29-Feb-2012
+* Moved some include statements inside the TaskScheduler class to avoid
+  polluting Object. Thanks go to Josh Cooper for the spot and patch.
+* Minor formatting tweaks to silence 1.9 warnings.
+
+== 0.2.1 - 8-Oct-2011
+* Fixed a bug that would not allow task to run as SYSTEM. Thanks go to
+  Josh cooper for the spot and patch.
+* Fixed a bug in new_work_item that would cause it to crash if you tried
+  to create a work item that already existed. An error is now raised instead.
+  Thanks go to Pete Higgins for the spot.
+* The set_trigger and trigger= methods now internally transform and validate
+  the trigger hash in the same manner as new_work_item. Thanks again go to
+  Pete Higgins.
+* Cleaned up the repo. The C source files have been removed from the main
+  repository (and this gem). They are in a separate branch on github for
+  anyone who misses them.
+* Refactored the Rakefile, removing tasks related to the old C source files,
+  and added tasks for cleaning, building and installing a gem.
+* Updated the README file, eliminating references to anything that was only
+  related to the older C version.
+
 == 0.2.0 - 19-Jun-2009
 * Rewritten in pure Ruby!
 * The TaskScheduler::ONCE constant is now a valid trigger type. Thanks go to
