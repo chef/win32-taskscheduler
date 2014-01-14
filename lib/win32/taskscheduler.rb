@@ -227,7 +227,8 @@ module Win32
 
     # Returns a new TaskScheduler object, attached to +folder+. If that
     # folder does not exist, but the +force+ option is set to true, then
-    # it will be created. Otherwise an error will be raised.
+    # it will be created. Otherwise an error will be raised. The default
+    # is to use the root folder.
     #
     # If +task+ and +trigger+ are present, then a new task is generated
     # as well. This is effectively the same as .new + #new_work_item.
@@ -353,7 +354,13 @@ module Win32
     #
     def machine=(host)
       raise TypeError unless host.is_a?(String)
-      @service.Connect(host)
+
+      begin
+        @service.Connect(host)
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('Connect', err)
+      end
+
       @host = host
       host
     end
