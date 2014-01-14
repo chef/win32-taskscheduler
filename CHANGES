@@ -9,6 +9,8 @@
 * Now requires structured_warnings gem.
 * Removed the doc directory and separate documentation file. Everything is
   inlined now. There's still an example under the "examples" directory, too.
+* Added test-unit, rake, and win32-security as development dependencies.
+  These are needed for testing only.
 
 == 0.2.2 - 29-Feb-2012
 * Moved some include statements inside the TaskScheduler class to avoid
