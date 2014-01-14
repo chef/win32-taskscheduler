@@ -7,6 +7,8 @@
   for backwards compatibility, but will raise a deprecation warning. In this
   version simply calling TaskScheduler#activate will implement the task.
 * Now requires structured_warnings gem.
+* Removed the doc directory and separate documentation file. Everything is
+  inlined now. There's still an example under the "examples" directory, too.
 
 == 0.2.2 - 29-Feb-2012
 * Moved some include statements inside the TaskScheduler class to avoid
