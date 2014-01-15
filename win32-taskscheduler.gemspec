@@ -13,6 +13,8 @@ Gem::Specification.new do |spec|
 
   spec.rubyforge_project = 'win32utils'
 
+  spec.add_dependency('structured_warnings')
+
   spec.add_development_dependency('test-unit')
   spec.add_development_dependency('rake')
   spec.add_development_dependency('win32-security')
