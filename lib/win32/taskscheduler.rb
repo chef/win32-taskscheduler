@@ -632,6 +632,8 @@ module Win32
       taskDefinition.Settings.Hidden = false
 
       case trigger[:trigger_type]
+        when TASK_TIME_TRIGGER_ONCE
+          type = 1
         when TASK_TIME_TRIGGER_DAILY
           type = 2
         when TASK_TIME_TRIGGER_WEEKLY
@@ -640,8 +642,12 @@ module Win32
           type = 4
         when TASK_TIME_TRIGGER_MONTHLYDOW
           type = 5
-        when TASK_TIME_TRIGGER_ONCE
-          type = 1
+        when TASK_EVENT_TRIGGER_ON_IDLE
+          type = 6
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+          type = 8
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          type = 9
         else
           raise ArgumentError, 'Unknown trigger type'
       end
@@ -888,6 +894,8 @@ module Win32
       definition.Triggers.Clear()
 
       case trigger[:trigger_type]
+        when TASK_TIME_TRIGGER_ONCE
+          type = 1
         when TASK_TIME_TRIGGER_DAILY
           type = 2
         when TASK_TIME_TRIGGER_WEEKLY
@@ -896,8 +904,12 @@ module Win32
           type = 4
         when TASK_TIME_TRIGGER_MONTHLYDOW
           type = 5
-        when TASK_TIME_TRIGGER_ONCE
-          type = 1
+        when TASK_EVENT_TRIGGER_ON_IDLE
+          type = 6
+        when TASK_EVENT_TRIGGER_AT_SYSTEM_START
+          type = 8
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          type = 9
         else
           raise Error, 'Unknown trigger type'
       end
@@ -1340,7 +1352,7 @@ if $0 == __FILE__
     :start_day    => 25,
     :start_hour   => 23,
     :start_minute => 5,
-    :trigger_type => TaskScheduler::MONTHLYDOW,
+    :trigger_type => TaskScheduler::AT_SYSTEMSTART, # Need admin privs
     :type => {
       :weeks        => TaskScheduler::FIRST_WEEK | TaskScheduler::LAST_WEEK,
       :days_of_week => TaskScheduler::MONDAY | TaskScheduler::FRIDAY,
