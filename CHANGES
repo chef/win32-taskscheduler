@@ -1,4 +1,4 @@
-== 0.3.0 - ???
+== 0.3.0 - 15-Jan-2014
 * Rewritten to use Win32OLE instead of using wrapping the C API. Benefits
   include working on Windows Vista or later, and working with JRuby.
 * Modified the constructor to accept 3rd and 4th arguments. These indicate
@@ -7,7 +7,7 @@
   for backwards compatibility, but will raise a deprecation warning. In this
   version simply calling TaskScheduler#activate will implement the task.
 * Added support for the AT_SYSTEMSTART, AT_LOGON and ON_IDLE trigger types.
-* Now requires structured_warnings gem.
+* Now requires the structured_warnings gem.
 * Removed the doc directory and separate documentation file. Everything is
   inlined now. There's still an example under the "examples" directory, too.
 * Added test-unit, rake, and win32-security as development dependencies.
