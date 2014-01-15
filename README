@@ -31,7 +31,7 @@
 
   ts.new_work_item('my_notepad', trigger)
   ts.application_name = 'notepad.exe'
-  ts.save
+  ts.activate('my_notepad')
 
 = Documentation
   If you installed this library as a gem then the documentation was built for
