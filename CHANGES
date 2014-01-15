@@ -6,6 +6,7 @@
 * The TaskScheduler#save method is now no longer necessary. It is retained
   for backwards compatibility, but will raise a deprecation warning. In this
   version simply calling TaskScheduler#activate will implement the task.
+* Added support for the AT_SYSTEMSTART, AT_LOGON and ON_IDLE trigger types.
 * Now requires structured_warnings gem.
 * Removed the doc directory and separate documentation file. Everything is
   inlined now. There's still an example under the "examples" directory, too.
