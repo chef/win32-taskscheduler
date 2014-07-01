@@ -7,7 +7,7 @@ module Windows
     ffi_lib :kernel32
 
     attach_function :FormatMessage, :FormatMessageA,
-    [:ulong, :pointer, :ulong, :ulong, :pointer, :ulong, :pointer], :ulong
+    [:uint32, :pointer, :uint32, :uint32, :pointer, :uint32, :pointer], :uint32
 
     def win_error(function, err=FFI.errno)
       flags = 0x00001000 | 0x00000200
