@@ -27,7 +27,7 @@ module Windows
               FORMAT_MESSAGE_IGNORE_INSERTS
       FFI::MemoryPointer.new(:char, 1024) do |buf|
 
-        FormatMessage(flags, nil, err, dwLanguageId, buf, 1024, nil)
+        FormatMessage(flags, FFI::Pointer::NULL, err, dwLanguageId, buf, 1024, FFI::Pointer::NULL)
 
         error_msg = function + ': ' + buf.read_string.strip
       end
