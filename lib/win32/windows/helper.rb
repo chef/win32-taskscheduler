@@ -10,12 +10,16 @@ module Windows
     [:uint32, :pointer, :uint32, :uint32, :pointer, :uint32, :pointer], :uint32
 
     def win_error(function, err=FFI.errno)
+      error_msg = ''
       flags = 0x00001000 | 0x00000200
-      buf = FFI::MemoryPointer.new(:char, 1024)
+      FFI::MemoryPointer.new(:char, 1024) do |buf|
 
-      FormatMessage(flags, nil, err , 0x0409, buf, 1024, nil)
+        FormatMessage(flags, nil, err , 0x0409, buf, 1024, nil)
 
-      function + ': ' + buf.read_string.strip
+        error_msg = function + ': ' + buf.read_string.strip
+      end
+
+      error_msg
     end
 
     def ole_error(function, err)
