@@ -11,6 +11,7 @@ module Windows
 
     FORMAT_MESSAGE_IGNORE_INSERTS    = 0x00000200
     FORMAT_MESSAGE_FROM_SYSTEM       = 0x00001000
+    FORMAT_MESSAGE_MAX_WIDTH_MASK    = 0x000000FF
 
     def win_error(function, err=FFI.errno)
       error_msg = ''
@@ -24,12 +25,13 @@ module Windows
       dwLanguageId = 0
 
       flags = FORMAT_MESSAGE_FROM_SYSTEM |
-              FORMAT_MESSAGE_IGNORE_INSERTS
+              FORMAT_MESSAGE_IGNORE_INSERTS |
+              FORMAT_MESSAGE_MAX_WIDTH_MASK
       FFI::MemoryPointer.new(:char, 1024) do |buf|
 
-        FormatMessage(flags, FFI::Pointer::NULL, err, dwLanguageId, buf, 1024, FFI::Pointer::NULL)
+        msg_len = FormatMessage(flags, FFI::Pointer::NULL, err, dwLanguageId, buf, 1024, FFI::Pointer::NULL)
 
-        error_msg = function + ': ' + buf.read_string.strip
+        error_msg = function + ': ' + buf.read_string(msg_len)
       end
 
       error_msg
