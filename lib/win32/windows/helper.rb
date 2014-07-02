@@ -45,7 +45,7 @@ module Windows
         error = match.captures.first.hex
         win_error(function, error)
       else
-        msg
+        "#{function}: #{err.to_s}"
       end
     end
   end
