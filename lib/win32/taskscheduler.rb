@@ -614,6 +614,42 @@ module Win32
       priority
     end
 
+    # Returns the task's flags as a numeric.
+    #
+    def flags
+      raise Error, 'No currently active task' if @task.nil?
+
+      @task.Definition.Settings.Flags
+    end
+
+    # Sets the flags of the task. The +flags+ should be a numeric
+    # TASK_FLAG constant value.
+    #
+    def flags=(flags)
+      raise TypeError unless flags.is_a?(Numeric)
+      raise Error, 'No currently active task' if @task.nil?
+
+      definition = @task.Definition
+
+      begin
+        definition.Settings.Flags = flags
+        user = definition.Principal.UserId
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('Flags', err)
+      end
+
+      @task = @root.RegisterTaskDefinition(
+        @task.Path,
+        definition,
+        TASK_CREATE_OR_UPDATE,
+        user,
+        @password,
+        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
+      )
+
+      flags
+    end
+
     # Creates a new work item (scheduled job) with the given +trigger+. The
     # trigger variable is a hash of options that define when the scheduled
     # job should run.
