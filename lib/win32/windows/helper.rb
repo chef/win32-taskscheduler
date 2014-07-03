@@ -6,6 +6,7 @@ module Windows
 
     FORMAT_MESSAGE_IGNORE_INSERTS = 0x00000200
     FORMAT_MESSAGE_FROM_SYSTEM    = 0x00001000
+    FORMAT_MESSAGE_MAX_WIDTH_MASK = 0x000000FF
 
     ffi_lib :kernel32
 
@@ -13,12 +14,15 @@ module Windows
     [:ulong, :pointer, :ulong, :ulong, :pointer, :ulong, :pointer], :ulong
 
     def win_error(function, err=FFI.errno)
-      flags = FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM
       buf = FFI::MemoryPointer.new(:char, 1024)
 
-      FormatMessage(flags, nil, err , 0x0409, buf, 1024, nil)
+      flags = FORMAT_MESSAGE_IGNORE_INSERTS |
+              FORMAT_MESSAGE_FROM_SYSTEM |
+              FORMAT_MESSAGE_MAX_WIDTH_MASK
 
-      function + ': ' + buf.read_string.strip
+      len = FormatMessage(flags, nil, err , 0x0409, buf, buf.size, nil)
+
+      function + ': ' + buf.read_string(len)
     end
 
     def ole_error(function, err)
