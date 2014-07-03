@@ -1,5 +1,7 @@
 == 0.3.1 - ???
 * Added FFI as a dependency. Thanks go to Maxime Lapointe for the spot.
+* Some updates to the win_error helper method. Thanks go to Ethan J. Brown
+  for the suggestions.
 
 == 0.3.0 - 15-Jan-2014
 * Rewritten to use Win32OLE instead of using wrapping the C API. Benefits
