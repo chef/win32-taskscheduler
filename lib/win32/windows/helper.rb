@@ -20,9 +20,11 @@ module Windows
               FORMAT_MESSAGE_FROM_SYSTEM |
               FORMAT_MESSAGE_MAX_WIDTH_MASK
 
+      # 0x0409 == MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)
+      # We use English for errors because Ruby uses English for errors.
       len = FormatMessage(flags, nil, err , 0x0409, buf, buf.size, nil)
 
-      function + ': ' + buf.read_string(len)
+      function + ': ' + buf.read_string(len).strip
     end
 
     def ole_error(function, err)
