@@ -17,9 +17,9 @@ namespace 'gem' do
   end
 
   desc 'Install the win32-taskscheduler library as a gem'
-  task :install => [:build] do
+  task :install => [:create] do
     file = Dir['win32-taskscheduler*.gem'].first
-    sh "gem install #{file}"
+    sh "gem install -l #{file}"
   end
 end
 
