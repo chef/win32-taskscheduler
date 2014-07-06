@@ -1,4 +1,4 @@
-== 0.3.1 - ???
+== 0.3.1 - 6-Jul-2014
 * Added FFI as a dependency. Thanks go to Maxime Lapointe for the spot.
 * Some updates to the win_error helper method. Thanks go to Ethan J. Brown
   for the suggestions.
