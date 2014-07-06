@@ -41,7 +41,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "version constant is set to expected value" do
-    assert_equal('0.3.0', TaskScheduler::VERSION)
+    assert_equal('0.3.1', TaskScheduler::VERSION)
   end
 
   test "account_information method basic functionality" do

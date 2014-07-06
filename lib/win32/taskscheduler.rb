@@ -12,7 +12,7 @@ module Win32
     include Windows::Helper
 
     # The version of the win32-taskscheduler library
-    VERSION = '0.3.0'
+    VERSION = '0.3.1'
 
     # The Error class is typically raised if any TaskScheduler methods fail.
     class Error < StandardError; end
