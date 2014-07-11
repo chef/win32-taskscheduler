@@ -1,3 +1,7 @@
+== 0.3.2 - ???
+* Use the block form for FFI::MemoryPointer in the error message helper
+  function. Thanks go to Ethan Brown for the suggestion.
+
 == 0.3.1 - 6-Jul-2014
 * Added FFI as a dependency. Thanks go to Maxime Lapointe for the spot.
 * Some updates to the win_error helper method. Thanks go to Ethan J. Brown
