@@ -14,17 +14,20 @@ module Windows
     [:ulong, :pointer, :ulong, :ulong, :pointer, :ulong, :pointer], :ulong
 
     def win_error(function, err=FFI.errno)
-      buf = FFI::MemoryPointer.new(:char, 1024)
-
+      err_msg = ''
       flags = FORMAT_MESSAGE_IGNORE_INSERTS |
-              FORMAT_MESSAGE_FROM_SYSTEM |
-              FORMAT_MESSAGE_MAX_WIDTH_MASK
+        FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_MAX_WIDTH_MASK
 
       # 0x0409 == MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)
       # We use English for errors because Ruby uses English for errors.
-      len = FormatMessage(flags, nil, err , 0x0409, buf, buf.size, nil)
 
-      function + ': ' + buf.read_string(len).strip
+      FFI::MemoryPointer.new(:char, 1024) do |buf|
+        len = FormatMessage(flags, nil, err , 0x0409, buf, buf.size, nil)
+        err_msg = function + ': ' + buf.read_string(len).strip
+      end
+
+      err_msg
     end
 
     def ole_error(function, err)
