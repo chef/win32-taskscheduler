@@ -9,7 +9,7 @@ module Win32
 
   # The TaskScheduler class encapsulates a Windows scheduled task
   class TaskScheduler
-    include Windows::Helper
+    include Windows::TaskSchedulerHelper
 
     # The version of the win32-taskscheduler library
     VERSION = '0.3.1'
