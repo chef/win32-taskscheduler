@@ -7,13 +7,9 @@ CLEAN.include("**/*.gem", "**/*.rbc")
 namespace 'gem' do
   desc 'Build the win32-taskscheduler gem'
   task :create => [:clean] do
+    require 'rubygems/package'
     spec = eval(IO.read('win32-taskscheduler.gemspec'))
-    if Gem::VERSION < "2.0"
-      Gem::Builder.new(spec).build
-    else
-      require 'rubygems/package'
-      Gem::Package.build(spec)
-    end
+    Gem::Package.build(spec, true)
   end
 
   desc 'Install the win32-taskscheduler library as a gem'
