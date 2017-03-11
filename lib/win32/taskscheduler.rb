@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'windows', 'helper')
+require_relative 'windows/helper'
 require 'win32ole'
 require 'socket'
 require 'time'
