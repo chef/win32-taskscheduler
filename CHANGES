@@ -1,6 +1,8 @@
 == 0.3.2 - ???
 * Use the block form for FFI::MemoryPointer in the error message helper
   function. Thanks go to Ethan Brown for the suggestion.
+* Rakefile now assumes Rubygems 2.0 or later for tasks.
+* Gemspec cleanup, updated home page, removed old rubyforge_project reference.
 
 == 0.3.1 - 6-Jul-2014
 * Added FFI as a dependency. Thanks go to Maxime Lapointe for the spot.
