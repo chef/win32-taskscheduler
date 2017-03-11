@@ -1,7 +1,7 @@
 require 'ffi'
 
 module Windows
-  module Helper
+  module TaskSchedulerHelper
     extend FFI::Library
 
     FORMAT_MESSAGE_IGNORE_INSERTS = 0x00000200
