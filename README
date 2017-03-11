@@ -52,12 +52,12 @@
   In some cases JRuby appears to raise a native exception rather than a
   Ruby exception on failure. This should be mostly harmless.
 
-  Please submit any bug reports to the project page at
-  http://github.com/djberg96/win32-taskscheduler or
-  http://www.rubyforge.org/projects/win32utils.
+  Please submit any bug reports to the project page at:
+
+  http://github.com/djberg96/win32-taskscheduler
 
 = Copyright
-  (C) 2003-2014 Daniel J. Berger
+  (C) 2003-2017 Daniel J. Berger
   All Rights Reserved
 
 = License
