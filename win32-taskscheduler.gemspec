@@ -2,16 +2,14 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name       = 'win32-taskscheduler'
-  spec.version    = '0.3.1'
+  spec.version    = '0.3.2'
   spec.authors    = ['Park Heesob', 'Daniel J. Berger']
   spec.license    = 'Artistic 2.0'
   spec.email      = 'djberg96@gmail.com'
-  spec.homepage   = 'http://www.rubyforge.org/projects/win32utils'
+  spec.homepage   = 'http://github.com/djberg96/win32-taskscheduler'
   spec.summary    = 'A library for the Windows task scheduler'
   spec.test_files = Dir['test/test*']
   spec.files      = Dir['**/*'].reject{ |f| f.include?('git') }
-
-  spec.rubyforge_project = 'win32utils'
 
   spec.add_dependency('ffi')
   spec.add_dependency('structured_warnings')
