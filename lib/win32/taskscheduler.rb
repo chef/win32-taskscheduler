@@ -1338,31 +1338,3 @@ module Win32
     end
   end
 end
-
-if $0 == __FILE__
-  require 'socket'
-  include Win32
-
-  task = 'foo'
-  ts = TaskScheduler.new
-
-  trigger = {
-    :start_year   => 2015,
-    :start_month  => 4,
-    :start_day    => 25,
-    :start_hour   => 23,
-    :start_minute => 5,
-    :trigger_type => TaskScheduler::AT_SYSTEMSTART, # Need admin privs
-    :type => {
-      :weeks        => TaskScheduler::FIRST_WEEK | TaskScheduler::LAST_WEEK,
-      :days_of_week => TaskScheduler::MONDAY | TaskScheduler::FRIDAY,
-      :months       => TaskScheduler::APRIL | TaskScheduler::MAY
-    }
-  }
-
-  ts.new_task(task, trigger)
-  ts.activate(task)
-  #p ts.account_information
-  #ts.save
-  #ts.machine = Socket.gethostname
-end
