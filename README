@@ -49,6 +49,10 @@
   warranties of merchantability and fitness for a particular purpose.
    
 = Known Issues
+  Some versions of Ruby have been known to segfault when attempting to create
+  a task. If this happens you will need to upgrade your version of Ruby. Or,
+  at least, your version of win32ole.
+  
   In some cases JRuby appears to raise a native exception rather than a
   Ruby exception on failure. This should be mostly harmless.
 
