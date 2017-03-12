@@ -327,8 +327,7 @@ module Win32
     # Execute the current task.
     #
     def run
-      raise Error, 'null task' if @task.nil?
-
+      check_for_active_task
       @task.run(nil)
     end
 
@@ -337,14 +336,14 @@ module Win32
     #
     def save(file = nil)
       warn DeprecatedMethodWarning, "this method is no longer necessary"
-      raise Error, 'null task' if @task.nil?
+      check_for_active_task
       # Do nothing, deprecated.
     end
 
     # Terminate (stop) the current task.
     #
     def terminate
-      raise Error, 'null task' if @task.nil?
+      check_for_active_task
       @task.stop(nil)
     end
 
@@ -391,10 +390,9 @@ module Win32
     # password are set properly then true is returned.
     #
     def set_account_information(user, password)
-      raise Error, 'No currently active task' if @task.nil?
-
       raise TypeError unless user.is_a?(String)
       raise TypeError unless password.is_a?(String)
+      check_for_active_task
 
       @password = password
 
@@ -425,7 +423,7 @@ module Win32
     # no application is associated with the task then nil is returned.
     #
     def application_name
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       app = nil
 
@@ -443,7 +441,7 @@ module Win32
     #
     def application_name=(app)
       raise TypeError unless app.is_a?(String)
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       definition = @task.Definition
 
@@ -468,7 +466,7 @@ module Win32
     # Returns the command line parameters for the task.
     #
     def parameters
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       param = nil
 
@@ -487,7 +485,7 @@ module Win32
     #
     def parameters=(param)
       raise TypeError unless param.is_a?(String)
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       definition = @task.Definition
       definition.Actions.each do |action|
@@ -510,7 +508,7 @@ module Win32
     # Returns the working directory for the task.
     #
     def working_directory
-      raise Error,"No currently active task" if @task.nil?
+      check_for_active_task
 
       dir = nil
 
@@ -526,8 +524,8 @@ module Win32
     # TODO: Why do I have to reactivate the task to see the change?
     #
     def working_directory=(dir)
-      raise Error, 'No currently active task' if @task.nil?
       raise TypeError unless dir.is_a?(String)
+      check_for_active_task
 
       definition = @task.Definition
 
@@ -554,7 +552,7 @@ module Win32
     # and 'unknown'.
     #
     def priority
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       case @task.Definition.Settings.Priority
         when 0
@@ -591,7 +589,7 @@ module Win32
     #
     def priority=(priority)
       raise TypeError unless priority.is_a?(Numeric)
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       definition = @task.Definition
 
@@ -752,7 +750,7 @@ module Win32
     #
     def trigger_string(index)
       raise TypeError unless index.is_a?(Numeric)
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
       index += 1  # first item index is 1
 
       begin
@@ -770,7 +768,7 @@ module Win32
     #
     def delete_trigger(index)
       raise TypeError unless index.is_a?(Numeric)
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
       index += 1  # first item index is 1
 
       definition = @task.Definition
@@ -794,7 +792,7 @@ module Win32
     #
     def trigger(index)
       raise TypeError unless index.is_a?(Numeric)
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
       index += 1  # first item index is 1
 
       begin
@@ -886,7 +884,7 @@ module Win32
     #
     def trigger=(trigger)
       raise TypeError unless trigger.is_a?(Hash)
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       validate_trigger(trigger)
 
@@ -992,7 +990,7 @@ module Win32
     def add_trigger(index, trigger)
       raise TypeError unless index.is_a?(Numeric)
       raise TypeError unless trigger.is_a?(Hash)
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       definition = @task.Definition
       case trigger[:trigger_type]
@@ -1097,7 +1095,7 @@ module Win32
     # 'ready', 'running', 'not scheduled' or 'unknown'.
     #
     def status
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       case @task.State
         when 3
@@ -1116,16 +1114,14 @@ module Win32
     # Returns the exit code from the last scheduled run.
     #
     def exit_code
-      raise Error, 'No currently active task' if @task.nil?
-
+      check_for_active_task
       @task.LastTaskResult
     end
 
     # Returns the comment associated with the task, if any.
     #
     def comment
-      raise Error, 'No currently active task' if @task.nil?
-
+      check_for_active_task
       @task.Definition.RegistrationInfo.Description
     end
 
@@ -1133,7 +1129,7 @@ module Win32
     #
     def comment=(comment)
       raise TypeError unless comment.is_a?(String)
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       definition = @task.Definition
       definition.RegistrationInfo.Description = comment
@@ -1155,8 +1151,7 @@ module Win32
     # Returns the name of the user who created the task.
     #
     def creator
-      raise Error, 'No currently active task' if @task.nil?
-
+      check_for_active_task
       @task.Definition.RegistrationInfo.Author
     end
 
@@ -1166,7 +1161,7 @@ module Win32
     #
     def creator=(creator)
       raise TypeError unless creator.is_a?(String)
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       definition = @task.Definition
       definition.RegistrationInfo.Author = creator
@@ -1188,7 +1183,7 @@ module Win32
     # Returns a Time object that indicates the next time the task will run.
     #
     def next_run_time
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       @task.NextRunTime
     end
@@ -1197,7 +1192,7 @@ module Win32
     # nil if the task has never run.
     #
     def most_recent_run_time
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       time = nil
 
@@ -1214,7 +1209,7 @@ module Win32
     # will run before terminating.
     #
     def max_run_time
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       t = @task.Definition.Settings.ExecutionTimeLimit
       year = t.scan(/(\d+?)Y/).flatten.first
@@ -1244,7 +1239,7 @@ module Win32
     #
     def max_run_time=(max_run_time)
       raise TypeError unless max_run_time.is_a?(Numeric)
-      raise Error, 'No currently active task' if @task.nil?
+      check_for_active_task
 
       t = max_run_time
       t /= 1000
@@ -1335,6 +1330,10 @@ module Win32
       [:start_year, :start_month, :start_day].each{ |key|
         raise ArgumentError, "#{key} must be set" unless hash[key]
       }
+    end
+
+    def check_for_active_task
+      raise Error, 'No currently active task' if @task.nil?
     end
   end
 end
