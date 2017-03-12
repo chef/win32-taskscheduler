@@ -1,6 +1,11 @@
 == 0.3.2 - ???
 * Use the block form for FFI::MemoryPointer in the error message helper
   function. Thanks go to Ethan Brown for the suggestion.
+* Fixed a potential bug in the helper module, which as also renamed to
+  help prevent any name collisions.
+* Added the description and description= aliases for comments.
+* Added the author= alias for creator=.
+* Some internal cleanup, moving common code to private methods.
 * Rakefile now assumes Rubygems 2.0 or later for tasks.
 * Gemspec cleanup, updated home page, removed old rubyforge_project reference.
 
