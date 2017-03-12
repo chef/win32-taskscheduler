@@ -1062,6 +1062,8 @@ module Win32
       @task.Definition.RegistrationInfo.Description
     end
 
+    alias description comment
+
     # Sets the comment for the task.
     #
     def comment=(comment)
@@ -1074,6 +1076,8 @@ module Win32
 
       comment
     end
+
+    alias description= comment=
 
     # Returns the name of the user who created the task.
     #
@@ -1098,26 +1102,6 @@ module Win32
     end
 
     alias author= creator=
-
-    # Returns the description of the task.
-    #
-    def description
-      check_for_active_task
-      @task.Definition.RegistrationInfo.Description
-    end
-
-    # Sets the description for the task.
-    #
-    def description=(text)
-      raise TypeError unless text.is_a?(String)
-      check_for_active_task
-
-      definition = @task.Definition
-      definition.RegistrationInfo.Description = text
-      update_task_definition(definition)
-
-      text
-    end
 
     # Returns a Time object that indicates the next time the task will run.
     #
