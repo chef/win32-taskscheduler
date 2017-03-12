@@ -12,7 +12,7 @@ module Win32
     include Windows::TaskSchedulerHelper
 
     # The version of the win32-taskscheduler library
-    VERSION = '0.3.1'
+    VERSION = '0.3.2'
 
     # The Error class is typically raised if any TaskScheduler methods fail.
     class Error < StandardError; end
@@ -449,16 +449,7 @@ module Win32
         action.Path = app if action.Type == 0
       end
 
-      user = definition.Principal.UserId
-
-      @task = @root.RegisterTaskDefinition(
-        @task.Path,
-        definition,
-        TASK_CREATE_OR_UPDATE,
-        user,
-        @password,
-        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
-      )
+      update_task_definition(definition)
 
       app
     end
@@ -488,19 +479,12 @@ module Win32
       check_for_active_task
 
       definition = @task.Definition
+
       definition.Actions.each do |action|
         action.Arguments = param if action.Type == 0
       end
-      user = definition.Principal.UserId
 
-      @task = @root.RegisterTaskDefinition(
-        @task.Path,
-        definition,
-        TASK_CREATE_OR_UPDATE,
-        user,
-        @password,
-        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
-      )
+      update_task_definition(definition)
 
       param
     end
@@ -533,16 +517,7 @@ module Win32
         action.WorkingDirectory = dir if action.Type == 0
       end
 
-      user = definition.Principal.UserId
-
-      @task = @root.RegisterTaskDefinition(
-        @task.Path,
-        definition,
-        TASK_CREATE_OR_UPDATE,
-        user,
-        @password,
-        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
-      )
+      update_task_definition(definition)
 
       dir
     end
@@ -600,14 +575,7 @@ module Win32
         raise Error, ole_error('Priority', err)
       end
 
-      @task = @root.RegisterTaskDefinition(
-        @task.Path,
-        definition,
-        TASK_CREATE_OR_UPDATE,
-        user,
-        @password,
-        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
-      )
+      update_task_definition(definition)
 
       priority
     end
@@ -717,6 +685,7 @@ module Win32
       act = taskDefinition.Actions.Create(0)
       act.Path = 'cmd'
 
+
       begin
         @task = @root.RegisterTaskDefinition(
           task,
@@ -773,16 +742,7 @@ module Win32
 
       definition = @task.Definition
       definition.Triggers.Remove(index)
-      user = definition.Principal.UserId
-
-      @task = @root.RegisterTaskDefinition(
-        @task.Path,
-        definition,
-        TASK_CREATE_OR_UPDATE,
-        user,
-        @password,
-        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
-      )
+      update_task_definition(definition)
 
       index
     end
@@ -971,16 +931,7 @@ module Win32
           end
       end
 
-      user = definition.Principal.UserId
-
-      @task = @root.RegisterTaskDefinition(
-        @task.Path,
-        definition,
-        TASK_CREATE_OR_UPDATE,
-        user,
-        @password,
-        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
-      )
+      update_task_definition(definition)
 
       trigger
     end
@@ -1072,21 +1023,7 @@ module Win32
           end
       end
 
-      user = definition.Principal.UserId
-
-      begin
-
-        @task = @root.RegisterTaskDefinition(
-          @task.Path,
-          definition,
-          TASK_CREATE_OR_UPDATE,
-          user,
-          @password,
-          @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
-        )
-      rescue WIN32OLERuntimeError => err
-        raise Error, ole_error('add_trigger', err)
-      end
+      update_task_definition(definition)
 
       true
     end
@@ -1133,17 +1070,7 @@ module Win32
 
       definition = @task.Definition
       definition.RegistrationInfo.Description = comment
-
-      user = definition.Principal.UserId
-
-      @task = @root.RegisterTaskDefinition(
-        @task.Path,
-        definition,
-        TASK_CREATE_OR_UPDATE,
-        user,
-        @password,
-        @password ? 1 : 3
-      )
+      update_task_definition(definition)
 
       comment
     end
@@ -1165,28 +1092,37 @@ module Win32
 
       definition = @task.Definition
       definition.RegistrationInfo.Author = creator
-
-      user = definition.Principal.UserId
-
-      @task = @root.RegisterTaskDefinition(
-        @task.Path,
-        definition,
-        TASK_CREATE_OR_UPDATE,
-        user,
-        @password,
-        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
-      )
+      update_task_definition(definition)
 
       creator
     end
 
     alias author= creator=
 
+    # Returns the description of the task.
+    #
+    def description
+      check_for_active_task
+      @task.Definition.RegistrationInfo.Description
+    end
+
+    # Sets the description for the task.
+    #
+    def description=(text)
+      raise TypeError unless text.is_a?(String)
+      check_for_active_task
+
+      definition = @task.Definition
+      definition.RegistrationInfo.Description = text
+      update_task_definition(definition)
+
+      text
+    end
+
     # Returns a Time object that indicates the next time the task will run.
     #
     def next_run_time
       check_for_active_task
-
       @task.NextRunTime
     end
 
@@ -1249,16 +1185,7 @@ module Win32
 
       definition = @task.Definition
       definition.Settings.ExecutionTimeLimit = limit
-      user = definition.Principal.UserId
-
-      @task = @root.RegisterTaskDefinition(
-        @task.Path,
-        definition,
-        TASK_CREATE_OR_UPDATE,
-        user,
-        @password,
-        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
-      )
+      update_task_definition(definition)
 
       max_run_time
     end
@@ -1336,6 +1263,22 @@ module Win32
 
     def check_for_active_task
       raise Error, 'No currently active task' if @task.nil?
+    end
+
+    def update_task_definition(definition)
+      user = definition.Principal.UserId
+
+      @task = @root.RegisterTaskDefinition(
+        @task.Path,
+        definition,
+        TASK_CREATE_OR_UPDATE,
+        user,
+        @password,
+        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
+      )
+    rescue WIN32OLERuntimeError => err
+      method_name = caller_locations(1,1)[0].label
+      raise Error, ole_error(method_name, err)
     end
   end
 end
