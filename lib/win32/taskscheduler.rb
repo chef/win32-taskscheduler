@@ -1180,6 +1180,8 @@ module Win32
       creator
     end
 
+    alias author= creator=
+
     # Returns a Time object that indicates the next time the task will run.
     #
     def next_run_time
