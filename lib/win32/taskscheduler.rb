@@ -1174,6 +1174,53 @@ module Win32
       max_run_time
     end
 
+    # Set registration information options. The possible options are:
+    #
+    # * author
+    # * date
+    # * description (or comment)
+    # * documentation
+    # * security_descriptor (should be a Win32::Security::SID)
+    # * source
+    # * uri
+    # * version
+    # * xml_text (or xml)
+    #
+    # Note that most of these options have standalone methods as well,
+    # e.g. calling ts.set_registration_info(:author => 'Dan') is the
+    # same as calling ts.author = 'Dan'.
+    #
+    def set_registration_info(hash)
+      raise TypeError unless hash.is_a?(Hash)
+      check_for_active_task
+
+      definition = @task.Definition
+
+      author = hash[:author]
+      date = hash[:date]
+      description = hash[:description] || hash[:comment]
+      documentation = hash[:documentation]
+      security_descriptor = hash[:security_descriptor]
+      source = hash[:source]
+      uri = hash[:uri]
+      version = hash[:version]
+      xml_text = hash[:xml_text] || hash[:xml]
+
+      definition.RegistrationInfo.Author = author if author
+      definition.RegistrationInfo.Date = date if date
+      definition.RegistrationInfo.Description = description if description
+      definition.RegistrationInfo.Documentation = documentation if documentation
+      definition.RegistrationInfo.SecurityDescriptor = security_descriptor if security_descriptor
+      definition.RegistrationInfo.Source = source if source
+      definition.RegistrationInfo.URI = uri if uri
+      definition.RegistrationInfo.Version = version if version
+      definition.RegistrationInfo.XmlText = xml_text if xml_text
+
+      update_task_definition(definition)
+
+      hash
+    end
+
     # Shorthand constants
 
     IDLE = IDLE_PRIORITY_CLASS
