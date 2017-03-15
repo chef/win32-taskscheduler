@@ -567,13 +567,7 @@ module Win32
       check_for_active_task
 
       definition = @task.Definition
-
-      begin
-        definition.Settings.Priority = priority
-        user = definition.Principal.UserId
-      rescue WIN32OLERuntimeError => err
-        raise Error, ole_error('Priority', err)
-      end
+      definition.Settings.Priority = priority
 
       update_task_definition(definition)
 
