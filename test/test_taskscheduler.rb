@@ -41,7 +41,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "version constant is set to expected value" do
-    assert_equal('0.3.1', TaskScheduler::VERSION)
+    assert_equal('0.3.2', TaskScheduler::VERSION)
   end
 
   test "account_information method basic functionality" do
@@ -676,6 +676,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
   def teardown
     @ts.delete(@task) if @ts.exists?(@task)
+    @ts.delete('bar') if @ts.exists?('bar')
     @ts = nil
     @task = nil
     @trigger = nil
