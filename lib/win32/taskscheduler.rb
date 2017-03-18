@@ -1254,10 +1254,10 @@ module Win32
     # * xml_text (or xml)
     #
     # Note that most of these options have standalone methods as well,
-    # e.g. calling ts.set_registration_info(:author => 'Dan') is the
-    # same as calling ts.author = 'Dan'.
+    # e.g. calling ts.configure_registration_info(:author => 'Dan') is
+    # the same as calling ts.author = 'Dan'.
     #
-    def set_registration_info(hash)
+    def configure_registration_info(hash)
       raise TypeError unless hash.is_a?(Hash)
       check_for_active_task
 
