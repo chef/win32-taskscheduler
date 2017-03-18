@@ -10,6 +10,7 @@ Gem::Specification.new do |spec|
   spec.summary    = 'A library for the Windows task scheduler'
   spec.test_files = Dir['test/test*']
   spec.files      = Dir['**/*'].reject{ |f| f.include?('git') }
+  spec.cert_chain = ['certs/djberg96_pub.pem']
 
   spec.add_dependency('ffi')
   spec.add_dependency('structured_warnings')
