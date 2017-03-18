@@ -1,10 +1,12 @@
-== 0.3.2 - ???
+== 0.3.2 - 18-Mar-2018
 * Use the block form for FFI::MemoryPointer in the error message helper
   function. Thanks go to Ethan Brown for the suggestion.
-* Fixed a potential bug in the helper module, which as also renamed to
+* Fixed a potential bug in the helper module, which was also renamed to
   help prevent any name collisions.
+* Added the configure_settings method.
+* Added the configure_registration_info method.
 * Added the description and description= aliases for comments.
-* Added the author= alias for creator=.
+* Added the author and author= aliases for creator.
 * Some internal cleanup, moving common code to private methods.
 * Rakefile now assumes Rubygems 2.0 or later for tasks.
 * Gemspec cleanup, updated home page, removed old rubyforge_project reference.
