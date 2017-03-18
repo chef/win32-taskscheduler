@@ -1229,6 +1229,7 @@ module Win32
       definition.Settings.NetworkSettings = network_settings if network_settings
       definition.Settings.Priority = priority if priority
       definition.Settings.RestartCount = restart_count if restart_count
+      definition.Settings.RestartInterval = restart_interval if restart_interval
       definition.Settings.RunOnlyIfIdle = run_only_if_idle if run_only_if_idle
       definition.Settings.RunOnlyIfNetworkAvailable = run_only_if_network_available if run_only_if_network_available
       definition.Settings.StartWhenAvailable = start_when_available if start_when_available
