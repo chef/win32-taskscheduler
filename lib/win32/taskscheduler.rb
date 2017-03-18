@@ -1168,6 +1168,29 @@ module Win32
       max_run_time
     end
 
+    # Accepts a hash that lets you configure various task definition settings.
+    # The possible options are:
+    #
+    # * allow_demand_start
+    # * allow_hard_terminate
+    # * compatibility
+    # * delete_expired_task_after
+    # * disallowed_start_if_on_batteries
+    # * enabled
+    # * execution_time_limit (or max_run_time)
+    # * hidden
+    # * idle_settings
+    # * network_settings
+    # * priority
+    # * restart_count
+    # * restart_interval
+    # * run_only_if_idle
+    # * run_only_if_network_available
+    # * start_when_available
+    # * stop_if_going_on_batteries
+    # * wake_to_run
+    # * xml_text (or xml)
+    #
     def configure_settings(hash)
       raise TypeError unless hash.is_a?(Hash)
       check_for_active_task
