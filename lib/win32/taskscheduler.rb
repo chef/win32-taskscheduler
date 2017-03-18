@@ -1168,6 +1168,56 @@ module Win32
       max_run_time
     end
 
+    def configure_settings(hash)
+      raise TypeError unless hash.is_a?(Hash)
+      check_for_active_task
+
+      definition = @task.Definition
+
+      allow_demand_start = hash[:allow_demand_start]
+      allow_hard_terminate = hash[:allow_hard_terminate]
+      compatibility = hash[:compatibility]
+      delete_expired_task_after = hash[:delete_expired_task_after]
+      disallow_start_if_on_batteries = hash[:disallow_start_if_on_batteries]
+      enabled = hash[:enabled]
+      execution_time_limit = hash[:execution_time_limit] || hash[:max_run_time]
+      hidden = hash[:hidden]
+      idle_settings = hash[:idle_settings]
+      network_settings = hash[:network_settings]
+      priority = hash[:priority]
+      restart_count = hash[:restart_count]
+      restart_interval = hash[:restart_interval]
+      run_only_if_idle = hash[:run_only_if_idle]
+      run_only_if_network_available = hash[:run_only_if_network_available]
+      start_when_available = hash[:start_when_available]
+      stop_if_going_on_batteries = hash[:stop_if_going_on_batteries]
+      wake_to_run = hash[:wake_to_run]
+      xml_text = hash[:xml_text] || hash[:xml]
+
+      definition.Settings.AllowDemandStart = allow_demand_start if allow_demand_start
+      definition.Settings.AllowHardTerminate = allow_hard_terminate if allow_hard_terminate
+      definition.Settings.Compatibility = compatibility if compatibility
+      definition.Settings.DeleteExpiredTaskAfter = delete_expired_task_after if delete_expired_task_after
+      definition.Settings.DisallowStartIfOnBatteries = disallow_start_if_on_batteries if disallow_start_if_on_batteries
+      definition.Settings.Enabled = enabled if enabled
+      definition.Settings.ExecutionTimeLimit = execution_time_limit if execution_time_limit
+      definition.Settings.Hidden = hidden if hidden
+      definition.Settings.IdleSettings = idle_settings if idle_settings
+      definition.Settings.NetworkSettings = network_settings if network_settings
+      definition.Settings.Priority = priority if priority
+      definition.Settings.RestartCount = restart_count if restart_count
+      definition.Settings.RunOnlyIfIdle = run_only_if_idle if run_only_if_idle
+      definition.Settings.RunOnlyIfNetworkAvailable = run_only_if_network_available if run_only_if_network_available
+      definition.Settings.StartWhenAvailable = start_when_available if start_when_available
+      definition.Settings.StopIfGoingOnBatteries = stop_if_going_on_batteries if stop_if_going_on_batteries
+      definition.Settings.WakeToRun = wake_to_run if wake_to_run
+      definition.Settings.XmlText = xml_text if xml_text
+
+      update_task_definition(definition)
+
+      hash
+    end
+
     # Set registration information options. The possible options are:
     #
     # * author
