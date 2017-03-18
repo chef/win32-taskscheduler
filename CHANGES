@@ -3,6 +3,7 @@
   function. Thanks go to Ethan Brown for the suggestion.
 * Fixed a potential bug in the helper module, which was also renamed to
   help prevent any name collisions.
+* Added the win32-taskscheduler.rb file for convenience.
 * Added the configure_settings method.
 * Added the configure_registration_info method.
 * Added the description and description= aliases for comments.
