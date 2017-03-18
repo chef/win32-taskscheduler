@@ -10,6 +10,7 @@
 * Some internal cleanup, moving common code to private methods.
 * Rakefile now assumes Rubygems 2.0 or later for tasks.
 * Gemspec cleanup, updated home page, removed old rubyforge_project reference.
+* This gem is now signed.
 
 == 0.3.1 - 6-Jul-2014
 * Added FFI as a dependency. Thanks go to Maxime Lapointe for the spot.
