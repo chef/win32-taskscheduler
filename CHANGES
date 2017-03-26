@@ -1,4 +1,4 @@
-== 0.3.2 - 18-Mar-2018
+== 0.3.2 - 18-Mar-2017
 * Use the block form for FFI::MemoryPointer in the error message helper
   function. Thanks go to Ethan Brown for the suggestion.
 * Fixed a potential bug in the helper module, which was also renamed to
