@@ -761,7 +761,7 @@ module Win32
       trigger[:start_minute] = trig.StartBoundary.scan(/(\d+)-(\d+)-(\d+)T(\d+):(\d+)/).first
 
       trigger[:end_year], trigger[:end_month],
-      trigger[:end_day] = trig.StartBoundary.scan(/(\d+)-(\d+)-(\d+)T/).first
+      trigger[:end_day] = trig.EndBoundary.scan(/(\d+)-(\d+)-(\d+)T/).first
 
       if trig.Repetition.Duration != ""
         trigger[:minutes_duration] = trig.Repetition.Duration.scan(/(\d+)M/)[0][0].to_i
