@@ -798,7 +798,7 @@ module Win32
           tmp = {}
           tmp[:months] = trig.MonthsOfYear
           tmp[:days_of_week] = trig.DaysOfWeek
-          tmp[:weeks] = trig.weeks
+          tmp[:weeks_of_month] = trig.WeeksOfMonth
           trigger[:type] = tmp
         when 1
           trigger[:trigger_type] = TASK_TIME_TRIGGER_ONCE
