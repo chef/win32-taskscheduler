@@ -666,7 +666,7 @@ module Win32
         when TASK_TIME_TRIGGER_MONTHLYDOW
           trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
           trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
-          trig.WeeksOfMonth = tmp[:weeks] if tmp && tmp[:weeks]
+          trig.WeeksOfMonth = tmp[:weeks_of_month] if tmp && tmp[:weeks_of_month]
           if trigger[:random_minutes_interval].to_i>0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
