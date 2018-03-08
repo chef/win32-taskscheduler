@@ -386,12 +386,16 @@ module Win32
     alias machine host
     alias set_host set_machine
 
+    SYSTEM_USERS = ['NT AUTHORITY\SYSTEM', "SYSTEM", 'NT AUTHORITY\LOCALSERVICE', 'NT AUTHORITY\NETWORKSERVICE', 'BUILTIN\USERS', "USERS"].freeze
+
     # Sets the +user+ and +password+ for the given task. If the user and
     # password are set properly then true is returned.
-    #
+    # throws TypeError if password is not provided for other than system users
     def set_account_information(user, password)
       raise TypeError unless user.is_a?(String)
-      raise TypeError unless password.is_a?(String)
+      unless SYSTEM_USERS.include?(user.upcase)
+        raise TypeError unless password.is_a?(String)
+      end
       check_for_active_task
 
       @password = password
