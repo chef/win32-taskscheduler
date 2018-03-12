@@ -724,11 +724,13 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          trig.UserId = trigger[:user_id] if trigger[:user_id]
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
       end
 
       act = taskDefinition.Actions.Create(0)
       act.Path = 'cmd'
-
 
       begin
         @task = @root.RegisterTaskDefinition(
@@ -821,8 +823,11 @@ module Win32
         trigger[:minutes_interval] = trig.Repetition.Interval.scan(/(\d+)M/)[0][0].to_i
       end
 
-      if trig.RandomDelay != ""
+      # RandonDelay is applicable for schedule based triggers
+      if (1..5).include?(trig.Type) && trig.RandomDelay != ""
         trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i
+      else
+        trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i
       end
 
       case trig.Type
@@ -855,6 +860,8 @@ module Win32
           tmp = {}
           tmp[:once] = nil
           trigger[:type] = tmp
+        when 9
+          trigger[:trigger_type] = TASK_EVENT_TRIGGER_AT_LOGON
         else
           raise Error, 'Unknown trigger type'
       end
@@ -973,6 +980,9 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          trig.UserId = trigger[:user_id] if trigger[:user_id]
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
       end
 
       update_task_definition(definition)
@@ -1065,6 +1075,9 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
           trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          trig.UserId = trigger[:user_id] if trigger[:user_id]
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
       end
 
       update_task_definition(definition)
