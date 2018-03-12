@@ -724,6 +724,8 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"          
         when TASK_EVENT_TRIGGER_AT_LOGON
           trig.UserId = trigger[:user_id] if trigger[:user_id]
           trig.Delay = "PT#{trigger[:delay_duration]||0}M"
@@ -824,10 +826,10 @@ module Win32
       end
 
       # RandonDelay is applicable for schedule based triggers
-      if (1..5).include?(trig.Type) && trig.RandomDelay != ""
-        trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i
+      if (1..5).include?(trig.Type)
+        trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
       else
-        trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i
+        trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i if trig.Delay != ""
       end
 
       case trig.Type
@@ -860,6 +862,8 @@ module Win32
           tmp = {}
           tmp[:once] = nil
           trigger[:type] = tmp
+        when 8
+          trigger[:trigger_type] = TASK_EVENT_TRIGGER_AT_SYSTEMSTART
         when 9
           trigger[:trigger_type] = TASK_EVENT_TRIGGER_AT_LOGON
         else
@@ -980,6 +984,8 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
         when TASK_EVENT_TRIGGER_AT_LOGON
           trig.UserId = trigger[:user_id] if trigger[:user_id]
           trig.Delay = "PT#{trigger[:delay_duration]||0}M"
@@ -1075,6 +1081,8 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
           trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
         when TASK_EVENT_TRIGGER_AT_LOGON
           trig.UserId = trigger[:user_id] if trigger[:user_id]
           trig.Delay = "PT#{trigger[:delay_duration]||0}M"
