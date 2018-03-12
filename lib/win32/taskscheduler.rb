@@ -1244,7 +1244,10 @@ module Win32
       enabled = hash[:enabled]
       execution_time_limit = hash[:execution_time_limit] || hash[:max_run_time]
       hidden = hash[:hidden]
-      idle_settings = hash[:idle_settings]
+      idle_duration = "PT#{hash[:idle_duration]||0}M"
+      stop_on_idle_end = hash[:stop_on_idle_end]
+      wait_timeout = "PT#{hash[:wait_timeout]||0}M"
+      restart_on_idle = hash[:restart_on_idle]
       network_settings = hash[:network_settings]
       priority = hash[:priority]
       restart_count = hash[:restart_count]
@@ -1264,7 +1267,10 @@ module Win32
       definition.Settings.Enabled = enabled if enabled
       definition.Settings.ExecutionTimeLimit = execution_time_limit if execution_time_limit
       definition.Settings.Hidden = hidden if hidden
-      definition.Settings.IdleSettings = idle_settings if idle_settings
+      definition.Settings.IdleSettings.IdleDuration = idle_duration if idle_duration
+      definition.Settings.IdleSettings.StopOnIdleEnd = stop_on_idle_end if stop_on_idle_end
+      definition.Settings.IdleSettings.WaitTimeout = wait_timeout if wait_timeout
+      definition.Settings.IdleSettings.RestartOnIdle = restart_on_idle if restart_on_idle
       definition.Settings.NetworkSettings = network_settings if network_settings
       definition.Settings.Priority = priority if priority
       definition.Settings.RestartCount = restart_count if restart_count
