@@ -39,10 +39,10 @@ module Win32
     TASK_EVENT_TRIGGER_ON_IDLE = 5
 
     # Trigger is set to run the task at system startup
-    TASK_EVENT_TRIGGER_AT_SYSTEMSTART = 6
+    TASK_EVENT_TRIGGER_AT_SYSTEMSTART = 7
 
     # Trigger is set to run the task when a user logs on
-    TASK_EVENT_TRIGGER_AT_LOGON = 7
+    TASK_EVENT_TRIGGER_AT_LOGON = 8
 
     # Daily Tasks
 
@@ -810,6 +810,47 @@ module Win32
       end
 
       trigger = {}
+
+      # Since the defined constants are OLEConsts-1
+      case(trig.Type - 1)
+        when TASK_TIME_TRIGGER_DAILY
+          tmp = {}
+          tmp[:days_interval] = trig.DaysInterval
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+        when TASK_TIME_TRIGGER_WEEKLY
+          tmp = {}
+          tmp[:weeks_interval] = trig.WeeksInterval
+          tmp[:days_of_week] = trig.DaysOfWeek
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+        when TASK_TIME_TRIGGER_MONTHLYDATE
+          tmp = {}
+          tmp[:months] = trig.MonthsOfYear
+          tmp[:days] = trig.DaysOfMonth
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+        when TASK_TIME_TRIGGER_MONTHLYDOW
+          tmp = {}
+          tmp[:months] = trig.MonthsOfYear
+          tmp[:days_of_week] = trig.DaysOfWeek
+          tmp[:weeks_of_month] = trig.WeeksOfMonth
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+        when TASK_TIME_TRIGGER_ONCE
+          tmp = {}
+          tmp[:once] = nil
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+          trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i if trig.Delay != ""
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          trigger[:user_id] = trig.UserId if trig.UserId.to_s != ""
+          trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i if trig.Delay != ""
+        else
+          raise Error, 'Unknown trigger type'
+      end
+      
       trigger[:start_year], trigger[:start_month],
       trigger[:start_day],  trigger[:start_hour],
       trigger[:start_minute] = trig.StartBoundary.scan(/(\d+)-(\d+)-(\d+)T(\d+):(\d+)/).first
@@ -824,51 +865,8 @@ module Win32
       if trig.Repetition.Interval != ""
         trigger[:minutes_interval] = trig.Repetition.Interval.scan(/(\d+)M/)[0][0].to_i
       end
-
-      # RandonDelay is applicable for schedule based triggers
-      if (1..5).include?(trig.Type)
-        trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
-      else
-        trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i if trig.Delay != ""
-      end
-
-      case trig.Type
-        when 2
-          trigger[:trigger_type] = TASK_TIME_TRIGGER_DAILY
-          tmp = {}
-          tmp[:days_interval] = trig.DaysInterval
-          trigger[:type] = tmp
-        when 3
-          trigger[:trigger_type] = TASK_TIME_TRIGGER_WEEKLY
-          tmp = {}
-          tmp[:weeks_interval] = trig.WeeksInterval
-          tmp[:days_of_week] = trig.DaysOfWeek
-          trigger[:type] = tmp
-        when 4
-          trigger[:trigger_type] = TASK_TIME_TRIGGER_MONTHLYDATE
-          tmp = {}
-          tmp[:months] = trig.MonthsOfYear
-          tmp[:days] = trig.DaysOfMonth
-          trigger[:type] = tmp
-        when 5
-          trigger[:trigger_type] = TASK_TIME_TRIGGER_MONTHLYDOW
-          tmp = {}
-          tmp[:months] = trig.MonthsOfYear
-          tmp[:days_of_week] = trig.DaysOfWeek
-          tmp[:weeks_of_month] = trig.WeeksOfMonth
-          trigger[:type] = tmp
-        when 1
-          trigger[:trigger_type] = TASK_TIME_TRIGGER_ONCE
-          tmp = {}
-          tmp[:once] = nil
-          trigger[:type] = tmp
-        when 8
-          trigger[:trigger_type] = TASK_EVENT_TRIGGER_AT_SYSTEMSTART
-        when 9
-          trigger[:trigger_type] = TASK_EVENT_TRIGGER_AT_LOGON
-        else
-          raise Error, 'Unknown trigger type'
-      end
+      
+      trigger[:trigger_type] = trig.Type
 
       trigger
     end
