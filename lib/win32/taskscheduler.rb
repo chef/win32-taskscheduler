@@ -844,6 +844,9 @@ module Win32
           tmp = {}
           tmp[:once] = nil
           trigger[:type] = tmp
+        when 6
+          trigger[:trigger_type] = TASK_EVENT_TRIGGER_ON_IDLE
+          trigger[:execution_time_limit] = trig.ExecutionTimeLimit
         else
           raise Error, 'Unknown trigger type'
       end
@@ -961,6 +964,11 @@ module Win32
         when TASK_TIME_TRIGGER_ONCE
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+          end
+        when TASK_EVENT_TRIGGER_ON_IDLE
+          # for setting execution time limit Ref : https://msdn.microsoft.com/en-us/library/windows/desktop/aa380724(v=vs.85).aspx
+          if trigger[:execution_time_limit].to_i > 0
+            trig.ExecutionTimeLimit = "PT#{trigger[:execution_time_limit]||0}M"
           end
       end
 
