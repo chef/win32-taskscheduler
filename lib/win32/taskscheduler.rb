@@ -1328,6 +1328,40 @@ module Win32
       hash
     end
 
+    # Returns a hash containing all settings of the current task
+    def settings
+      check_for_active_task
+      settings_hash = {}
+      @task.Definition.Settings.ole_get_methods.each do |setting|
+        next if setting.name == "XmlText" # not needed
+        settings_hash[setting.name] = @task.Definition.Settings._getproperty(setting.dispid, [], [])
+      end
+
+      settings_hash["IdleSettings"] = idle_settings
+      settings_hash["NetworkSettings"] = network_settings
+      symbolize_keys(settings_hash)
+    end
+
+    # Returns a hash of idle settings of the current task
+    def idle_settings
+      check_for_active_task
+      settings_hash = {}
+      @task.Definition.Settings.IdleSettings.ole_get_methods.each do |setting|
+        settings_hash[setting.name] = @task.Definition.Settings.IdleSettings._getproperty(setting.dispid, [], [])
+      end
+      symbolize_keys(settings_hash)
+    end
+
+    # Returns a hash of network settings of the current task
+    def network_settings
+      check_for_active_task
+      settings_hash = {}
+      @task.Definition.Settings.NetworkSettings.ole_get_methods.each do |setting|
+        settings_hash[setting.name] = @task.Definition.Settings.NetworkSettings._getproperty(setting.dispid, [], [])
+      end
+      symbolize_keys(settings_hash)
+    end
+
     # Shorthand constants
 
     IDLE = IDLE_PRIORITY_CLASS
@@ -1425,6 +1459,18 @@ module Win32
     LAST = TASK_LAST
 
     private
+
+    # Returns a camle-case string to its underscore format
+    def underscore(string)
+      string.gsub(/([a-z\d])([A-Z])/, '\1_\2'.freeze).downcase
+    end
+
+    # Converts all the keys of a hash to underscored-symbol format
+    def symbolize_keys(hash)
+      hash.each_with_object({}) do |(k, v), h|
+        h[underscore(k.to_s).to_sym] = v.is_a?(Hash) ? symbolize_keys(v) : v 
+      end
+    end    
 
     def validate_trigger(hash)
       [:start_year, :start_month, :start_day].each{ |key|
