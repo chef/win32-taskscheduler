@@ -1168,6 +1168,16 @@ module Win32
       time
     end
 
+    def idle_settings
+      check_for_active_task
+      idle_settings = {}
+      idle_settings[:idle_duration] = @task.Definition.Settings.IdleSettings.IdleDuration
+      idle_settings[:stop_on_idle_end] = @task.Definition.Settings.IdleSettings.StopOnIdleEnd
+      idle_settings[:wait_timeout] = @task.Definition.Settings.IdleSettings.WaitTimeout
+      idle_settings[:restart_on_idle] = @task.Definition.Settings.IdleSettings.RestartOnIdle
+      idle_settings
+    end
+
     # Returns the maximum length of time, in milliseconds, that the task
     # will run before terminating.
     #
