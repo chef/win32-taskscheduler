@@ -333,6 +333,17 @@ module Win32
       enum.include?(task)
     end
 
+    def get_task(task)
+      raise TypeError unless task.is_a?(String)
+
+      begin
+        registeredTask = @root.GetTask(task)
+        @task = registeredTask
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('activate', err)
+      end
+    end
+
     # Activate the specified task.
     #
     def activate(task)
@@ -1079,6 +1090,11 @@ module Win32
       end
 
       status
+    end
+
+    def enabled?
+      check_for_active_task
+      @task.enabled
     end
 
     # Returns the exit code from the last scheduled run.
