@@ -255,6 +255,30 @@ module Win32
     TASK_THIRTY_FIRST = 0x40000000
     TASK_LAST = 0x80000000
 
+
+    # Run Level Types
+    # Tasks will be run with the least privileges
+    TASK_RUNLEVEL_LUA      = 0
+    # Tasks will be run with the highest privileges
+    TASK_RUNLEVEL_HIGHEST  = 1
+
+    # Logon Types
+    # Used for non-NT credentials
+    TASK_LOGON_NONE                           = 0
+    # Use a password for logging on the user
+    TASK_LOGON_PASSWORD                       = 1
+    # The service will log the user on using Service For User
+    TASK_LOGON_S4U                            = 2
+    # Task will be run only in an existing interactive session
+    TASK_LOGON_INTERACTIVE_TOKEN              = 3
+    # Group activation. The groupId field specifies the group
+    TASK_LOGON_GROUP                          = 4
+    # When Local System, Local Service, or Network Service account is
+    # being used as a security context to run the task
+    TASK_LOGON_SERVICE_ACCOUNT                = 5
+    # Not in use; currently identical to TASK_LOGON_PASSWORD
+    TASK_LOGON_INTERACTIVE_TOKEN_OR_PASSWORD  = 6
+
     # :startdoc:
 
     attr_accessor :password
