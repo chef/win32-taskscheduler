@@ -1344,6 +1344,32 @@ module Win32
       hash
     end
 
+    # Expected principal hash: { id: STRING, display_name: STRING, user_id: STRING,
+    # logon_type: INTEGER, group_id: STRING, run_level: INTEGER }
+    def configure_principals(principals)
+      raise TypeError unless principals.is_a?(Hash)
+      check_for_active_task
+      definition = @task.Definition
+      definition.Principal.Id = principals[:id] if principals[:id].to_s != ""
+      definition.Principal.DisplayName = principals[:display_name] if principals[:display_name].to_s != ""
+      definition.Principal.UserId = principals[:user_id] if principals[:user_id].to_s != ""
+      definition.Principal.LogonType = principals[:logon_type] if principals[:logon_type].to_s != ""
+      definition.Principal.GroupId = principals[:group_id] if principals[:group_id].to_s != ""
+      definition.Principal.RunLevel = principals[:run_level] if principals[:run_level].to_s != ""
+      update_task_definition(definition)
+      principals
+    end
+
+    # Returns a hash containing all the principal information of the current task
+    def principals
+      check_for_active_task
+      principals_hash = {}
+      @task.Definition.Principal.ole_get_methods.each do |principal|
+        principals_hash[principal.name] = @task.Definition.Principal._getproperty(principal.dispid, [], [])
+      end
+      symbolize_keys(principals_hash)   
+    end
+
     # Returns a hash containing all settings of the current task
     def settings
       check_for_active_task
