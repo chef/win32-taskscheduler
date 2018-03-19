@@ -41,10 +41,10 @@ module Win32
     TASK_TRIGGER_REGISTRATION = 7
 
     # Trigger is set to run the task at system startup
-    TASK_TRIGGER_BOOT = 8
+    TASK_EVENT_TRIGGER_AT_SYSTEMSTART = 8
 
     # Trigger is set to run the task when a user logs on
-    TASK_TRIGGER_LOGON = 9
+    TASK_EVENT_TRIGGER_AT_LOGON = 9
 
     TASK_TRIGGER_SESSION_STATE_CHANGE = 11
 
@@ -709,9 +709,9 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
-        when TASK_TRIGGER_BOOT
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
           trig.Delay = "PT#{trigger[:delay_duration]||0}M"          
-        when TASK_TRIGGER_LOGON
+        when TASK_EVENT_TRIGGER_AT_LOGON
           trig.UserId = trigger[:user_id] if trigger[:user_id]
           trig.Delay = "PT#{trigger[:delay_duration]||0}M"
       end
@@ -826,9 +826,9 @@ module Win32
           tmp[:once] = nil
           trigger[:type] = tmp
           trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
-        when TASK_TRIGGER_BOOT
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
           trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i if trig.Delay != ""
-        when TASK_TRIGGER_LOGON
+        when TASK_EVENT_TRIGGER_AT_LOGON
           trigger[:user_id] = trig.UserId if trig.UserId.to_s != ""
           trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i if trig.Delay != ""
         else
@@ -947,9 +947,9 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
-        when TASK_TRIGGER_BOOT
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
           trig.Delay = "PT#{trigger[:delay_duration]||0}M"
-        when TASK_TRIGGER_LOGON
+        when TASK_EVENT_TRIGGER_AT_LOGON
           trig.UserId = trigger[:user_id] if trigger[:user_id]
           trig.Delay = "PT#{trigger[:delay_duration]||0}M"
       end
@@ -1032,9 +1032,9 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
           trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
-        when TASK_TRIGGER_BOOT
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
           trig.Delay = "PT#{trigger[:delay_duration]||0}M"
-        when TASK_TRIGGER_LOGON
+        when TASK_EVENT_TRIGGER_AT_LOGON
           trig.UserId = trigger[:user_id] if trigger[:user_id]
           trig.Delay = "PT#{trigger[:delay_duration]||0}M"
       end
@@ -1366,8 +1366,8 @@ module Win32
     MONTHLYDOW = TASK_TIME_TRIGGER_MONTHLYDOW
 
     ON_IDLE = TASK_EVENT_TRIGGER_ON_IDLE
-    AT_SYSTEMSTART = TASK_TRIGGER_BOOT
-    AT_LOGON = TASK_TRIGGER_LOGON
+    AT_SYSTEMSTART = TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+    AT_LOGON = TASK_EVENT_TRIGGER_AT_LOGON
     FIRST_WEEK = TASK_FIRST_WEEK
     SECOND_WEEK = TASK_SECOND_WEEK
     THIRD_WEEK = TASK_THIRD_WEEK
@@ -1463,7 +1463,7 @@ module Win32
     def valid_trigger_option(trigger_type)
       [ TASK_TIME_TRIGGER_ONCE, TASK_TIME_TRIGGER_DAILY, TASK_TIME_TRIGGER_WEEKLY,
         TASK_TIME_TRIGGER_MONTHLYDATE, TASK_TIME_TRIGGER_MONTHLYDOW, TASK_EVENT_TRIGGER_ON_IDLE,
-        TASK_TRIGGER_BOOT, TASK_TRIGGER_LOGON ].include?(trigger_type.to_i)
+        TASK_EVENT_TRIGGER_AT_SYSTEMSTART, TASK_EVENT_TRIGGER_AT_LOGON ].include?(trigger_type.to_i)
     end
 
 
