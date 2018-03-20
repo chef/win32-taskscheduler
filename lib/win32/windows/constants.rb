@@ -1,37 +1,38 @@
 module Windows
   module TaskSchedulerConstants
 
-    # The version of the win32-taskscheduler library
-    VERSION = '0.3.2'.freeze
-
     SYSTEM_USERS = ['NT AUTHORITY\SYSTEM', "SYSTEM", 'NT AUTHORITY\LOCALSERVICE', 'NT AUTHORITY\NETWORKSERVICE', 'BUILTIN\USERS', "USERS"].freeze
 
     # Triggers
 
-    # Trigger is set to run the task a single tim
-    TASK_TIME_TRIGGER_ONCE = 0
+    # Trigger is set to run the task a single time
+    TASK_TIME_TRIGGER_ONCE = 1
 
     # Trigger is set to run the task on a daily interval
-    TASK_TIME_TRIGGER_DAILY = 1
+    TASK_TIME_TRIGGER_DAILY = 2
 
     # Trigger is set to run the task on specific days of a specific week & month
-    TASK_TIME_TRIGGER_WEEKLY = 2
+    TASK_TIME_TRIGGER_WEEKLY = 3
 
     # Trigger is set to run the task on specific day(s) of the month
-    TASK_TIME_TRIGGER_MONTHLYDATE = 3
+    TASK_TIME_TRIGGER_MONTHLYDATE = 4
 
     # Trigger is set to run the task on specific day(s) of the month
-    TASK_TIME_TRIGGER_MONTHLYDOW = 4
+    TASK_TIME_TRIGGER_MONTHLYDOW = 5
 
     # Trigger is set to run the task if the system remains idle for the amount
     # of time specified by the idle wait time of the task
-    TASK_EVENT_TRIGGER_ON_IDLE = 5
+    TASK_EVENT_TRIGGER_ON_IDLE = 6
+
+    TASK_TRIGGER_REGISTRATION = 7
 
     # Trigger is set to run the task at system startup
-    TASK_EVENT_TRIGGER_AT_SYSTEMSTART = 6
+    TASK_EVENT_TRIGGER_AT_SYSTEMSTART = 8
 
     # Trigger is set to run the task when a user logs on
-    TASK_EVENT_TRIGGER_AT_LOGON = 7
+    TASK_EVENT_TRIGGER_AT_LOGON = 9
+
+    TASK_TRIGGER_SESSION_STATE_CHANGE = 11
 
     # Daily Tasks
 
@@ -168,7 +169,29 @@ module Windows
     # The task trigger is disabled
     TASK_TRIGGER_FLAG_DISABLED = 0x4
 
-    # :stopdoc:
+    # Run Level Types
+    # Tasks will be run with the least privileges
+    TASK_RUNLEVEL_LUA      = 0
+    # Tasks will be run with the highest privileges
+    TASK_RUNLEVEL_HIGHEST  = 1
+
+    # Logon Types
+    # Used for non-NT credentials
+    TASK_LOGON_NONE                           = 0
+    # Use a password for logging on the user
+    TASK_LOGON_PASSWORD                       = 1
+    # The service will log the user on using Service For User
+    TASK_LOGON_S4U                            = 2
+    # Task will be run only in an existing interactive session
+    TASK_LOGON_INTERACTIVE_TOKEN              = 3
+    # Group activation. The groupId field specifies the group
+    TASK_LOGON_GROUP                          = 4
+    # When Local System, Local Service, or Network Service account is
+    # being used as a security context to run the task
+    TASK_LOGON_SERVICE_ACCOUNT                = 5
+    # Not in use; currently identical to TASK_LOGON_PASSWORD
+    TASK_LOGON_INTERACTIVE_TOKEN_OR_PASSWORD  = 6
+
 
     TASK_MAX_RUN_TIMES = 1440
     TASKS_TO_RETRIEVE  = 5
@@ -182,16 +205,6 @@ module Windows
     TASK_DISABLE = 0x8
     TASK_DONT_ADD_PRINCIPAL_ACE = 0x10
     TASK_IGNORE_REGISTRATION_TRIGGERS = 0x20
-
-    # Task logon types
-
-    TASK_LOGON_NONE = 0
-    TASK_LOGON_PASSWORD = 1
-    TASK_LOGON_S4U = 2
-    TASK_LOGON_INTERACTIVE_TOKEN = 3
-    TASK_LOGON_GROUP = 4
-    TASK_LOGON_SERVICE_ACCOUNT = 5
-    TASK_LOGON_INTERACTIVE_TOKEN_OR_PASSWORD = 6
 
     # Priority classes
 

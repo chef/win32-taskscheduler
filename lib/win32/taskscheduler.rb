@@ -13,6 +13,9 @@ module Win32
     include Windows::TaskSchedulerHelper
     include Windows::TaskSchedulerConstants
 
+    # The version of the win32-taskscheduler library
+    VERSION = '0.3.2'.freeze
+
     # The Error class is typically raised if any TaskScheduler methods fail.
     class Error < StandardError; end
 
@@ -112,29 +115,6 @@ module Win32
     THIRTY_FIRST = TASK_THIRTY_FIRST
     LAST = TASK_LAST
 
-
-    # Run Level Types
-    # Tasks will be run with the least privileges
-    TASK_RUNLEVEL_LUA      = 0
-    # Tasks will be run with the highest privileges
-    TASK_RUNLEVEL_HIGHEST  = 1
-
-    # Logon Types
-    # Used for non-NT credentials
-    TASK_LOGON_NONE                           = 0
-    # Use a password for logging on the user
-    TASK_LOGON_PASSWORD                       = 1
-    # The service will log the user on using Service For User
-    TASK_LOGON_S4U                            = 2
-    # Task will be run only in an existing interactive session
-    TASK_LOGON_INTERACTIVE_TOKEN              = 3
-    # Group activation. The groupId field specifies the group
-    TASK_LOGON_GROUP                          = 4
-    # When Local System, Local Service, or Network Service account is
-    # being used as a security context to run the task
-    TASK_LOGON_SERVICE_ACCOUNT                = 5
-    # Not in use; currently identical to TASK_LOGON_PASSWORD
-    TASK_LOGON_INTERACTIVE_TOKEN_OR_PASSWORD  = 6
 
     # :startdoc:
 
@@ -510,6 +490,7 @@ module Win32
     def new_work_item(task, trigger)
       raise TypeError unless task.is_a?(String)
       raise TypeError unless trigger.is_a?(Hash)
+      raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
 
       validate_trigger(trigger)
 
@@ -519,27 +500,7 @@ module Win32
       taskDefinition.Settings.StartWhenAvailable = true
       taskDefinition.Settings.Enabled  = true
       taskDefinition.Settings.Hidden = false
-
-      case trigger[:trigger_type]
-        when TASK_TIME_TRIGGER_ONCE
-          type = 1
-        when TASK_TIME_TRIGGER_DAILY
-          type = 2
-        when TASK_TIME_TRIGGER_WEEKLY
-          type = 3
-        when TASK_TIME_TRIGGER_MONTHLYDATE
-          type = 4
-        when TASK_TIME_TRIGGER_MONTHLYDOW
-          type = 5
-        when TASK_EVENT_TRIGGER_ON_IDLE
-          type = 6
-        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
-          type = 8
-        when TASK_EVENT_TRIGGER_AT_LOGON
-          type = 9
-        else
-          raise ArgumentError, 'Unknown trigger type'
-      end
+      
 
       startTime = "%04d-%02d-%02dT%02d:%02d:00" % [
         trigger[:start_year], trigger[:start_month], trigger[:start_day],
@@ -555,7 +516,7 @@ module Win32
         trigger[:end_year], trigger[:end_month], trigger[:end_day]
       ]
 
-      trig = taskDefinition.Triggers.Create(type)
+      trig = taskDefinition.Triggers.Create(trigger[:trigger_type].to_i)
       trig.Id = "RegistrationTriggerId#{taskDefinition.Triggers.Count}"
       trig.StartBoundary = startTime
       trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
@@ -603,11 +564,15 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"          
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          trig.UserId = trigger[:user_id] if trigger[:user_id]
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
       end
 
       act = taskDefinition.Actions.Create(0)
       act.Path = 'cmd'
-
 
       begin
         @task = @root.RegisterTaskDefinition(
@@ -685,6 +650,48 @@ module Win32
       end
 
       trigger = {}
+
+      case trig.Type
+        when TASK_TIME_TRIGGER_DAILY
+          tmp = {}
+          tmp[:days_interval] = trig.DaysInterval
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+        when TASK_TIME_TRIGGER_WEEKLY
+          tmp = {}
+          tmp[:weeks_interval] = trig.WeeksInterval
+          tmp[:days_of_week] = trig.DaysOfWeek
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+        when TASK_TIME_TRIGGER_MONTHLYDATE
+          tmp = {}
+          tmp[:months] = trig.MonthsOfYear
+          tmp[:days] = trig.DaysOfMonth
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+        when TASK_TIME_TRIGGER_MONTHLYDOW
+          tmp = {}
+          tmp[:months] = trig.MonthsOfYear
+          tmp[:days_of_week] = trig.DaysOfWeek
+          tmp[:weeks_of_month] = trig.WeeksOfMonth
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+        when TASK_TIME_TRIGGER_ONCE
+          tmp = {}
+          tmp[:once] = nil
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+          trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i if trig.Delay != ""
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          trigger[:user_id] = trig.UserId if trig.UserId.to_s != ""
+          trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i if trig.Delay != ""
+        when TASK_EVENT_TRIGGER_ON_IDLE
+          trigger[:execution_time_limit] = trig.ExecutionTimeLimit
+        else
+          raise Error, 'Unknown trigger type'
+      end
+
       trigger[:start_year], trigger[:start_month],
       trigger[:start_day],  trigger[:start_hour],
       trigger[:start_minute] = trig.StartBoundary.scan(/(\d+)-(\d+)-(\d+)T(\d+):(\d+)/).first
@@ -699,47 +706,8 @@ module Win32
       if trig.Repetition.Interval != ""
         trigger[:minutes_interval] = trig.Repetition.Interval.scan(/(\d+)M/)[0][0].to_i
       end
-
-      if trig.RandomDelay != ""
-        trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i
-      end
-
-      case trig.Type
-        when 2
-          trigger[:trigger_type] = TASK_TIME_TRIGGER_DAILY
-          tmp = {}
-          tmp[:days_interval] = trig.DaysInterval
-          trigger[:type] = tmp
-        when 3
-          trigger[:trigger_type] = TASK_TIME_TRIGGER_WEEKLY
-          tmp = {}
-          tmp[:weeks_interval] = trig.WeeksInterval
-          tmp[:days_of_week] = trig.DaysOfWeek
-          trigger[:type] = tmp
-        when 4
-          trigger[:trigger_type] = TASK_TIME_TRIGGER_MONTHLYDATE
-          tmp = {}
-          tmp[:months] = trig.MonthsOfYear
-          tmp[:days] = trig.DaysOfMonth
-          trigger[:type] = tmp
-        when 5
-          trigger[:trigger_type] = TASK_TIME_TRIGGER_MONTHLYDOW
-          tmp = {}
-          tmp[:months] = trig.MonthsOfYear
-          tmp[:days_of_week] = trig.DaysOfWeek
-          tmp[:weeks_of_month] = trig.WeeksOfMonth
-          trigger[:type] = tmp
-        when 1
-          trigger[:trigger_type] = TASK_TIME_TRIGGER_ONCE
-          tmp = {}
-          tmp[:once] = nil
-          trigger[:type] = tmp
-        when 6
-          trigger[:trigger_type] = TASK_EVENT_TRIGGER_ON_IDLE
-          trigger[:execution_time_limit] = trig.ExecutionTimeLimit
-        else
-          raise Error, 'Unknown trigger type'
-      end
+      
+      trigger[:trigger_type] = trig.Type
 
       trigger
     end
@@ -770,33 +738,14 @@ module Win32
     #
     def trigger=(trigger)
       raise TypeError unless trigger.is_a?(Hash)
+      raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
+      
       check_for_active_task
 
       validate_trigger(trigger)
 
       definition = @task.Definition
       definition.Triggers.Clear()
-
-      case trigger[:trigger_type]
-        when TASK_TIME_TRIGGER_ONCE
-          type = 1
-        when TASK_TIME_TRIGGER_DAILY
-          type = 2
-        when TASK_TIME_TRIGGER_WEEKLY
-          type = 3
-        when TASK_TIME_TRIGGER_MONTHLYDATE
-          type = 4
-        when TASK_TIME_TRIGGER_MONTHLYDOW
-          type = 5
-        when TASK_EVENT_TRIGGER_ON_IDLE
-          type = 6
-        when TASK_EVENT_TRIGGER_AT_SYSTEM_START
-          type = 8
-        when TASK_EVENT_TRIGGER_AT_LOGON
-          type = 9
-        else
-          raise Error, 'Unknown trigger type'
-      end
 
       startTime = "%04d-%02d-%02dT%02d:%02d:00" % [
         trigger[:start_year], trigger[:start_month],
@@ -807,7 +756,7 @@ module Win32
         trigger[:end_year], trigger[:end_month], trigger[:end_day]
       ]
 
-      trig = definition.Triggers.Create(type)
+      trig = definition.Triggers.Create( trigger[:trigger_type].to_i )
       trig.Id = "RegistrationTriggerId#{definition.Triggers.Count}"
       trig.StartBoundary = startTime
       trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
@@ -855,6 +804,11 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          trig.UserId = trigger[:user_id] if trigger[:user_id]
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
         when TASK_EVENT_TRIGGER_ON_IDLE
           # for setting execution time limit Ref : https://msdn.microsoft.com/en-us/library/windows/desktop/aa380724(v=vs.85).aspx
           if trigger[:execution_time_limit].to_i > 0
@@ -872,23 +826,11 @@ module Win32
     def add_trigger(index, trigger)
       raise TypeError unless index.is_a?(Numeric)
       raise TypeError unless trigger.is_a?(Hash)
+      raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
+
       check_for_active_task
 
       definition = @task.Definition
-      case trigger[:trigger_type]
-        when TASK_TIME_TRIGGER_DAILY
-          type = 2
-        when TASK_TIME_TRIGGER_WEEKLY
-          type = 3
-        when TASK_TIME_TRIGGER_MONTHLYDATE
-          type = 4
-        when TASK_TIME_TRIGGER_MONTHLYDOW
-          type = 5
-        when TASK_TIME_TRIGGER_ONCE
-          type = 1
-        else
-          raise Error, 'Unknown trigger type'
-      end
 
       startTime = "%04d-%02d-%02dT%02d:%02d:00" % [
         trigger[:start_year], trigger[:start_month], trigger[:start_day],
@@ -904,7 +846,7 @@ module Win32
         trigger[:end_year], trigger[:end_month], trigger[:end_day]
       ]
 
-      trig = definition.Triggers.Create(type)
+      trig = definition.Triggers.Create( trigger[:trigger_type].to_i )
       trig.Id = "RegistrationTriggerId#{definition.Triggers.Count}"
       trig.StartBoundary = startTime
       trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
@@ -952,6 +894,11 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
           trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          trig.UserId = trigger[:user_id] if trigger[:user_id]
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
       end
 
       update_task_definition(definition)
@@ -1321,6 +1268,13 @@ module Win32
       end
     end    
 
+    def valid_trigger_option(trigger_type)
+      [ TASK_TIME_TRIGGER_ONCE, TASK_TIME_TRIGGER_DAILY, TASK_TIME_TRIGGER_WEEKLY,
+        TASK_TIME_TRIGGER_MONTHLYDATE, TASK_TIME_TRIGGER_MONTHLYDOW, TASK_EVENT_TRIGGER_ON_IDLE,
+        TASK_EVENT_TRIGGER_AT_SYSTEMSTART, TASK_EVENT_TRIGGER_AT_LOGON ].include?(trigger_type.to_i)
+    end
+
+
     def validate_trigger(hash)
       [:start_year, :start_month, :start_day].each{ |key|
         raise ArgumentError, "#{key} must be set" unless hash[key]
@@ -1347,4 +1301,5 @@ module Win32
       raise Error, ole_error(method_name, err)
     end
   end
+  # :stopdoc:
 end
