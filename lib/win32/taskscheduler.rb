@@ -756,7 +756,7 @@ module Win32
         trigger[:end_year], trigger[:end_month], trigger[:end_day]
       ]
 
-      trig = definition.Triggers.Create(type)
+      trig = definition.Triggers.Create( trigger[:trigger_type].to_i )
       trig.Id = "RegistrationTriggerId#{definition.Triggers.Count}"
       trig.StartBoundary = startTime
       trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
