@@ -710,6 +710,9 @@ module Win32
           tmp = {}
           tmp[:once] = nil
           trigger[:type] = tmp
+        when 6
+          trigger[:trigger_type] = TASK_EVENT_TRIGGER_ON_IDLE
+          trigger[:execution_time_limit] = trig.ExecutionTimeLimit
         else
           raise Error, 'Unknown trigger type'
       end
@@ -827,6 +830,11 @@ module Win32
         when TASK_TIME_TRIGGER_ONCE
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+          end
+        when TASK_EVENT_TRIGGER_ON_IDLE
+          # for setting execution time limit Ref : https://msdn.microsoft.com/en-us/library/windows/desktop/aa380724(v=vs.85).aspx
+          if trigger[:execution_time_limit].to_i > 0
+            trig.ExecutionTimeLimit = "PT#{trigger[:execution_time_limit]||0}M"
           end
       end
 
@@ -1031,6 +1039,16 @@ module Win32
       time
     end
 
+    def idle_settings
+      check_for_active_task
+      idle_settings = {}
+      idle_settings[:idle_duration] = @task.Definition.Settings.IdleSettings.IdleDuration
+      idle_settings[:stop_on_idle_end] = @task.Definition.Settings.IdleSettings.StopOnIdleEnd
+      idle_settings[:wait_timeout] = @task.Definition.Settings.IdleSettings.WaitTimeout
+      idle_settings[:restart_on_idle] = @task.Definition.Settings.IdleSettings.RestartOnIdle
+      idle_settings
+    end
+
     # Returns the maximum length of time, in milliseconds, that the task
     # will run before terminating.
     #
@@ -1115,7 +1133,10 @@ module Win32
       enabled = hash[:enabled]
       execution_time_limit = hash[:execution_time_limit] || hash[:max_run_time]
       hidden = hash[:hidden]
-      idle_settings = hash[:idle_settings]
+      idle_duration = "PT#{hash[:idle_duration]||0}M"
+      stop_on_idle_end = hash[:stop_on_idle_end]
+      wait_timeout = "PT#{hash[:wait_timeout]||0}M"
+      restart_on_idle = hash[:restart_on_idle]
       network_settings = hash[:network_settings]
       priority = hash[:priority]
       restart_count = hash[:restart_count]
@@ -1135,7 +1156,10 @@ module Win32
       definition.Settings.Enabled = enabled if enabled
       definition.Settings.ExecutionTimeLimit = execution_time_limit if execution_time_limit
       definition.Settings.Hidden = hidden if hidden
-      definition.Settings.IdleSettings = idle_settings if idle_settings
+      definition.Settings.IdleSettings.IdleDuration = idle_duration if idle_duration
+      definition.Settings.IdleSettings.StopOnIdleEnd = stop_on_idle_end if stop_on_idle_end
+      definition.Settings.IdleSettings.WaitTimeout = wait_timeout if wait_timeout
+      definition.Settings.IdleSettings.RestartOnIdle = restart_on_idle if restart_on_idle
       definition.Settings.NetworkSettings = network_settings if network_settings
       definition.Settings.Priority = priority if priority
       definition.Settings.RestartCount = restart_count if restart_count
