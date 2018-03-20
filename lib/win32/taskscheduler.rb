@@ -1,4 +1,5 @@
 require_relative 'windows/helper'
+require_relative 'windows/constants'
 require 'win32ole'
 require 'socket'
 require 'time'
@@ -10,6 +11,7 @@ module Win32
   # The TaskScheduler class encapsulates a Windows scheduled task
   class TaskScheduler
     include Windows::TaskSchedulerHelper
+    include Windows::TaskSchedulerConstants
 
     # The version of the win32-taskscheduler library
     VERSION = '0.3.2'.freeze
@@ -17,247 +19,102 @@ module Win32
     # The Error class is typically raised if any TaskScheduler methods fail.
     class Error < StandardError; end
 
-    # Triggers
+    # Shorthand constants
+
+    IDLE = IDLE_PRIORITY_CLASS
+    NORMAL = NORMAL_PRIORITY_CLASS
+    HIGH = HIGH_PRIORITY_CLASS
+    REALTIME = REALTIME_PRIORITY_CLASS
+    BELOW_NORMAL = BELOW_NORMAL_PRIORITY_CLASS
+    ABOVE_NORMAL = ABOVE_NORMAL_PRIORITY_CLASS
+
+    ONCE = TASK_TIME_TRIGGER_ONCE
+    DAILY = TASK_TIME_TRIGGER_DAILY
+    WEEKLY = TASK_TIME_TRIGGER_WEEKLY
+    MONTHLYDATE = TASK_TIME_TRIGGER_MONTHLYDATE
+    MONTHLYDOW = TASK_TIME_TRIGGER_MONTHLYDOW
+
+    ON_IDLE = TASK_EVENT_TRIGGER_ON_IDLE
+    AT_SYSTEMSTART = TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+    AT_LOGON = TASK_EVENT_TRIGGER_AT_LOGON
+    FIRST_WEEK = TASK_FIRST_WEEK
+    SECOND_WEEK = TASK_SECOND_WEEK
+    THIRD_WEEK = TASK_THIRD_WEEK
+    FOURTH_WEEK = TASK_FOURTH_WEEK
+    LAST_WEEK = TASK_LAST_WEEK
+    SUNDAY = TASK_SUNDAY
+    MONDAY = TASK_MONDAY
+    TUESDAY = TASK_TUESDAY
+    WEDNESDAY = TASK_WEDNESDAY
+    THURSDAY = TASK_THURSDAY
+    FRIDAY = TASK_FRIDAY
+    SATURDAY = TASK_SATURDAY
+    JANUARY = TASK_JANUARY
+    FEBRUARY = TASK_FEBRUARY
+    MARCH = TASK_MARCH
+    APRIL = TASK_APRIL
+    MAY = TASK_MAY
+    JUNE = TASK_JUNE
+    JULY = TASK_JULY
+    AUGUST = TASK_AUGUST
+    SEPTEMBER = TASK_SEPTEMBER
+    OCTOBER = TASK_OCTOBER
+    NOVEMBER = TASK_NOVEMBER
+    DECEMBER = TASK_DECEMBER
+
+    INTERACTIVE = TASK_FLAG_INTERACTIVE
+    DELETE_WHEN_DONE = TASK_FLAG_DELETE_WHEN_DONE
+    DISABLED = TASK_FLAG_DISABLED
+    START_ONLY_IF_IDLE = TASK_FLAG_START_ONLY_IF_IDLE
+    KILL_ON_IDLE_END = TASK_FLAG_KILL_ON_IDLE_END
+    DONT_START_IF_ON_BATTERIES = TASK_FLAG_DONT_START_IF_ON_BATTERIES
+    KILL_IF_GOING_ON_BATTERIES = TASK_FLAG_KILL_IF_GOING_ON_BATTERIES
+    RUN_ONLY_IF_DOCKED = TASK_FLAG_RUN_ONLY_IF_DOCKED
+    HIDDEN = TASK_FLAG_HIDDEN
+    RUN_IF_CONNECTED_TO_INTERNET = TASK_FLAG_RUN_IF_CONNECTED_TO_INTERNET
+    RESTART_ON_IDLE_RESUME = TASK_FLAG_RESTART_ON_IDLE_RESUME
+    SYSTEM_REQUIRED = TASK_FLAG_SYSTEM_REQUIRED
+    RUN_ONLY_IF_LOGGED_ON = TASK_FLAG_RUN_ONLY_IF_LOGGED_ON
+
+    FLAG_HAS_END_DATE = TASK_TRIGGER_FLAG_HAS_END_DATE
+    FLAG_KILL_AT_DURATION_END = TASK_TRIGGER_FLAG_KILL_AT_DURATION_END
+    FLAG_DISABLED = TASK_TRIGGER_FLAG_DISABLED
+
+    MAX_RUN_TIMES = TASK_MAX_RUN_TIMES
+
+    FIRST = TASK_FIRST
+    SECOND = TASK_SECOND
+    THIRD = TASK_THIRD
+    FOURTH = TASK_FOURTH
+    FIFTH = TASK_FIFTH
+    SIXTH = TASK_SIXTH
+    SEVENTH = TASK_SEVENTH
+    EIGHTH = TASK_EIGHTH
+    NINETH = TASK_NINETH
+    TENTH = TASK_TENTH
+    ELEVENTH = TASK_ELEVENTH
+    TWELFTH = TASK_TWELFTH
+    THIRTEENTH = TASK_THIRTEENTH
+    FOURTEENTH = TASK_FOURTEENTH
+    FIFTEENTH = TASK_FIFTEENTH
+    SIXTEENTH = TASK_SIXTEENTH
+    SEVENTEENTH = TASK_SEVENTEENTH
+    EIGHTEENTH = TASK_EIGHTEENTH
+    NINETEENTH = TASK_NINETEENTH
+    TWENTIETH = TASK_TWENTIETH
+    TWENTY_FIRST = TASK_TWENTY_FIRST
+    TWENTY_SECOND = TASK_TWENTY_SECOND
+    TWENTY_THIRD = TASK_TWENTY_THIRD
+    TWENTY_FOURTH = TASK_TWENTY_FOURTH
+    TWENTY_FIFTH = TASK_TWENTY_FIFTH
+    TWENTY_SIXTH = TASK_TWENTY_SIXTH
+    TWENTY_SEVENTH = TASK_TWENTY_SEVENTH
+    TWENTY_EIGHTH = TASK_TWENTY_EIGHTH
+    TWENTY_NINTH = TASK_TWENTY_NINTH
+    THIRTYETH = TASK_THIRTYETH
+    THIRTY_FIRST = TASK_THIRTY_FIRST
+    LAST = TASK_LAST
 
-    # Trigger is set to run the task a single time
-    TASK_TIME_TRIGGER_ONCE = 1
-
-    # Trigger is set to run the task on a daily interval
-    TASK_TIME_TRIGGER_DAILY = 2
-
-    # Trigger is set to run the task on specific days of a specific week & month
-    TASK_TIME_TRIGGER_WEEKLY = 3
-
-    # Trigger is set to run the task on specific day(s) of the month
-    TASK_TIME_TRIGGER_MONTHLYDATE = 4
-
-    # Trigger is set to run the task on specific day(s) of the month
-    TASK_TIME_TRIGGER_MONTHLYDOW = 5
-
-    # Trigger is set to run the task if the system remains idle for the amount
-    # of time specified by the idle wait time of the task
-    TASK_EVENT_TRIGGER_ON_IDLE = 6
-
-    TASK_TRIGGER_REGISTRATION = 7
-
-    # Trigger is set to run the task at system startup
-    TASK_EVENT_TRIGGER_AT_SYSTEMSTART = 8
-
-    # Trigger is set to run the task when a user logs on
-    TASK_EVENT_TRIGGER_AT_LOGON = 9
-
-    TASK_TRIGGER_SESSION_STATE_CHANGE = 11
-
-    # Daily Tasks
-
-    # The task will run on Sunday
-    TASK_SUNDAY = 0x1
-
-    # The task will run on Monday
-    TASK_MONDAY = 0x2
-
-    # The task will run on Tuesday
-    TASK_TUESDAY = 0x4
-
-    # The task will run on Wednesday
-    TASK_WEDNESDAY = 0x8
-
-    # The task will run on Thursday
-    TASK_THURSDAY = 0x10
-
-    # The task will run on Friday
-    TASK_FRIDAY = 0x20
-
-    # The task will run on Saturday
-    TASK_SATURDAY = 0x40
-
-    # Weekly tasks
-
-    # The task will run between the 1st and 7th day of the month
-    TASK_FIRST_WEEK = 1
-
-    # The task will run between the 8th and 14th day of the month
-    TASK_SECOND_WEEK = 2
-
-    # The task will run between the 15th and 21st day of the month
-    TASK_THIRD_WEEK = 3
-
-    # The task will run between the 22nd and 28th day of the month
-    TASK_FOURTH_WEEK = 4
-
-    # The task will run the last seven days of the month
-    TASK_LAST_WEEK = 5
-
-    # Monthly tasks
-
-    # The task will run in January
-    TASK_JANUARY = 0x1
-
-    # The task will run in February
-    TASK_FEBRUARY = 0x2
-
-    # The task will run in March
-    TASK_MARCH = 0x4
-
-    # The task will run in April
-    TASK_APRIL = 0x8
-
-    # The task will run in May
-    TASK_MAY = 0x10
-
-    # The task will run in June
-    TASK_JUNE = 0x20
-
-    # The task will run in July
-    TASK_JULY = 0x40
-
-    # The task will run in August
-    TASK_AUGUST = 0x80
-
-    # The task will run in September
-    TASK_SEPTEMBER = 0x100
-
-    # The task will run in October
-    TASK_OCTOBER = 0x200
-
-    # The task will run in November
-    TASK_NOVEMBER = 0x400
-
-    # The task will run in December
-    TASK_DECEMBER = 0x800
-
-    # Flags
-
-    # Used when converting AT service jobs into work items
-    TASK_FLAG_INTERACTIVE = 0x1
-
-    # The work item will be deleted when there are no more scheduled run times
-    TASK_FLAG_DELETE_WHEN_DONE = 0x2
-
-    # The work item is disabled. Useful for temporarily disabling a task
-    TASK_FLAG_DISABLED = 0x4
-
-    # The work item begins only if the computer is not in use at the scheduled
-    # start time
-    TASK_FLAG_START_ONLY_IF_IDLE = 0x10
-
-    # The work item terminates if the computer makes an idle to non-idle
-    # transition while the work item is running
-    TASK_FLAG_KILL_ON_IDLE_END = 0x20
-
-    # The work item does not start if the computer is running on battery power
-    TASK_FLAG_DONT_START_IF_ON_BATTERIES = 0x40
-
-    # The work item ends, and the associated application quits, if the computer
-    # switches to battery power
-    TASK_FLAG_KILL_IF_GOING_ON_BATTERIES = 0x80
-
-    # The work item starts only if the computer is in a docking station
-    TASK_FLAG_RUN_ONLY_IF_DOCKED = 0x100
-
-    # The work item created will be hidden
-    TASK_FLAG_HIDDEN = 0x200
-
-    # The work item runs only if there is a valid internet connection
-    TASK_FLAG_RUN_IF_CONNECTED_TO_INTERNET = 0x400
-
-    # The work item starts again if the computer makes a non-idle to idle
-    # transition
-    TASK_FLAG_RESTART_ON_IDLE_RESUME = 0x800
-
-    # The work item causes the system to be resumed, or awakened, if the
-    # system is running on batter power
-    TASK_FLAG_SYSTEM_REQUIRED = 0x1000
-
-    # The work item runs only if a specified account is logged on interactively
-    TASK_FLAG_RUN_ONLY_IF_LOGGED_ON = 0x2000
-
-    # Triggers
-
-    # The task will stop at some point in time
-    TASK_TRIGGER_FLAG_HAS_END_DATE = 0x1
-
-    # The task can be stopped at the end of the repetition period
-    TASK_TRIGGER_FLAG_KILL_AT_DURATION_END = 0x2
-
-    # The task trigger is disabled
-    TASK_TRIGGER_FLAG_DISABLED = 0x4
-
-    # :stopdoc:
-
-    TASK_MAX_RUN_TIMES = 1440
-    TASKS_TO_RETRIEVE  = 5
-
-    # Task creation
-
-    TASK_VALIDATE_ONLY = 0x1
-    TASK_CREATE = 0x2
-    TASK_UPDATE = 0x4
-    TASK_CREATE_OR_UPDATE = 0x6
-    TASK_DISABLE = 0x8
-    TASK_DONT_ADD_PRINCIPAL_ACE = 0x10
-    TASK_IGNORE_REGISTRATION_TRIGGERS = 0x20
-
-    # Task logon types
-
-    TASK_LOGON_NONE = 0
-    TASK_LOGON_PASSWORD = 1
-    TASK_LOGON_S4U = 2
-    TASK_LOGON_INTERACTIVE_TOKEN = 3
-    TASK_LOGON_GROUP = 4
-    TASK_LOGON_SERVICE_ACCOUNT = 5
-    TASK_LOGON_INTERACTIVE_TOKEN_OR_PASSWORD = 6
-
-    # Priority classes
-
-    REALTIME_PRIORITY_CLASS     = 0
-    HIGH_PRIORITY_CLASS         = 1
-    ABOVE_NORMAL_PRIORITY_CLASS = 2 # Or 3
-    NORMAL_PRIORITY_CLASS       = 4 # Or 5, 6
-    BELOW_NORMAL_PRIORITY_CLASS = 7 # Or 8
-    IDLE_PRIORITY_CLASS         = 9 # Or 10
-
-    CLSCTX_INPROC_SERVER  = 0x1
-    CLSID_CTask =  [0x148BD520,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
-    CLSID_CTaskScheduler =  [0x148BD52A,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
-    IID_ITaskScheduler = [0x148BD527,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
-    IID_ITask = [0x148BD524,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
-    IID_IPersistFile = [0x0000010b,0x0000,0x0000,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46].pack('LSSC8')
-
-    # Days of month
-
-    TASK_FIRST = 0x01
-    TASK_SECOND = 0x02
-    TASK_THIRD = 0x04
-    TASK_FOURTH = 0x08
-    TASK_FIFTH = 0x10
-    TASK_SIXTH = 0x20
-    TASK_SEVENTH = 0x40
-    TASK_EIGHTH = 0x80
-    TASK_NINETH = 0x100
-    TASK_TENTH = 0x200
-    TASK_ELEVENTH = 0x400
-    TASK_TWELFTH = 0x800
-    TASK_THIRTEENTH = 0x1000
-    TASK_FOURTEENTH = 0x2000
-    TASK_FIFTEENTH = 0x4000
-    TASK_SIXTEENTH = 0x8000
-    TASK_SEVENTEENTH = 0x10000
-    TASK_EIGHTEENTH = 0x20000
-    TASK_NINETEENTH = 0x40000
-    TASK_TWENTIETH = 0x80000
-    TASK_TWENTY_FIRST = 0x100000
-    TASK_TWENTY_SECOND = 0x200000
-    TASK_TWENTY_THIRD = 0x400000
-    TASK_TWENTY_FOURTH = 0x800000
-    TASK_TWENTY_FIFTH = 0x1000000
-    TASK_TWENTY_SIXTH = 0x2000000
-    TASK_TWENTY_SEVENTH = 0x4000000
-    TASK_TWENTY_EIGHTH = 0x8000000
-    TASK_TWENTY_NINTH = 0x10000000
-    TASK_THIRTYETH = 0x20000000
-    TASK_THIRTY_FIRST = 0x40000000
-    TASK_LAST = 0x80000000
 
     # :startdoc:
 
@@ -435,8 +292,6 @@ module Win32
     alias host= machine=
     alias machine host
     alias set_host set_machine
-
-    SYSTEM_USERS = ['NT AUTHORITY\SYSTEM', "SYSTEM", 'NT AUTHORITY\LOCALSERVICE', 'NT AUTHORITY\NETWORKSERVICE', 'BUILTIN\USERS', "USERS"].freeze
 
     # Sets the +user+ and +password+ for the given task. If the user and
     # password are set properly then true is returned.
@@ -831,10 +686,12 @@ module Win32
         when TASK_EVENT_TRIGGER_AT_LOGON
           trigger[:user_id] = trig.UserId if trig.UserId.to_s != ""
           trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i if trig.Delay != ""
+        when TASK_EVENT_TRIGGER_ON_IDLE
+          trigger[:execution_time_limit] = trig.ExecutionTimeLimit
         else
           raise Error, 'Unknown trigger type'
       end
-      
+
       trigger[:start_year], trigger[:start_month],
       trigger[:start_day],  trigger[:start_hour],
       trigger[:start_minute] = trig.StartBoundary.scan(/(\d+)-(\d+)-(\d+)T(\d+):(\d+)/).first
@@ -952,6 +809,11 @@ module Win32
         when TASK_EVENT_TRIGGER_AT_LOGON
           trig.UserId = trigger[:user_id] if trigger[:user_id]
           trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+        when TASK_EVENT_TRIGGER_ON_IDLE
+          # for setting execution time limit Ref : https://msdn.microsoft.com/en-us/library/windows/desktop/aa380724(v=vs.85).aspx
+          if trigger[:execution_time_limit].to_i > 0
+            trig.ExecutionTimeLimit = "PT#{trigger[:execution_time_limit]||0}M"
+          end
       end
 
       update_task_definition(definition)
@@ -1148,6 +1010,16 @@ module Win32
       time
     end
 
+    def idle_settings
+      check_for_active_task
+      idle_settings = {}
+      idle_settings[:idle_duration] = @task.Definition.Settings.IdleSettings.IdleDuration
+      idle_settings[:stop_on_idle_end] = @task.Definition.Settings.IdleSettings.StopOnIdleEnd
+      idle_settings[:wait_timeout] = @task.Definition.Settings.IdleSettings.WaitTimeout
+      idle_settings[:restart_on_idle] = @task.Definition.Settings.IdleSettings.RestartOnIdle
+      idle_settings
+    end
+
     # Returns the maximum length of time, in milliseconds, that the task
     # will run before terminating.
     #
@@ -1232,7 +1104,10 @@ module Win32
       enabled = hash[:enabled]
       execution_time_limit = hash[:execution_time_limit] || hash[:max_run_time]
       hidden = hash[:hidden]
-      idle_settings = hash[:idle_settings]
+      idle_duration = "PT#{hash[:idle_duration]||0}M"
+      stop_on_idle_end = hash[:stop_on_idle_end]
+      wait_timeout = "PT#{hash[:wait_timeout]||0}M"
+      restart_on_idle = hash[:restart_on_idle]
       network_settings = hash[:network_settings]
       priority = hash[:priority]
       restart_count = hash[:restart_count]
@@ -1252,7 +1127,10 @@ module Win32
       definition.Settings.Enabled = enabled if enabled
       definition.Settings.ExecutionTimeLimit = execution_time_limit if execution_time_limit
       definition.Settings.Hidden = hidden if hidden
-      definition.Settings.IdleSettings = idle_settings if idle_settings
+      definition.Settings.IdleSettings.IdleDuration = idle_duration if idle_duration
+      definition.Settings.IdleSettings.StopOnIdleEnd = stop_on_idle_end if stop_on_idle_end
+      definition.Settings.IdleSettings.WaitTimeout = wait_timeout if wait_timeout
+      definition.Settings.IdleSettings.RestartOnIdle = restart_on_idle if restart_on_idle
       definition.Settings.NetworkSettings = network_settings if network_settings
       definition.Settings.Priority = priority if priority
       definition.Settings.RestartCount = restart_count if restart_count
@@ -1316,6 +1194,32 @@ module Win32
       hash
     end
 
+    # Expected principal hash: { id: STRING, display_name: STRING, user_id: STRING,
+    # logon_type: INTEGER, group_id: STRING, run_level: INTEGER }
+    def configure_principals(principals)
+      raise TypeError unless principals.is_a?(Hash)
+      check_for_active_task
+      definition = @task.Definition
+      definition.Principal.Id = principals[:id] if principals[:id].to_s != ""
+      definition.Principal.DisplayName = principals[:display_name] if principals[:display_name].to_s != ""
+      definition.Principal.UserId = principals[:user_id] if principals[:user_id].to_s != ""
+      definition.Principal.LogonType = principals[:logon_type] if principals[:logon_type].to_s != ""
+      definition.Principal.GroupId = principals[:group_id] if principals[:group_id].to_s != ""
+      definition.Principal.RunLevel = principals[:run_level] if principals[:run_level].to_s != ""
+      update_task_definition(definition)
+      principals
+    end
+
+    # Returns a hash containing all the principal information of the current task
+    def principals
+      check_for_active_task
+      principals_hash = {}
+      @task.Definition.Principal.ole_get_methods.each do |principal|
+        principals_hash[principal.name] = @task.Definition.Principal._getproperty(principal.dispid, [], [])
+      end
+      symbolize_keys(principals_hash)   
+    end
+
     # Returns a hash containing all settings of the current task
     def settings
       check_for_active_task
@@ -1349,102 +1253,6 @@ module Win32
       end
       symbolize_keys(settings_hash)
     end
-
-    # Shorthand constants
-
-    IDLE = IDLE_PRIORITY_CLASS
-    NORMAL = NORMAL_PRIORITY_CLASS
-    HIGH = HIGH_PRIORITY_CLASS
-    REALTIME = REALTIME_PRIORITY_CLASS
-    BELOW_NORMAL = BELOW_NORMAL_PRIORITY_CLASS
-    ABOVE_NORMAL = ABOVE_NORMAL_PRIORITY_CLASS
-
-    ONCE = TASK_TIME_TRIGGER_ONCE
-    DAILY = TASK_TIME_TRIGGER_DAILY
-    WEEKLY = TASK_TIME_TRIGGER_WEEKLY
-    MONTHLYDATE = TASK_TIME_TRIGGER_MONTHLYDATE
-    MONTHLYDOW = TASK_TIME_TRIGGER_MONTHLYDOW
-
-    ON_IDLE = TASK_EVENT_TRIGGER_ON_IDLE
-    AT_SYSTEMSTART = TASK_EVENT_TRIGGER_AT_SYSTEMSTART
-    AT_LOGON = TASK_EVENT_TRIGGER_AT_LOGON
-    FIRST_WEEK = TASK_FIRST_WEEK
-    SECOND_WEEK = TASK_SECOND_WEEK
-    THIRD_WEEK = TASK_THIRD_WEEK
-    FOURTH_WEEK = TASK_FOURTH_WEEK
-    LAST_WEEK = TASK_LAST_WEEK
-    SUNDAY = TASK_SUNDAY
-    MONDAY = TASK_MONDAY
-    TUESDAY = TASK_TUESDAY
-    WEDNESDAY = TASK_WEDNESDAY
-    THURSDAY = TASK_THURSDAY
-    FRIDAY = TASK_FRIDAY
-    SATURDAY = TASK_SATURDAY
-    JANUARY = TASK_JANUARY
-    FEBRUARY = TASK_FEBRUARY
-    MARCH = TASK_MARCH
-    APRIL = TASK_APRIL
-    MAY = TASK_MAY
-    JUNE = TASK_JUNE
-    JULY = TASK_JULY
-    AUGUST = TASK_AUGUST
-    SEPTEMBER = TASK_SEPTEMBER
-    OCTOBER = TASK_OCTOBER
-    NOVEMBER = TASK_NOVEMBER
-    DECEMBER = TASK_DECEMBER
-
-    INTERACTIVE = TASK_FLAG_INTERACTIVE
-    DELETE_WHEN_DONE = TASK_FLAG_DELETE_WHEN_DONE
-    DISABLED = TASK_FLAG_DISABLED
-    START_ONLY_IF_IDLE = TASK_FLAG_START_ONLY_IF_IDLE
-    KILL_ON_IDLE_END = TASK_FLAG_KILL_ON_IDLE_END
-    DONT_START_IF_ON_BATTERIES = TASK_FLAG_DONT_START_IF_ON_BATTERIES
-    KILL_IF_GOING_ON_BATTERIES = TASK_FLAG_KILL_IF_GOING_ON_BATTERIES
-    RUN_ONLY_IF_DOCKED = TASK_FLAG_RUN_ONLY_IF_DOCKED
-    HIDDEN = TASK_FLAG_HIDDEN
-    RUN_IF_CONNECTED_TO_INTERNET = TASK_FLAG_RUN_IF_CONNECTED_TO_INTERNET
-    RESTART_ON_IDLE_RESUME = TASK_FLAG_RESTART_ON_IDLE_RESUME
-    SYSTEM_REQUIRED = TASK_FLAG_SYSTEM_REQUIRED
-    RUN_ONLY_IF_LOGGED_ON = TASK_FLAG_RUN_ONLY_IF_LOGGED_ON
-
-    FLAG_HAS_END_DATE = TASK_TRIGGER_FLAG_HAS_END_DATE
-    FLAG_KILL_AT_DURATION_END = TASK_TRIGGER_FLAG_KILL_AT_DURATION_END
-    FLAG_DISABLED = TASK_TRIGGER_FLAG_DISABLED
-
-    MAX_RUN_TIMES = TASK_MAX_RUN_TIMES
-
-    FIRST = TASK_FIRST
-    SECOND = TASK_SECOND
-    THIRD = TASK_THIRD
-    FOURTH = TASK_FOURTH
-    FIFTH = TASK_FIFTH
-    SIXTH = TASK_SIXTH
-    SEVENTH = TASK_SEVENTH
-    EIGHTH = TASK_EIGHTH
-    NINETH = TASK_NINETH
-    TENTH = TASK_TENTH
-    ELEVENTH = TASK_ELEVENTH
-    TWELFTH = TASK_TWELFTH
-    THIRTEENTH = TASK_THIRTEENTH
-    FOURTEENTH = TASK_FOURTEENTH
-    FIFTEENTH = TASK_FIFTEENTH
-    SIXTEENTH = TASK_SIXTEENTH
-    SEVENTEENTH = TASK_SEVENTEENTH
-    EIGHTEENTH = TASK_EIGHTEENTH
-    NINETEENTH = TASK_NINETEENTH
-    TWENTIETH = TASK_TWENTIETH
-    TWENTY_FIRST = TASK_TWENTY_FIRST
-    TWENTY_SECOND = TASK_TWENTY_SECOND
-    TWENTY_THIRD = TASK_TWENTY_THIRD
-    TWENTY_FOURTH = TASK_TWENTY_FOURTH
-    TWENTY_FIFTH = TASK_TWENTY_FIFTH
-    TWENTY_SIXTH = TASK_TWENTY_SIXTH
-    TWENTY_SEVENTH = TASK_TWENTY_SEVENTH
-    TWENTY_EIGHTH = TASK_TWENTY_EIGHTH
-    TWENTY_NINTH = TASK_TWENTY_NINTH
-    THIRTYETH = TASK_THIRTYETH
-    THIRTY_FIRST = TASK_THIRTY_FIRST
-    LAST = TASK_LAST
 
     private
 
@@ -1493,4 +1301,5 @@ module Win32
       raise Error, ole_error(method_name, err)
     end
   end
+  # :stopdoc:
 end
