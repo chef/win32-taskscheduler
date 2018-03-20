@@ -112,6 +112,30 @@ module Win32
     THIRTY_FIRST = TASK_THIRTY_FIRST
     LAST = TASK_LAST
 
+
+    # Run Level Types
+    # Tasks will be run with the least privileges
+    TASK_RUNLEVEL_LUA      = 0
+    # Tasks will be run with the highest privileges
+    TASK_RUNLEVEL_HIGHEST  = 1
+
+    # Logon Types
+    # Used for non-NT credentials
+    TASK_LOGON_NONE                           = 0
+    # Use a password for logging on the user
+    TASK_LOGON_PASSWORD                       = 1
+    # The service will log the user on using Service For User
+    TASK_LOGON_S4U                            = 2
+    # Task will be run only in an existing interactive session
+    TASK_LOGON_INTERACTIVE_TOKEN              = 3
+    # Group activation. The groupId field specifies the group
+    TASK_LOGON_GROUP                          = 4
+    # When Local System, Local Service, or Network Service account is
+    # being used as a security context to run the task
+    TASK_LOGON_SERVICE_ACCOUNT                = 5
+    # Not in use; currently identical to TASK_LOGON_PASSWORD
+    TASK_LOGON_INTERACTIVE_TOKEN_OR_PASSWORD  = 6
+
     # :startdoc:
 
     attr_accessor :password
@@ -1221,6 +1245,32 @@ module Win32
       update_task_definition(definition)
 
       hash
+    end
+
+    # Expected principal hash: { id: STRING, display_name: STRING, user_id: STRING,
+    # logon_type: INTEGER, group_id: STRING, run_level: INTEGER }
+    def configure_principals(principals)
+      raise TypeError unless principals.is_a?(Hash)
+      check_for_active_task
+      definition = @task.Definition
+      definition.Principal.Id = principals[:id] if principals[:id].to_s != ""
+      definition.Principal.DisplayName = principals[:display_name] if principals[:display_name].to_s != ""
+      definition.Principal.UserId = principals[:user_id] if principals[:user_id].to_s != ""
+      definition.Principal.LogonType = principals[:logon_type] if principals[:logon_type].to_s != ""
+      definition.Principal.GroupId = principals[:group_id] if principals[:group_id].to_s != ""
+      definition.Principal.RunLevel = principals[:run_level] if principals[:run_level].to_s != ""
+      update_task_definition(definition)
+      principals
+    end
+
+    # Returns a hash containing all the principal information of the current task
+    def principals
+      check_for_active_task
+      principals_hash = {}
+      @task.Definition.Principal.ole_get_methods.each do |principal|
+        principals_hash[principal.name] = @task.Definition.Principal._getproperty(principal.dispid, [], [])
+      end
+      symbolize_keys(principals_hash)   
     end
 
     # Returns a hash containing all settings of the current task
