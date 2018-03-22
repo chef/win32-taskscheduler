@@ -500,7 +500,7 @@ module Win32
       taskDefinition.Settings.StartWhenAvailable = true
       taskDefinition.Settings.Enabled  = true
       taskDefinition.Settings.Hidden = false
-      
+
 
       startTime = "%04d-%02d-%02dT%02d:%02d:00" % [
         trigger[:start_year], trigger[:start_month], trigger[:start_day],
@@ -565,7 +565,7 @@ module Win32
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
         when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
-          trig.Delay = "PT#{trigger[:delay_duration]||0}M"          
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
         when TASK_EVENT_TRIGGER_AT_LOGON
           trig.UserId = trigger[:user_id] if trigger[:user_id]
           trig.Delay = "PT#{trigger[:delay_duration]||0}M"
@@ -706,7 +706,7 @@ module Win32
       if trig.Repetition.Interval != ""
         trigger[:minutes_interval] = trig.Repetition.Interval.scan(/(\d+)M/)[0][0].to_i
       end
-      
+
       trigger[:trigger_type] = trig.Type
 
       trigger
@@ -739,7 +739,7 @@ module Win32
     def trigger=(trigger)
       raise TypeError unless trigger.is_a?(Hash)
       raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
-      
+
       check_for_active_task
 
       validate_trigger(trigger)
@@ -796,7 +796,7 @@ module Win32
         when TASK_TIME_TRIGGER_MONTHLYDOW
           trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
           trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
-          trig.WeeksOfMonth = tmp[:weeks] if tmp && tmp[:weeks]
+          trig.WeeksOfMonth = tmp[:weeks_of_month] if tmp && tmp[:weeks_of_month]
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
@@ -917,6 +917,8 @@ module Win32
           status = 'ready'
         when 4
           status = 'running'
+        when 2
+          status = 'queued'
         when 1
           status = 'not scheduled'
         else
@@ -1020,6 +1022,11 @@ module Win32
       idle_settings
     end
 
+    def execution_time_limit
+      check_for_active_task
+      @task.Definition.Settings.ExecutionTimeLimit
+    end
+
     # Returns the maximum length of time, in milliseconds, that the task
     # will run before terminating.
     #
@@ -1102,7 +1109,7 @@ module Win32
       delete_expired_task_after = hash[:delete_expired_task_after]
       disallow_start_if_on_batteries = hash[:disallow_start_if_on_batteries]
       enabled = hash[:enabled]
-      execution_time_limit = hash[:execution_time_limit] || hash[:max_run_time]
+      execution_time_limit = "PT#{hash[:execution_time_limit] || hash[:max_run_time] || 0}M"
       hidden = hash[:hidden]
       idle_duration = "PT#{hash[:idle_duration]||0}M"
       stop_on_idle_end = hash[:stop_on_idle_end]
@@ -1217,7 +1224,7 @@ module Win32
       @task.Definition.Principal.ole_get_methods.each do |principal|
         principals_hash[principal.name] = @task.Definition.Principal._getproperty(principal.dispid, [], [])
       end
-      symbolize_keys(principals_hash)   
+      symbolize_keys(principals_hash)
     end
 
     # Returns a hash containing all settings of the current task
@@ -1264,9 +1271,9 @@ module Win32
     # Converts all the keys of a hash to underscored-symbol format
     def symbolize_keys(hash)
       hash.each_with_object({}) do |(k, v), h|
-        h[underscore(k.to_s).to_sym] = v.is_a?(Hash) ? symbolize_keys(v) : v 
+        h[underscore(k.to_s).to_sym] = v.is_a?(Hash) ? symbolize_keys(v) : v
       end
-    end    
+    end
 
     def valid_trigger_option(trigger_type)
       [ TASK_TIME_TRIGGER_ONCE, TASK_TIME_TRIGGER_DAILY, TASK_TIME_TRIGGER_WEEKLY,

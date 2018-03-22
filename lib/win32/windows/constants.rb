@@ -60,19 +60,19 @@ module Windows
     # Weekly tasks
 
     # The task will run between the 1st and 7th day of the month
-    TASK_FIRST_WEEK = 1
+    TASK_FIRST_WEEK = 0X01
 
     # The task will run between the 8th and 14th day of the month
-    TASK_SECOND_WEEK = 2
+    TASK_SECOND_WEEK = 0x02
 
     # The task will run between the 15th and 21st day of the month
-    TASK_THIRD_WEEK = 3
+    TASK_THIRD_WEEK = 0X04
 
     # The task will run between the 22nd and 28th day of the month
-    TASK_FOURTH_WEEK = 4
+    TASK_FOURTH_WEEK = 0X08
 
     # The task will run the last seven days of the month
-    TASK_LAST_WEEK = 5
+    TASK_LAST_WEEK = 0X10
 
     # Monthly tasks
 
