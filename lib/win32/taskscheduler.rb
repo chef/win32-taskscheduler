@@ -1264,7 +1264,7 @@ module Win32
     # Will return total time in minutes
     def time_in_minutes(time_str)
       hour, min, sec = time_details(time_str)
-      ((hour.to_i * 60) + min.to_i + (sec.to_i / 60)) # may also use ceil if required
+      ((hour.to_i * 60) + min.to_i + (sec.to_i / 60)).to_s # may also use ceil if required
     end
 
     # will return an array of [hour, minute, seconds]
