@@ -656,57 +656,50 @@ module Win32
           tmp = {}
           tmp[:days_interval] = trig.DaysInterval
           trigger[:type] = tmp
-          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+          trigger[:random_minutes_interval] = time_in_minutes(trig.RandomDelay)
         when TASK_TIME_TRIGGER_WEEKLY
           tmp = {}
           tmp[:weeks_interval] = trig.WeeksInterval
           tmp[:days_of_week] = trig.DaysOfWeek
           trigger[:type] = tmp
-          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+          trigger[:random_minutes_interval] = time_in_minutes(trig.RandomDelay)
         when TASK_TIME_TRIGGER_MONTHLYDATE
           tmp = {}
           tmp[:months] = trig.MonthsOfYear
           tmp[:days] = trig.DaysOfMonth
           trigger[:type] = tmp
-          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+          trigger[:random_minutes_interval] = time_in_minutes(trig.RandomDelay)
         when TASK_TIME_TRIGGER_MONTHLYDOW
           tmp = {}
           tmp[:months] = trig.MonthsOfYear
           tmp[:days_of_week] = trig.DaysOfWeek
           tmp[:weeks_of_month] = trig.WeeksOfMonth
           trigger[:type] = tmp
-          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+          trigger[:random_minutes_interval] = time_in_minutes(trig.RandomDelay)
         when TASK_TIME_TRIGGER_ONCE
           tmp = {}
           tmp[:once] = nil
           trigger[:type] = tmp
-          trigger[:random_minutes_interval] = trig.RandomDelay.scan(/(\d+)M/)[0][0].to_i if trig.RandomDelay != ""
+          trigger[:random_minutes_interval] = time_in_minutes(trig.RandomDelay)
         when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
-          trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i if trig.Delay != ""
+          trigger[:delay_duration] = time_in_minutes(trig.Delay)
         when TASK_EVENT_TRIGGER_AT_LOGON
           trigger[:user_id] = trig.UserId if trig.UserId.to_s != ""
-          trigger[:delay_duration] = trig.Delay.scan(/(\d+)M/)[0][0].to_i if trig.Delay != ""
+          trigger[:delay_duration] = time_in_minutes(trig.Delay)
         when TASK_EVENT_TRIGGER_ON_IDLE
-          trigger[:execution_time_limit] = trig.ExecutionTimeLimit
+          trigger[:execution_time_limit] = time_in_minutes(trig.ExecutionTimeLimit)
         else
           raise Error, 'Unknown trigger type'
       end
 
-      trigger[:start_year], trigger[:start_month],
-      trigger[:start_day],  trigger[:start_hour],
-      trigger[:start_minute] = trig.StartBoundary.scan(/(\d+)-(\d+)-(\d+)T(\d+):(\d+)/).first
+      trigger[:start_year], trigger[:start_month], trigger[:start_day],
+      trigger[:start_hour], trigger[:start_minute] = trig.StartBoundary.scan(/(\d+)-(\d+)-(\d+)T(\d+):(\d+)/).first
 
       trigger[:end_year], trigger[:end_month],
       trigger[:end_day] = trig.EndBoundary.scan(/(\d+)-(\d+)-(\d+)T/).first
 
-      if trig.Repetition.Duration != ""
-        trigger[:minutes_duration] = trig.Repetition.Duration.scan(/(\d+)M/)[0][0].to_i
-      end
-
-      if trig.Repetition.Interval != ""
-        trigger[:minutes_interval] = trig.Repetition.Interval.scan(/(\d+)M/)[0][0].to_i
-      end
-      
+      trigger[:minutes_duration] = time_in_minutes(trig.Repetition.Duration)
+      trigger[:minutes_interval] = time_in_minutes(trig.Repetition.Interval)
       trigger[:trigger_type] = trig.Type
 
       trigger
@@ -1266,7 +1259,28 @@ module Win32
       hash.each_with_object({}) do |(k, v), h|
         h[underscore(k.to_s).to_sym] = v.is_a?(Hash) ? symbolize_keys(v) : v 
       end
-    end    
+    end
+
+    # Will return total time in minutes
+    def time_in_minutes(time_str)
+      hour, min, sec = time_details(time_str)
+      ((hour.to_i * 60) + min.to_i + (sec.to_i / 60)) # may also use ceil if required
+    end
+
+    # will return an array of [hour, minute, seconds]
+    def time_details(time_str)
+      time_arr = []
+      # Will retrieve an array of arrays; each with a respective index position of
+      # [H, M, T] and rest will be nil.
+      # example: "PT2S10M4H" will return in
+      # [[nil, nil, "2"], [nil, "10", nil], ["4", nil, nil]]
+      splitted = time_str.scan(/(\d+)(?:H)|(\d+)(?:M)|(\d+)(?:S)/)
+      splitted.each do |arr|
+        i = arr.index{|x| !x.nil?}
+        time_arr[i] = arr[i]
+      end
+      time_arr
+    end
 
     def valid_trigger_option(trigger_type)
       [ TASK_TIME_TRIGGER_ONCE, TASK_TIME_TRIGGER_DAILY, TASK_TIME_TRIGGER_WEEKLY,
