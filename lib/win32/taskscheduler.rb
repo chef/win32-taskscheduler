@@ -1261,25 +1261,72 @@ module Win32
       end
     end
 
-    # Will return total time in minutes
+    # Returns total time in minutes
     def time_in_minutes(time_str)
-      hour, min, sec = time_details(time_str)
-      ((hour.to_i * 60) + min.to_i + (sec.to_i / 60)).to_s # may also use ceil if required
+      time_in_seconds(time_str) / 60
     end
 
-    # will return an array of [hour, minute, seconds]
+    # Calculates total time duration in seconds
+    def time_in_seconds(time_str)
+      t = time_details(time_str)
+      curr_time = Time.now
+
+      # Basic time variables
+      y = curr_time.year + t[:year].to_i
+      mth = curr_time.month + t[:month].to_i
+      d = curr_time.day + t[:day].to_i
+      h = curr_time.hour + t[:hour].to_i
+      min = curr_time.min + t[:min].to_i
+      s = curr_time.sec + t[:sec].to_i
+
+      # 'extra value' calculations for these time variables
+      s, min = extra_time(s, min, 60)
+      min, h = extra_time(min, h, 60)
+      h, d = extra_time(h, d, 24)
+      d, mth = extra_time(d, mth, 30)
+      mth, y = extra_time(mth, y, 12)
+
+      future_time = Time.new(y, mth, d, h, min, s)
+
+      # Difference in time returns seconds
+      future_time.to_i - curr_time.to_i
+    end
+
+    def extra_time(low, up, div_val)
+      # a will contain extra up(min); b will hold actual low(sec). Example:
+      # a, b = s.divmod(60)
+      # min += a; s = b
+      a, b = low.divmod(div_val)
+      up += a; low = b
+      [low, up]
+    end
+
+    # Extracts "P_Y_M_DT_H_M_S" format and
+    # Returns a hash with applicable values of 
+    # (keys =>) [:year, :month, :day, :hour, :min, :sec]
+    # Example: "PT3S" => {sec: 3}
     def time_details(time_str)
-      time_arr = []
-      # Will retrieve an array of arrays; each with a respective index position of
-      # [H, M, T] and rest will be nil.
-      # example: "PT2S10M4H" will return in
-      # [[nil, nil, "2"], [nil, "10", nil], ["4", nil, nil]]
-      splitted = time_str.scan(/(\d+)(?:H)|(\d+)(?:M)|(\d+)(?:S)/)
-      splitted.each do |arr|
-        i = arr.index{|x| !x.nil?}
-        time_arr[i] = arr[i]
+      tm_detail = {}
+      if time_str.to_s != ""
+        # Ignoring 'P' and extracting date and time
+        dt, tm = time_str[1..-1].split('T')
+
+        if dt.to_s != ""
+          dt['Y'] = 'year' if dt['Y']; dt['M'] = 'month' if dt['M']; dt['D'] = 'day' if dt['D']
+          dt_tm_array_to_hash(dt, tm_detail)
+        end
+
+        if tm.to_s != ""
+          tm['H'] = 'hour' if tm['H']; tm['M'] = 'min' if tm['M']; tm['S'] = 'sec' if tm['S']
+          dt_tm_array_to_hash(tm, tm_detail)
+        end
       end
-      time_arr
+      symbolize_keys(tm_detail)
+    end
+
+    # method explicitly to be used to convert date/time array to hash
+    def dt_tm_array_to_hash(arr, tm_detail)
+      arr.split(/(\d+)/)[1..-1].each_slice(2).inject(tm_detail) { |h,i| h[i.last] = i.first; h }
     end
 
     def valid_trigger_option(trigger_type)
