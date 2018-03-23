@@ -733,7 +733,7 @@ module Win32
     def trigger=(trigger)
       raise TypeError unless trigger.is_a?(Hash)
       raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
-      
+
       check_for_active_task
 
       validate_trigger(trigger)
@@ -1218,7 +1218,7 @@ module Win32
       @task.Definition.Principal.ole_get_methods.each do |principal|
         principals_hash[principal.name] = @task.Definition.Principal._getproperty(principal.dispid, [], [])
       end
-      symbolize_keys(principals_hash)   
+      symbolize_keys(principals_hash)
     end
 
     # Returns a hash containing all settings of the current task
@@ -1342,7 +1342,6 @@ module Win32
         TASK_TIME_TRIGGER_MONTHLYDATE, TASK_TIME_TRIGGER_MONTHLYDOW, TASK_EVENT_TRIGGER_ON_IDLE,
         TASK_EVENT_TRIGGER_AT_SYSTEMSTART, TASK_EVENT_TRIGGER_AT_LOGON ].include?(trigger_type.to_i)
     end
-
 
     def validate_trigger(hash)
       [:start_year, :start_month, :start_day].each{ |key|
