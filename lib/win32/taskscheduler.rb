@@ -490,9 +490,6 @@ module Win32
     def new_work_item(task, trigger)
       raise TypeError unless task.is_a?(String)
       raise TypeError unless trigger.is_a?(Hash)
-      raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
-
-      validate_trigger(trigger)
 
       taskDefinition = @service.NewTask(0)
       taskDefinition.RegistrationInfo.Description = ''
@@ -500,75 +497,79 @@ module Win32
       taskDefinition.Settings.StartWhenAvailable = true
       taskDefinition.Settings.Enabled  = true
       taskDefinition.Settings.Hidden = false
-      
 
-      startTime = "%04d-%02d-%02dT%02d:%02d:00" % [
-        trigger[:start_year], trigger[:start_month], trigger[:start_day],
-        trigger[:start_hour], trigger[:start_minute]
-      ]
+      unless trigger.empty?
+        raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
+        validate_trigger(trigger)
 
-      # Set defaults
-      trigger[:end_year]  ||= 0
-      trigger[:end_month] ||= 0
-      trigger[:end_day]   ||= 0
+        startTime = "%04d-%02d-%02dT%02d:%02d:00" % [
+          trigger[:start_year], trigger[:start_month], trigger[:start_day],
+          trigger[:start_hour], trigger[:start_minute]
+        ]
 
-      endTime = "%04d-%02d-%02dT00:00:00" % [
-        trigger[:end_year], trigger[:end_month], trigger[:end_day]
-      ]
+        # Set defaults
+        trigger[:end_year]  ||= 0
+        trigger[:end_month] ||= 0
+        trigger[:end_day]   ||= 0
 
-      trig = taskDefinition.Triggers.Create(trigger[:trigger_type].to_i)
-      trig.Id = "RegistrationTriggerId#{taskDefinition.Triggers.Count}"
-      trig.StartBoundary = startTime
-      trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
-      trig.Enabled = true
+        endTime = "%04d-%02d-%02dT00:00:00" % [
+          trigger[:end_year], trigger[:end_month], trigger[:end_day]
+        ]
 
-      repetitionPattern = trig.Repetition
+        trig = taskDefinition.Triggers.Create(trigger[:trigger_type].to_i)
+        trig.Id = "RegistrationTriggerId#{taskDefinition.Triggers.Count}"
+        trig.StartBoundary = startTime
+        trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
+        trig.Enabled = true
 
-      if trigger[:minutes_duration].to_i > 0
-        repetitionPattern.Duration = "PT#{trigger[:minutes_duration]||0}M"
-      end
+        repetitionPattern = trig.Repetition
 
-      if trigger[:minutes_interval].to_i > 0
-        repetitionPattern.Interval = "PT#{trigger[:minutes_interval]||0}M"
-      end
+        if trigger[:minutes_duration].to_i > 0
+          repetitionPattern.Duration = "PT#{trigger[:minutes_duration]||0}M"
+        end
 
-      tmp = trigger[:type]
-      tmp = nil unless tmp.is_a?(Hash)
+        if trigger[:minutes_interval].to_i > 0
+          repetitionPattern.Interval = "PT#{trigger[:minutes_interval]||0}M"
+        end
 
-      case trigger[:trigger_type]
-        when TASK_TIME_TRIGGER_DAILY
-          trig.DaysInterval = tmp[:days_interval] if tmp && tmp[:days_interval]
-          if trigger[:random_minutes_interval].to_i > 0
-            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]}M"
-          end
-        when TASK_TIME_TRIGGER_WEEKLY
-          trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
-          trig.WeeksInterval = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
-          if trigger[:random_minutes_interval].to_i > 0
-            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
-          end
-        when TASK_TIME_TRIGGER_MONTHLYDATE
-          trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
-          trig.DaysOfMonth = tmp[:days] if tmp && tmp[:days]
-          if trigger[:random_minutes_interval].to_i > 0
-            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
-          end
-        when TASK_TIME_TRIGGER_MONTHLYDOW
-          trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
-          trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
-          trig.WeeksOfMonth = tmp[:weeks_of_month] if tmp && tmp[:weeks_of_month]
-          if trigger[:random_minutes_interval].to_i>0
-            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
-          end
-        when TASK_TIME_TRIGGER_ONCE
-          if trigger[:random_minutes_interval].to_i > 0
-            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
-          end
-        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
-          trig.Delay = "PT#{trigger[:delay_duration]||0}M"          
-        when TASK_EVENT_TRIGGER_AT_LOGON
-          trig.UserId = trigger[:user_id] if trigger[:user_id]
-          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+        tmp = trigger[:type]
+        tmp = nil unless tmp.is_a?(Hash)
+
+        case trigger[:trigger_type]
+          when TASK_TIME_TRIGGER_DAILY
+            trig.DaysInterval = tmp[:days_interval] if tmp && tmp[:days_interval]
+            if trigger[:random_minutes_interval].to_i > 0
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]}M"
+            end
+          when TASK_TIME_TRIGGER_WEEKLY
+            trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+            trig.WeeksInterval = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
+            if trigger[:random_minutes_interval].to_i > 0
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            end
+          when TASK_TIME_TRIGGER_MONTHLYDATE
+            trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
+            trig.DaysOfMonth = tmp[:days] if tmp && tmp[:days]
+            if trigger[:random_minutes_interval].to_i > 0
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            end
+          when TASK_TIME_TRIGGER_MONTHLYDOW
+            trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
+            trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+            trig.WeeksOfMonth = tmp[:weeks_of_month] if tmp && tmp[:weeks_of_month]
+            if trigger[:random_minutes_interval].to_i>0
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            end
+          when TASK_TIME_TRIGGER_ONCE
+            if trigger[:random_minutes_interval].to_i > 0
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            end
+          when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+            trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+          when TASK_EVENT_TRIGGER_AT_LOGON
+            trig.UserId = trigger[:user_id] if trigger[:user_id]
+            trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+        end
       end
 
       act = taskDefinition.Actions.Create(0)
