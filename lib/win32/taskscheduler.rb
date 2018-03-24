@@ -1,4 +1,5 @@
 require_relative 'windows/helper'
+require_relative 'windows/time_calc_helper'
 require_relative 'windows/constants'
 require 'win32ole'
 require 'socket'
@@ -11,6 +12,7 @@ module Win32
   # The TaskScheduler class encapsulates a Windows scheduled task
   class TaskScheduler
     include Windows::TaskSchedulerHelper
+    include Windows::TimeCalcHelper
     include Windows::TaskSchedulerConstants
 
     # The version of the win32-taskscheduler library
@@ -1267,74 +1269,6 @@ module Win32
       hash.each_with_object({}) do |(k, v), h|
         h[underscore(k.to_s).to_sym] = v.is_a?(Hash) ? symbolize_keys(v) : v 
       end
-    end
-
-    # Returns total time in minutes
-    def time_in_minutes(time_str)
-      time_in_seconds(time_str) / 60
-    end
-
-    # Calculates total time duration in seconds
-    def time_in_seconds(time_str)
-      t = time_details(time_str)
-      curr_time = Time.now
-
-      # Basic time variables
-      y = curr_time.year + t[:year].to_i
-      mth = curr_time.month + t[:month].to_i
-      d = curr_time.day + t[:day].to_i
-      h = curr_time.hour + t[:hour].to_i
-      min = curr_time.min + t[:min].to_i
-      s = curr_time.sec + t[:sec].to_i
-
-      # 'extra value' calculations for these time variables
-      s, min = extra_time(s, min, 60)
-      min, h = extra_time(min, h, 60)
-      h, d = extra_time(h, d, 24)
-      d, mth = extra_time(d, mth, 30)
-      mth, y = extra_time(mth, y, 12)
-
-      future_time = Time.new(y, mth, d, h, min, s)
-
-      # Difference in time returns seconds
-      future_time.to_i - curr_time.to_i
-    end
-
-    def extra_time(low, up, div_val)
-      # a will contain extra up(min); b will hold actual low(sec). Example:
-      # a, b = s.divmod(60)
-      # min += a; s = b
-      a, b = low.divmod(div_val)
-      up += a; low = b
-      [low, up]
-    end
-
-    # Extracts "P_Y_M_DT_H_M_S" format and
-    # Returns a hash with applicable values of 
-    # (keys =>) [:year, :month, :day, :hour, :min, :sec]
-    # Example: "PT3S" => {sec: 3}
-    def time_details(time_str)
-      tm_detail = {}
-      if time_str.to_s != ""
-        # Ignoring 'P' and extracting date and time
-        dt, tm = time_str[1..-1].split('T')
-
-        if dt.to_s != ""
-          dt['Y'] = 'year' if dt['Y']; dt['M'] = 'month' if dt['M']; dt['D'] = 'day' if dt['D']
-          dt_tm_array_to_hash(dt, tm_detail)
-        end
-
-        if tm.to_s != ""
-          tm['H'] = 'hour' if tm['H']; tm['M'] = 'min' if tm['M']; tm['S'] = 'sec' if tm['S']
-          dt_tm_array_to_hash(tm, tm_detail)
-        end
-      end
-      symbolize_keys(tm_detail)
-    end
-
-    # method explicitly to be used to convert date/time array to hash
-    def dt_tm_array_to_hash(arr, tm_detail)
-      arr.split(/(\d+)/)[1..-1].each_slice(2).inject(tm_detail) { |h,i| h[i.last] = i.first; h }
     end
 
     def valid_trigger_option(trigger_type)
