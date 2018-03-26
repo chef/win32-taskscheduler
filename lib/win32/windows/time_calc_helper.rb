@@ -21,38 +21,38 @@ module Windows
 
     # Calculates total time duration in seconds
     def time_in_seconds(time_str)
-      t = time_details(time_str)
+      dt_tm_hash = time_details(time_str)
       curr_time = Time.now
 
       # Basic time variables
-      y = curr_time.year + t[:year].to_i
-      mth = curr_time.month + t[:month].to_i
-      d = curr_time.day + t[:day].to_i
-      h = curr_time.hour + t[:hour].to_i
-      min = curr_time.min + t[:min].to_i
-      s = curr_time.sec + t[:sec].to_i
+      future_year = curr_time.year + dt_tm_hash[:year].to_i
+      future_mth = curr_time.month + dt_tm_hash[:month].to_i
+      future_day = curr_time.day + dt_tm_hash[:day].to_i
+      future_hr = curr_time.hour + dt_tm_hash[:hour].to_i
+      future_min = curr_time.min + dt_tm_hash[:min].to_i
+      future_sec = curr_time.sec + dt_tm_hash[:sec].to_i
 
       # 'extra value' calculations for these time variables
-      s, min = extra_time(s, min, 60)
-      min, h = extra_time(min, h, 60)
-      h, d = extra_time(h, d, 24)
+      future_sec, future_min = extra_time(future_sec, future_min, 60)
+      future_min, future_hr = extra_time(future_min, future_hr, 60)
+      future_hr, future_day = extra_time(future_hr, future_day, 24)
 
       # explicit method to calculate overloaded days;
       # They may stretch upto years; heance leap year & months are into consideration
-      d, mth, y = extra_days(d, mth, y, curr_time.month, curr_time.year)
+      future_day, future_mth, future_year = extra_days(future_day, future_mth, future_year, curr_time.month, curr_time.year)
 
-      mth, y = extra_time(mth, y, 12)
+      future_mth, future_year = extra_time(future_mth, future_year, 12)
 
-      future_time = Time.new(y, mth, d, h, min, s)
+      future_time = Time.new(future_year, future_mth, future_day, future_hr, future_min, future_sec)
 
       # Difference in time will return seconds
       future_time.to_i - curr_time.to_i
     end
 
-    # a will contain extra value in high_rank(eg min);
-    # b will hold actual low_rank(ie sec) Example:
+    # a will contain extra value of low_rank (in high_rank(eg min));
+    # b will hold actual low_rank value(ie sec) Example:
     # low_rank = 65, high_rank = 2, div_val = 60
-    # Hence a = 5; b = 1
+    # Hence a = 1; b = 5
     def extra_time(low_rank, high_rank, div_val)
       a, b = low_rank.divmod(div_val)
       high_rank += a; low_rank = b
