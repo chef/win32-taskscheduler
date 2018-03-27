@@ -1,6 +1,10 @@
 module Windows
   module TimeCalcHelper
 
+    # Returns actual no of days for given month;
+    # Array with a 0 is defined to give actual result without
+    # any manipulation. eg, DAY_OF_MONTH[1] = 31
+    # 0(NUMBER) is kept to avoid exceptions during calculations
     DAY_OF_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
     # Returns no of days in a given month of a year
@@ -26,7 +30,7 @@ module Windows
 
       # Basic time variables
       future_year = curr_time.year + dt_tm_hash[:year].to_i
-      future_mth = curr_time.month + dt_tm_hash[:month].to_i
+      future_month = curr_time.month + dt_tm_hash[:month].to_i
       future_day = curr_time.day + dt_tm_hash[:day].to_i
       future_hr = curr_time.hour + dt_tm_hash[:hour].to_i
       future_min = curr_time.min + dt_tm_hash[:min].to_i
@@ -39,11 +43,11 @@ module Windows
 
       # explicit method to calculate overloaded days;
       # They may stretch upto years; heance leap year & months are into consideration
-      future_day, future_mth, future_year = extra_days(future_day, future_mth, future_year, curr_time.month, curr_time.year)
+      future_day, future_month, future_year = extra_days(future_day, future_month, future_year, curr_time.month, curr_time.year)
 
-      future_mth, future_year = extra_time(future_mth, future_year, 12)
+      future_month, future_year = extra_time(future_month, future_year, 12)
 
-      future_time = Time.new(future_year, future_mth, future_day, future_hr, future_min, future_sec)
+      future_time = Time.new(future_year, future_month, future_day, future_hr, future_min, future_sec)
 
       # Difference in time will return seconds
       future_time.to_i - curr_time.to_i
