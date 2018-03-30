@@ -555,6 +555,7 @@ module Win32
             if trigger[:random_minutes_interval].to_i > 0
               trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
             end
+            trig.RunOnLastDayOfMonth = trigger[:run_on_last_day_of_month] if trigger[:run_on_last_day_of_month]
           when TASK_TIME_TRIGGER_MONTHLYDOW
             trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
             trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
@@ -562,6 +563,7 @@ module Win32
             if trigger[:random_minutes_interval].to_i>0
               trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
             end
+            trig.RunOnLastWeekOfMonth = trigger[:run_on_last_week_of_month] if trigger[:run_on_last_week_of_month]
           when TASK_TIME_TRIGGER_ONCE
             if trigger[:random_minutes_interval].to_i > 0
               trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
@@ -672,6 +674,7 @@ module Win32
           tmp[:days] = trig.DaysOfMonth
           trigger[:type] = tmp
           trigger[:random_minutes_interval] = time_in_minutes(trig.RandomDelay)
+          trigger[:run_on_last_day_of_month] = trig.RunOnLastDayOfMonth
         when TASK_TIME_TRIGGER_MONTHLYDOW
           tmp = {}
           tmp[:months] = trig.MonthsOfYear
@@ -679,6 +682,7 @@ module Win32
           tmp[:weeks_of_month] = trig.WeeksOfMonth
           trigger[:type] = tmp
           trigger[:random_minutes_interval] = time_in_minutes(trig.RandomDelay)
+          trigger[:run_on_last_week_of_month] = trig.RunOnLastWeekOfMonth
         when TASK_TIME_TRIGGER_ONCE
           tmp = {}
           tmp[:once] = nil
@@ -789,6 +793,7 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+          trig.RunOnLastDayOfMonth = trigger[:run_on_last_day_of_month] if trigger[:run_on_last_day_of_month]
         when TASK_TIME_TRIGGER_MONTHLYDOW
           trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
           trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
@@ -796,6 +801,7 @@ module Win32
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+          trig.RunOnLastWeekOfMonth = trigger[:run_on_last_week_of_month] if trigger[:run_on_last_week_of_month]
         when TASK_TIME_TRIGGER_ONCE
           if trigger[:random_minutes_interval].to_i > 0
             trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
@@ -877,15 +883,17 @@ module Win32
           trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
           trig.DaysOfMonth = tmp[:days] if tmp && tmp[:days]
           if trigger[:random_minutes_interval].to_i > 0
-          trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+          trig.RunOnLastDayOfMonth = trigger[:run_on_last_day_of_month] if trigger[:run_on_last_day_of_month]
         when TASK_TIME_TRIGGER_MONTHLYDOW
           trig.MonthsOfYear  = tmp[:months] if tmp && tmp[:months]
           trig.DaysOfWeek  = tmp[:days_of_week] if tmp && tmp[:days_of_week]
-          trig.WeeksOfMonth  = tmp[:weeks] if tmp && tmp[:weeks]
+          trig.WeeksOfMonth  = tmp[:weeks_of_month] if tmp && tmp[:weeks_of_month]
           if trigger[:random_minutes_interval].to_i > 0
           trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+          trig.RunOnLastWeekOfMonth = trigger[:run_on_last_week_of_month] if trigger[:run_on_last_week_of_month]
         when TASK_TIME_TRIGGER_ONCE
           if trigger[:random_minutes_interval].to_i > 0
           trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
@@ -1267,7 +1275,7 @@ module Win32
     # Converts all the keys of a hash to underscored-symbol format
     def symbolize_keys(hash)
       hash.each_with_object({}) do |(k, v), h|
-        h[underscore(k.to_s).to_sym] = v.is_a?(Hash) ? symbolize_keys(v) : v 
+        h[underscore(k.to_s).to_sym] = v.is_a?(Hash) ? symbolize_keys(v) : v
       end
     end
 
