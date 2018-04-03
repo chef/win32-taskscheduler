@@ -3,13 +3,13 @@ module Windows
 
     # Returns actual no of days for given month;
     # Array with a 0 is defined to give actual result without
-    # any manipulation. eg, DAY_OF_MONTH[1] = 31
+    # any manipulation. eg, DAYS_IN_A_MONTH[1] = 31
     # 0(NUMBER) is kept to avoid exceptions during calculations
-    DAY_OF_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    DAYS_IN_A_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
     # Returns no of days in a given month of a year
     def day_in_month(month, year)
-      (month == 2 && is_leap_year?(year)) ? 29 : DAY_OF_MONTH[month]
+      (month == 2 && is_leap_year?(year)) ? 29 : DAYS_IN_A_MONTH[month]
     end
 
     # Year is leap when it is a multiple of 4 and not a multiple of 100.
