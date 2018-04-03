@@ -45,7 +45,7 @@ module Windows
       # They may stretch upto years; heance leap year & months are into consideration
       future_day, future_month, future_year = extra_days(future_day, future_month, future_year, curr_time.month, curr_time.year)
 
-      future_month, future_year = extra_time(future_month, future_year, 12)
+      future_month, future_year = extra_months(future_month, future_year, curr_time.month, curr_time.year)
 
       future_time = Time.new(future_year, future_month, future_day, future_hr, future_min, future_sec)
 
@@ -61,6 +61,16 @@ module Windows
       a, b = low_rank.divmod(div_val)
       high_rank += a; low_rank = b
       [low_rank, high_rank]
+    end
+
+    def extra_months(month_count, year_count, init_month, init_year)
+      year, month_count = month_count.divmod(12)
+      if year.positive? && month_count.zero?
+        month_count = 12
+        year -= 1
+      end
+      year_count += year
+      [month_count, year_count]
     end
 
     # Returns no of actual days with all overloaded months & Years
