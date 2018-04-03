@@ -8,7 +8,7 @@ module Windows
     DAYS_IN_A_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
     # Returns no of days in a given month of a year
-    def day_in_month(month, year)
+    def days_in_month(month, year)
       (month == 2 && is_leap_year?(year)) ? 29 : DAYS_IN_A_MONTH[month]
     end
 
@@ -81,7 +81,7 @@ module Windows
       yr = init_year
 
       loop do
-       days -= day_in_month(mth, yr)
+       days -= days_in_month(mth, yr)
        break if days <= 0
        mth += 1
        if mth > 12
