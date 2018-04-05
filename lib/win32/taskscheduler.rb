@@ -16,7 +16,7 @@ module Win32
     include Windows::TaskSchedulerConstants
 
     # The version of the win32-taskscheduler library
-    VERSION = '0.3.2'.freeze
+    VERSION = '0.4.0'.freeze
 
     # The Error class is typically raised if any TaskScheduler methods fail.
     class Error < StandardError; end
@@ -196,6 +196,8 @@ module Win32
       enum.include?(task)
     end
 
+    # Return the sepcified task if exist
+    #
     def get_task(task)
       raise TypeError unless task.is_a?(String)
 
@@ -932,6 +934,7 @@ module Win32
       status
     end
 
+    # Returns true if current task is enabled
     def enabled?
       check_for_active_task
       @task.enabled
@@ -1016,6 +1019,8 @@ module Win32
       time
     end
 
+    # Returns idle settings for current active task
+    #
     def idle_settings
       check_for_active_task
       idle_settings = {}
@@ -1026,6 +1031,8 @@ module Win32
       idle_settings
     end
 
+    # Returns the execution time limit for current active task
+    #
     def execution_time_limit
       check_for_active_task
       @task.Definition.Settings.ExecutionTimeLimit
@@ -1205,8 +1212,10 @@ module Win32
       hash
     end
 
+    # Sets the principals for current active task. The principal is hash with following possible options.
     # Expected principal hash: { id: STRING, display_name: STRING, user_id: STRING,
     # logon_type: INTEGER, group_id: STRING, run_level: INTEGER }
+    #
     def configure_principals(principals)
       raise TypeError unless principals.is_a?(Hash)
       check_for_active_task
