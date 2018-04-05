@@ -1,9 +1,4 @@
-## [v0.4.0](release version link)(date of release)
-
-#### Merged Pull request
-
-### Changes since 0.3.2 release
-
+## [v0.4.0](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-0.4.0) (5-Apr-2018)
 - Updated code to create task without trigger. [#25](https://github.com/chef/win32-taskscheduler/pull/25) ([#Vasu1105](https://github.com/Vasu1105))
 - Fix for execution time limit and weeks of month. [#23](https://github.com/chef/win32-taskscheduler/pull/23) ([#Vasu1105](https://github.com/Vasu1105))
 - Added methods to get and set principal information of the task. [#22](https://github.com/chef/win32-taskscheduler/pull/22) ([#Nimesh-Msys](https://github.com/Nimesh-Msys))
@@ -16,7 +11,6 @@
 - Fix for handling days of month for trigger_type MONTHLYDATE. [#15](https://github.com/chef/win32-taskscheduler/pull/15)([#Vasu1105](https://github.com/Vasu1105))
 - Fix for setting system user for scheduled task. [#14](https://github.com/chef/win32-taskscheduler/pull/14) ([#Vasu1105](https://github.com/Vasu1105))
 - Fix for Wrong value is set for end_day, end_year, end_month it should be EndBoundary and not StartBoundary. [#13](https://github.com/chef/win32-taskscheduler/pull/13)([#Vasu1105](https://github.com/Vasu1105))
-
 
 ## [v0.3.2](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-0.3.2) (18-Mar-2017)
 - Use the block form for FFI::MemoryPointer in the error message helper

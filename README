@@ -58,10 +58,11 @@
 
   Please submit any bug reports to the project page at:
 
-  http://github.com/djberg96/win32-taskscheduler
+  http://github.com/chef/win32-taskscheduler
 
 = Copyright
   (C) 2003-2017 Daniel J. Berger
+  (C) 2018 Chef Software, Inc.
   All Rights Reserved
 
 = License
