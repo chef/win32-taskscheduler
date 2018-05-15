@@ -580,15 +580,16 @@ module Win32
 
       act = taskDefinition.Actions.Create(0)
       act.Path = 'cmd'
+      user = taskDefinition.Principal.UserId
 
       begin
         @task = @root.RegisterTaskDefinition(
           task,
           taskDefinition,
           TASK_CREATE_OR_UPDATE,
-          nil,
-          nil,
-          TASK_LOGON_INTERACTIVE_TOKEN
+          user.empty? ? 'SYSTEM' : user,
+          @password,
+          @password ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
         )
       rescue WIN32OLERuntimeError => err
         raise Error, ole_error('RegisterTaskDefinition', err)
@@ -1313,7 +1314,7 @@ module Win32
         TASK_CREATE_OR_UPDATE,
         user,
         @password,
-        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_INTERACTIVE_TOKEN
+        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
       )
     rescue WIN32OLERuntimeError => err
       method_name = caller_locations(1,1)[0].label
