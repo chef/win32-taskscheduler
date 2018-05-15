@@ -1,3 +1,6 @@
+## [v0.4.1](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-0.4.1) (15-May-2018)
+- Fix the issue of "no mapping" while creating Windows task for SYSTEM USERS. [#30](https://github.com/chef/win32-taskscheduler/pull/30) ([#NAshwini](https://github.com/NAshwini)
+
 ## [v0.4.0](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-0.4.0) (5-Apr-2018)
 - Updated code to create task without trigger. [#25](https://github.com/chef/win32-taskscheduler/pull/25) ([#Vasu1105](https://github.com/Vasu1105))
 - Fix for execution time limit and weeks of month. [#23](https://github.com/chef/win32-taskscheduler/pull/23) ([#Vasu1105](https://github.com/Vasu1105))
