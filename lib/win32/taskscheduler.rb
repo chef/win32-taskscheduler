@@ -522,7 +522,7 @@ module Win32
 
         trig = taskDefinition.Triggers.Create(trigger[:trigger_type].to_i)
         trig.Id = "RegistrationTriggerId#{taskDefinition.Triggers.Count}"
-        trig.StartBoundary = startTime
+        trig.StartBoundary = startTime if startTime != '0000-00-00T00:00:00'
         trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
         trig.Enabled = true
 
@@ -760,7 +760,7 @@ module Win32
 
       trig = definition.Triggers.Create( trigger[:trigger_type].to_i )
       trig.Id = "RegistrationTriggerId#{definition.Triggers.Count}"
-      trig.StartBoundary = startTime
+      trig.StartBoundary = startTime if startTime != '0000-00-00T00:00:00'
       trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
       trig.Enabled = true
 
@@ -852,7 +852,7 @@ module Win32
 
       trig = definition.Triggers.Create( trigger[:trigger_type].to_i )
       trig.Id = "RegistrationTriggerId#{definition.Triggers.Count}"
-      trig.StartBoundary = startTime
+      trig.StartBoundary = startTime if startTime != '0000-00-00T00:00:00'
       trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
       trig.Enabled = true
 
