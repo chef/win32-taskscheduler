@@ -158,6 +158,7 @@ module Win32
           @root = @service.GetFolder(folder)
         rescue WIN32OLERuntimeError => err
           if force
+            @root = @service.GetFolder("\\")
             @root.CreateFolder(folder)
             @root = @service.GetFolder(folder)
           else
