@@ -491,13 +491,16 @@ module Win32
     # trigger variable is a hash of options that define when the scheduled
     # job should run.
     #
-    def new_work_item(task, userinfo, trigger)
+    def new_work_item(task, trigger, userinfo = { user: nil, password: nil })
       raise TypeError unless userinfo.is_a?(Hash)
       raise TypeError unless task.is_a?(String)
       raise TypeError unless trigger.is_a?(Hash)
-      raise TypeError unless userinfo[:user].is_a?(String)
-      unless SYSTEM_USERS.include?(userinfo[:user])
-        raise TypeError unless userinfo[:password].is_a?(String)
+
+      unless userinfo[:user].nil?
+        raise TypeError unless userinfo[:user].is_a?(String)
+        unless SYSTEM_USERS.include?(userinfo[:user])
+          raise TypeError unless userinfo[:password].is_a?(String)
+        end
       end
 
       taskDefinition = @service.NewTask(0)
@@ -594,7 +597,7 @@ module Win32
           task,
           taskDefinition,
           TASK_CREATE_OR_UPDATE,
-          userinfo[:user],
+          userinfo[:user].nil? || userinfo[:user].empty? ? 'SYSTEM': userinfo[:user],
           userinfo[:password],
           userinfo[:password] ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
         )
