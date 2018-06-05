@@ -193,7 +193,30 @@ module Win32
     # Returns whether or not the specified task exists.
     #
     def exists?(task)
-      enum.include?(task)
+      path = nil
+      task_name = nil
+
+      if task.include?("\\")
+        *path, task_name = task.split("\\")
+      end
+
+      folder = path.nil? ? "\\" : path.join("\\")
+
+      begin
+        root = @service.GetFolder(folder)
+      rescue WIN32OLERuntimeError => err
+        return false
+      end
+
+      task = nil
+      if root
+        begin
+          task = root.GetTask(task_name)
+          task && task.Name == task_name
+        rescue WIN32OLERuntimeError => err
+          return false
+        end
+      end
     end
 
     # Return the sepcified task if exist
