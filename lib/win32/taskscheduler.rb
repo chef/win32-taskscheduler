@@ -316,7 +316,7 @@ module Win32
           TASK_CREATE_OR_UPDATE,
           user,
           password,
-          password ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
+          TASK_LOGON_PASSWORD
         )
       rescue WIN32OLERuntimeError => err
         raise Error, ole_error('RegisterTaskDefinition', err)
@@ -491,26 +491,16 @@ module Win32
     # trigger variable is a hash of options that define when the scheduled
     # job should run.
     #
-    def new_work_item(task, trigger, userinfo = { user: nil, password: nil })
-      raise TypeError unless userinfo.is_a?(Hash)
+    def new_work_item(task, trigger)
       raise TypeError unless task.is_a?(String)
       raise TypeError unless trigger.is_a?(Hash)
-
-      unless userinfo[:user].nil?
-        raise TypeError unless userinfo[:user].is_a?(String)
-        unless SYSTEM_USERS.include?(userinfo[:user])
-          raise TypeError unless userinfo[:password].is_a?(String)
-        end
-      end
 
       taskDefinition = @service.NewTask(0)
       taskDefinition.RegistrationInfo.Description = ''
       taskDefinition.RegistrationInfo.Author = ''
-      taskDefinition.Settings.StartWhenAvailable = false
+      taskDefinition.Settings.StartWhenAvailable = true
       taskDefinition.Settings.Enabled  = true
       taskDefinition.Settings.Hidden = false
-
-
 
       unless trigger.empty?
         raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
@@ -590,16 +580,16 @@ module Win32
 
       act = taskDefinition.Actions.Create(0)
       act.Path = 'cmd'
+      user = taskDefinition.Principal.UserId
 
-      @password = userinfo[:password]
       begin
         @task = @root.RegisterTaskDefinition(
           task,
           taskDefinition,
           TASK_CREATE_OR_UPDATE,
-          userinfo[:user].nil? || userinfo[:user].empty? ? 'SYSTEM': userinfo[:user],
-          userinfo[:password],
-          userinfo[:password] ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
+          user.empty? ? 'SYSTEM' : user,
+          @password,
+          @password ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
         )
       rescue WIN32OLERuntimeError => err
         raise Error, ole_error('RegisterTaskDefinition', err)
