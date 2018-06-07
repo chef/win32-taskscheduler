@@ -192,12 +192,13 @@ module Win32
 
     # Returns whether or not the specified task exists.
     #
-    def exists?(task)
+    def exists?(full_task_path)
       path = nil
       task_name = nil
 
-      if task.include?("\\")
-        *path, task_name = task.split("\\")
+      # Used the splat operator to put all folder elements into path and leave only the task name`
+      if full_task_path.include?("\\")
+        *path, task_name = full_task_path.split("\\")
       end
 
       folder = path.nil? ? "\\" : path.join("\\")
@@ -208,11 +209,12 @@ module Win32
         return false
       end
 
-      task = nil
-      if root
+      if root.nil?
+        return false
+      else
         begin
           task = root.GetTask(task_name)
-          task && task.Name == task_name
+          return task && task.Name == task_name
         rescue WIN32OLERuntimeError => err
           return false
         end
