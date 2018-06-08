@@ -15,7 +15,10 @@ github:
   # The Github Team primarily responsible for handling incoming Pull Requests.
   maintainer_group: chef/msys-developers
   release_branch:
+    - master:
+        version_constraint: "0.*"
     - ole:
+        version_constraint: "1.*"
 promote:
   action:
     - built_in:publish_rubygems
