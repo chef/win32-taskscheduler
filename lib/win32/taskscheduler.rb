@@ -200,6 +200,8 @@ module Win32
       # Used the splat operator to put all folder elements into path and leave only the task name`
       if full_task_path.include?("\\")
         *path, task_name = full_task_path.split("\\")
+      else
+        task_name = full_task_path
       end
 
       folder = path.nil? ? "\\" : path.join("\\")
