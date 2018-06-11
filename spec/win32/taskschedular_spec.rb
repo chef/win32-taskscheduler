@@ -91,6 +91,19 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     end
   end
 
+  describe '#enabled?' do
+    let(:task_scheduler) { Win32::TaskScheduler.new }    
+    it 'raises an error when a task is not found' do
+      expect{ task_scheduler.enabled? }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'returns true for enabled task' do
+      create_task
+      expect(task_scheduler.enabled?).to eql(true)
+      delete_task
+    end  
+  end
+
   describe '#activate' do
     let(:task_scheduler) { Win32::TaskScheduler.new }
     it 'requires an argument' do
@@ -135,6 +148,169 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
       create_task
       expect(delete_task).to be_nil
       expect(task_scheduler.exists?(task)).to be(false)
+    end
+  end
+
+  describe '#run' do
+    # Need to check this method. Not wokring for win10
+  end
+
+  describe '#terminate' do
+    # Need to check this method. Not wokring for win10
+  end
+
+  describe '#application_name' do
+    let(:task_scheduler) { Win32::TaskScheduler.new }
+    let(:test_app){'cmd.exe'}
+    it 'setter raises an error when a string is not passed' do
+      expect{ task_scheduler.application_name=(1) }.to raise_error(TypeError)
+    end
+
+    it 'raises an error when a task is not found' do
+      expect{ task_scheduler.application_name=('app') }.to raise_error(Win32::TaskScheduler::Error)
+      expect{ task_scheduler.application_name }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter raises an error if no active tasks' do
+      expect{ task_scheduler.application_name }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter and setter works' do
+      create_task
+      expect(task_scheduler.application_name=(test_app)).to eql(test_app)
+      expect(task_scheduler.application_name).to eql(test_app)
+      delete_task
+    end
+  end
+
+  describe '#parameters' do
+    let(:task_scheduler) { Win32::TaskScheduler.new }
+    let(:test_app){'cmd1.exe'}
+    it 'setter raises an error when a string is not passed' do
+      expect{ task_scheduler.parameters=(1) }.to raise_error(TypeError)
+    end
+
+    it 'raises an error when a task is not found' do
+      expect{ task_scheduler.parameters=('app') }.to raise_error(Win32::TaskScheduler::Error)
+      expect{ task_scheduler.parameters }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter raises an error if no active tasks' do
+      expect{ task_scheduler.parameters }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter and setter works' do
+      create_task
+      expect(task_scheduler.parameters=(test_app)).to eql(test_app)
+      expect(task_scheduler.parameters).to eql(test_app)
+      delete_task
+    end
+  end
+
+  describe '#working_directory' do
+    let(:task_scheduler) { Win32::TaskScheduler.new }
+    let(:test_dir){ Dir.pwd }
+    it 'setter raises an error when a string is not passed' do
+      expect{ task_scheduler.working_directory=(1) }.to raise_error(TypeError)
+    end
+
+    it 'raises an error when a task is not found' do
+      expect{ task_scheduler.working_directory=('app') }.to raise_error(Win32::TaskScheduler::Error)
+      expect{ task_scheduler.working_directory }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter raises an error if no active tasks' do
+      expect{ task_scheduler.working_directory }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter and setter works' do
+      create_task
+      expect(task_scheduler.working_directory=(test_dir)).to eql(test_dir)
+      expect(task_scheduler.working_directory).to eql(test_dir)
+      delete_task
+    end
+  end
+
+  describe '#priority' do
+    let(:task_scheduler) { Win32::TaskScheduler.new }
+    let(:priority_val){ Win32::TaskScheduler::HIGH_PRIORITY_CLASS }
+    it 'setter raises an error when an integer is not passed' do
+      expect{ task_scheduler.priority=('highest') }.to raise_error(TypeError)
+    end
+
+    it 'raises an error when a task is not found' do
+      expect{ task_scheduler.priority=(priority_val) }.to raise_error(Win32::TaskScheduler::Error)
+      expect{ task_scheduler.priority }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter raises an error if no active tasks' do
+      expect{ task_scheduler.priority }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter and setter works' do
+      create_task
+      expect(task_scheduler.priority=(priority_val)).to eql(priority_val)
+      expect(task_scheduler.priority).to eql('highest')
+      delete_task
+    end
+  end
+
+  describe '#comment' do
+    let(:task_scheduler) { Win32::TaskScheduler.new }
+    let(:comment_val){ 'Test Comment' }
+    it 'setter raises an error when a String is not passed' do
+      expect{ task_scheduler.comment=(1) }.to raise_error(TypeError)
+    end
+
+    it 'raises an error when a task is not found' do
+      expect{ task_scheduler.comment=(comment_val) }.to raise_error(Win32::TaskScheduler::Error)
+      expect{ task_scheduler.comment }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter raises an error if no active tasks' do
+      expect{ task_scheduler.comment }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter and setter works' do
+      create_task
+      expect(task_scheduler.comment=(comment_val)).to eql(comment_val)
+      expect(task_scheduler.comment).to eql(comment_val)
+      delete_task
+    end
+
+    it 'is an alias for description' do
+      create_task
+      expect(task_scheduler.description=(comment_val)).to eql(comment_val)
+      expect(task_scheduler.description).to eql(comment_val)
+      delete_task
+    end
+  end
+
+
+  describe '#max_run_time' do
+    let(:task_scheduler) { Win32::TaskScheduler.new }
+    let(:max_run_time_val){ 1244145000000 } # Just a random time in miliseconds
+    it 'setter raises an error when an integer is not passed' do
+      expect{ task_scheduler.max_run_time=('time') }.to raise_error(TypeError)
+    end
+
+    it 'raises an error when a task is not found' do
+      expect{ task_scheduler.max_run_time=(max_run_time_val) }.to raise_error(Win32::TaskScheduler::Error)
+      expect{ task_scheduler.max_run_time }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter raises an error if no active tasks' do
+      expect{ task_scheduler.max_run_time }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    # TODO: max_run_time setter expects time in miliseconds(may be an overhead),
+    # and parser of getter is not working. It may be required to take a look again
+    # Well, getter may implement `time_in_seconds` of TimeCalcHelper
+    it 'getter and setter works' do
+      create_task
+      expect(task_scheduler.max_run_time=(max_run_time_val)).to eql(max_run_time_val)
+      expect(task_scheduler.max_run_time).to eql(max_run_time_val)
+      delete_task
     end
   end
 
