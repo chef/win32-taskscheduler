@@ -20,10 +20,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "~>3.0"
 
   spec.extra_rdoc_files = [
-    'README',
-    'CHANGELOG.md',
-    'RELEASE_NOTES.md',
-    'MANIFEST',
+    "README.md",
+    "CHANGELOG.md",
+    "RELEASE_NOTES.md",
+    "MANIFEST",
   ]
 
   spec.description = <<-EOF
