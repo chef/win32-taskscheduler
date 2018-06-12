@@ -16,7 +16,7 @@ module Win32
     include Windows::TaskSchedulerConstants
 
     # The version of the win32-taskscheduler library
-    VERSION = '0.4.1'.freeze
+    VERSION = '1.0.1'.freeze
 
     # The Error class is typically raised if any TaskScheduler methods fail.
     class Error < StandardError; end
