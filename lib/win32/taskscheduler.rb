@@ -1,6 +1,7 @@
 require_relative 'windows/helper'
 require_relative 'windows/time_calc_helper'
 require_relative 'windows/constants'
+require_relative 'taskscheduler/version'
 require 'win32ole'
 require 'socket'
 require 'time'
@@ -14,9 +15,6 @@ module Win32
     include Windows::TaskSchedulerHelper
     include Windows::TimeCalcHelper
     include Windows::TaskSchedulerConstants
-
-    # The version of the win32-taskscheduler library
-    VERSION = '1.0.1'.freeze
 
     # The Error class is typically raised if any TaskScheduler methods fail.
     class Error < StandardError; end
