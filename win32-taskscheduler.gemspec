@@ -1,11 +1,11 @@
 require 'rubygems'
-require_relative 'lib/win32/taskscheduler'
+require_relative 'lib/win32/taskscheduler/version'
 
 Gem::Specification.new do |spec|
   spec.name       = 'win32-taskscheduler'
   spec.version    = Win32::TaskScheduler::VERSION
   spec.authors    = ['Park Heesob', 'Daniel J. Berger']
-  spec.license    = 'Artistic 2.0'
+  spec.license    = 'Artistic-2.0'
   spec.email      = 'djberg96@gmail.com'
   spec.homepage   = 'http://github.com/chef/win32-taskscheduler'
   spec.summary    = 'A library for the Windows task scheduler'
