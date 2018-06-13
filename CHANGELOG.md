@@ -7,16 +7,17 @@ prior to release 0.4.1, please visit the [source repository](https://github.com/
 <!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=1.0.2 -->
+### Changes since 1.0.2 release
 <!-- release_rollup -->
 
+<!-- latest_stable_release -->
+## [win32-taskscheduler-1.0.2](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.2) (2018-06-13)
 <!-- latest_stable_release -->
 
 ## [v0.4.1](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-0.4.1) (15-May-2018)
 - Fix the issue of "no mapping" while creating Windows task for SYSTEM USERS. [#30](https://github.com/chef/win32-taskscheduler/pull/30) ([#NAshwini](https://github.com/NAshwini))
 - Fix for not to set start time if not set if its 0000-00-00T00:00:00 [#29][(https://github.com/chef/win32-taskscheduler/pull/29) ([#Vasu1105](https://github.com/Vasu1105))
-
-<!-- latest_stable_release -->
 
 
 ## [v0.4.0](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-0.4.0) (5-Apr-2018)
