@@ -30,6 +30,100 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     end
   end
 
+  describe '#constructor' do
+    let(:ts) { Win32::TaskScheduler }
+    let(:task) { "test_task" }
+    let(:folder) { '\\' }
+    let(:force) { false }
+    before { trigger[:trigger_type] = Win32::TaskScheduler::ONCE }
+    context 'argument' do
+      context 'requires upto 4 parameters' do
+        it 'runs with no arguments' do
+          expect(ts.new).to be_a(ts)
+        end
+        it 'runs with an argument: task' do
+          expect(ts.new(task)).to be_a(ts)
+        end
+        it 'raises error when with two arguments: task, trigger and trigger_type is blank' do
+          trigger[:trigger_type] = nil
+          expect{ ts.new(task, trigger) }.to raise_error(ArgumentError)
+        end
+        it 'runs with two arguments: task, trigger and trigger_type is not blank' do
+          expect(ts.new(task, trigger)).to be_a(ts)
+          delete_task
+        end
+        it 'runs with three arguments: task, trigger, folder' do
+          expect(ts.new(task, trigger, folder)).to be_a(ts)
+          delete_task
+        end
+        it 'runs with four arguments: task, trigger, folder, force' do
+          expect(ts.new(task, trigger, folder, force)).to be_a(ts)
+          delete_task
+        end
+        it 'raises an error for more than four arguments' do
+          expect{ ts.new(task, trigger, folder, force, 1) }.to raise_error(ArgumentError)
+          expect{ ts.new(task, trigger, folder, force, 'abc') }.to raise_error(ArgumentError)
+        end
+      end
+      context 'task' do
+        it 'default value is nil' do
+          task_scheduler = ts.new(task)
+          expect(task_scheduler).to be_a(ts)
+        end
+        it 'does not create any task if trigger is absent' do
+          task_scheduler = ts.new(task)
+          expect(task_scheduler).to be_a(ts)
+          expect(task_scheduler.exists?(task)).to be(false)
+        end
+        it 'can create a task if trigger is present' do
+          task_scheduler = ts.new(task, trigger)
+          expect(task_scheduler).to be_a(ts)
+          expect(task_scheduler.exists?(task)).to be(true)
+          delete_task
+          expect(task_scheduler.exists?(task)).to be(false)
+        end
+      end
+      context 'trigger' do
+        it 'default value is nil' do
+          task_scheduler = ts.new(task)
+          expect(task_scheduler).to be_a(ts)
+        end
+        it 'can create a task if task argument is present' do
+          task_scheduler = ts.new(task, trigger)
+          expect(task_scheduler).to be_a(ts)
+          expect(task_scheduler.exists?(task)).to be(true)
+          delete_task
+          expect(task_scheduler.exists?(task)).to be(false)
+        end
+        it 'does not create any task if task argument is absent' do
+          task_scheduler = ts.new(nil, trigger)
+          expect(task_scheduler).to be_a(ts)
+          expect(task_scheduler.exists?(task)).to be(false)
+        end
+      end
+      # context 'folder' do
+      #   it 'default value is root' do
+      #   end
+      #   it 'raises an error if path separators (\\\) are absent' do
+      #   end
+      #   context 'when valid' do
+      #     it 'creates the task at specified path' do
+      #     end
+      #     it 'works well irrespective of force value' do
+      #     end
+      #   end
+      #   context 'when invalid' do
+      #     it 'raises an error when force is not given' do
+      #     end
+      #     it 'raises an error when force is false' do
+      #     end
+      #     it 'creates a folder when force is true' do
+      #     end
+      #   end
+      # end
+    end
+  end
+
   before(:context) do
     @task = "test_task"
     @task_scheduler = Win32::TaskScheduler.new
