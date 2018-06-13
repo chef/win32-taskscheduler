@@ -13,6 +13,23 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
   let(:trigger) { { start_year: tsk_time.year, start_month: tsk_time.month, start_day: tsk_time.day,
                     start_hour: tsk_time.hour, start_minute: tsk_time.min } }
 
+  describe 'Ensuring trigger constants' do
+    subject(:ts) { Win32::TaskScheduler }
+    describe 'to handle scheduled tasks' do
+      it { should be_const_defined(:ONCE) }
+      it { should be_const_defined(:DAILY) }
+      it { should be_const_defined(:WEEKLY) }
+      it { should be_const_defined(:MONTHLYDATE) }
+      it { should be_const_defined(:MONTHLYDOW) }
+    end
+
+    describe 'to handle other types' do
+      it { should be_const_defined(:AT_LOGON) }
+      it { should be_const_defined(:AT_SYSTEMSTART) }
+      it { should be_const_defined(:ON_IDLE) }
+    end
+  end
+
   before(:context) do
     @task = "test_task"
     @task_scheduler = Win32::TaskScheduler.new
@@ -21,23 +38,6 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
   # Cleanup TaskScheduler object
   after(:context) do
     delete_task
-  end
-
-  context 'Ensuring trigger constants' do
-    subject(:ts) { Win32::TaskScheduler }
-    context 'to handle scheduled tasks' do
-      it { should be_const_defined(:ONCE) }
-      it { should be_const_defined(:DAILY) }
-      it { should be_const_defined(:WEEKLY) }
-      it { should be_const_defined(:MONTHLYDATE) }
-      it { should be_const_defined(:MONTHLYDOW) }
-    end
-
-    context 'to handle other types' do
-      it { should be_const_defined(:AT_LOGON) }
-      it { should be_const_defined(:AT_SYSTEMSTART) }
-      it { should be_const_defined(:ON_IDLE) }
-    end
   end
 
   context '#tasks' do
@@ -179,7 +179,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
       expect{ @task_scheduler.application_name }.to raise_error(Win32::TaskScheduler::Error)
     end
 
-    it 'getter and setter works' do
+    it 'getter and setter are working successfully' do
       create_task
       expect(@task_scheduler.application_name=(test_app)).to eql(test_app)
       expect(@task_scheduler.application_name).to eql(test_app)
@@ -202,7 +202,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
       expect{ @task_scheduler.parameters }.to raise_error(Win32::TaskScheduler::Error)
     end
 
-    it 'getter and setter works' do
+    it 'getter and setter are working successfully' do
       create_task
       expect(@task_scheduler.parameters=(test_app)).to eql(test_app)
       expect(@task_scheduler.parameters).to eql(test_app)
@@ -225,7 +225,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
       expect{ @task_scheduler.working_directory }.to raise_error(Win32::TaskScheduler::Error)
     end
 
-    it 'getter and setter works' do
+    it 'getter and setter are working successfully' do
       create_task
       expect(@task_scheduler.working_directory=(test_dir)).to eql(test_dir)
       expect(@task_scheduler.working_directory).to eql(test_dir)
@@ -248,7 +248,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
       expect{ @task_scheduler.priority }.to raise_error(Win32::TaskScheduler::Error)
     end
 
-    it 'getter and setter works' do
+    it 'getter and setter are working successfully' do
       create_task
       expect(@task_scheduler.priority=(priority_val)).to eql(priority_val)
       expect(@task_scheduler.priority).to eql('highest')
@@ -271,7 +271,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
       expect{ @task_scheduler.comment }.to raise_error(Win32::TaskScheduler::Error)
     end
 
-    it 'getter and setter works' do
+    it 'getter and setter are working successfully' do
       create_task
       expect(@task_scheduler.comment=(comment_val)).to eql(comment_val)
       expect(@task_scheduler.comment).to eql(comment_val)
@@ -304,7 +304,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     # TODO: max_run_time setter expects time in miliseconds(may be an overhead),
     # and parser of getter is not working. It may be required to take a look again
     # Well, getter may implement `time_in_seconds` of TimeCalcHelper
-    it 'getter and setter works' do
+    it 'getter and setter are working successfully' do
       create_task
       expect(@task_scheduler.max_run_time=(max_run_time_val)).to eql(max_run_time_val)
       expect(@task_scheduler.max_run_time).to eql(max_run_time_val)
