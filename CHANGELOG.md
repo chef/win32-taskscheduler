@@ -1,8 +1,8 @@
 # win32-taskscheduler change log
 
-Note: this log contains only changes from win32-taskscheduler release 0.4.1 and later
+Note: this log contains only changes from win32-taskscheduler release 0.4.0 and later
 -- it does not contain the changes from prior releases. To view change history
-prior to release 0.4.1, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
+prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
 <!-- latest_release -->
 <!-- latest_release -->
@@ -13,6 +13,12 @@ prior to release 0.4.1, please visit the [source repository](https://github.com/
 
 <!-- latest_stable_release -->
 ## [win32-taskscheduler-1.0.2](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.2) (2018-06-13)
+- Fix for exists? method returning false for task without full path. [#43](https://github.com/chef/win32-taskscheduler/pull/43)([#Vasu1105](https://github.com/Vasu1105))
+- Fix to set user information at the time of creation of task. [#42](https://github.com/chef/win32-taskscheduler/pull/42)([#Vasu1105](https://github.com/Vasu1105))
+- Fix exists? method to find task in given path and if path or folder not present return false. [#40](https://github.com/chef/win32-taskscheduler/pull/40)([#Vasu1105](https://github.com/Vasu1105))
+- Fix for undefined method nil:Nilclass error when force flag is passed to create folder. [#32](https://github.com/chef/win32-taskscheduler/pull/32)([#Vasu1105](https://github.com/Vasu1105))
+
+
 <!-- latest_stable_release -->
 
 ## [v0.4.1](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-0.4.1) (15-May-2018)
