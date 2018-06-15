@@ -459,7 +459,6 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     end
   end
 
-
   context '#max_run_time' do
     let(:max_run_time_val){ 1244145000000 } # Just a random time in miliseconds
     it 'setter raises an error when an integer is not passed' do
@@ -487,6 +486,96 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     end
   end
 
+  context '#account_information' do
+    it 'returns nil when a task is not found' do
+      expect(@task_scheduler.account_information).to be_nil
+    end
+
+    it 'returns User ID for the task' do
+      create_task
+      expect(@task_scheduler.account_information).to be_a(String)
+    end
+
+    it 'returns nil post task deletion' do
+      skip 'instance variable @task needs to be set as nil in #delete_task in taskscheduler.rb'
+      delete_task
+      expect(@task_scheduler.account_information).to be_nil
+    end
+  end
+
+  context '#set_account_information' do
+    let(:numeric_pwd) {12345}
+    let(:string_pwd) {"pwd@123"}
+    it 'require user_id in String format' do
+      expect{ @task_scheduler.set_account_information(numeric_pwd, string_pwd) }.to raise_error(TypeError)
+    end
+    context 'system user' do
+      let(:user_id) {"SYSTEM"}
+      it 'does not require password to be String' do
+        expect{ @task_scheduler.set_account_information(user_id, numeric_pwd) }.to raise_error(Win32::TaskScheduler::Error)
+        expect{ @task_scheduler.set_account_information(user_id, string_pwd) }.to raise_error(Win32::TaskScheduler::Error)
+      end
+      it 'raises an error when a task is not found' do
+        expect{ @task_scheduler.set_account_information(user_id, string_pwd) }.to raise_error(Win32::TaskScheduler::Error)
+      end
+      it 'is able to set credentials for the task' do
+        skip 'credentials required'
+        create_task
+        expect(@task_scheduler.set_account_information(user_id, string_pwd)).to eql(true)
+        expect(@task_scheduler.account_information).to eql(user_id)
+        delete_task
+      end
+    end
+    context 'non-system user' do
+      let(:user_id) {"Guest"}
+      it 'require password to be String' do
+        expect{ @task_scheduler.set_account_information(user_id, numeric_pwd) }.to raise_error(TypeError)
+      end
+      it 'raises an error when a task is not found' do
+        expect{ @task_scheduler.set_account_information(user_id, string_pwd) }.to raise_error(Win32::TaskScheduler::Error)
+      end
+      it 'is able to set credentials for the task for string password' do
+        skip 'credentials required'
+        create_task
+        expect(@task_scheduler.set_account_information(user_id, string_pwd)).to eql(true)
+        expect(@task_scheduler.account_information).to eql(user_id)
+        delete_task
+      end
+    end
+  end
+
+  context '#author' do
+    let(:author_id){ "Author" }
+    it 'setter requires String argument' do
+      expect{ @task_scheduler.author=(123) }.to raise_error(TypeError)
+    end
+
+    it 'raises an error when a task is not found' do
+      @task_scheduler.instance_variable_set(:@task, nil)
+      expect{ @task_scheduler.author=(author_id) }.to raise_error(Win32::TaskScheduler::Error)
+      expect{ @task_scheduler.author }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter raises an error if no active tasks' do
+      @task_scheduler.instance_variable_set(:@task, nil)
+      expect{ @task_scheduler.author }.to raise_error(Win32::TaskScheduler::Error)
+    end
+
+    it 'getter and setter are working successfully' do
+      create_task
+      expect(@task_scheduler.author=(author_id)).to eql(author_id)
+      expect(@task_scheduler.author).to eql(author_id)
+    end
+
+    it 'is an alias with #creator' do
+      create_task
+      expect(@task_scheduler.creator=(author_id)).to eql(author_id)
+      expect(@task_scheduler.creator).to eql(author_id)
+    end
+  end
+
+
+  private
   def create_task
     trigger[:trigger_type] = Win32::TaskScheduler::ONCE
     @task_scheduler.new_work_item(@task, trigger)
