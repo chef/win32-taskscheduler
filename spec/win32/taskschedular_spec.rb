@@ -219,16 +219,13 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     it 'returns an array' do
       expect(@task_scheduler.tasks).to be_a(Array)
     end
-
     it 'returns tasks name post creation' do
       create_task
       expect(@task_scheduler.tasks).to include(@task)
     end
-
     it 'is an alias with enum' do
       expect(@task_scheduler.tasks).to include(@task)
     end
-
     it 'does not return the task name post deletion' do
       delete_task
       expect(@task_scheduler.tasks).not_to include(@task)
@@ -253,20 +250,16 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     it 'requires an argument' do
       expect{ @task_scheduler.get_task }.to raise_error(ArgumentError)
     end
-
     it 'raises an error when a string is not passed' do
       expect{ @task_scheduler.get_task(1) }.to raise_error(TypeError)
     end
-
     it 'raises an error when a task is not found' do
       expect{ @task_scheduler.get_task(@task) }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'returns task when it is present' do
       create_task
       expect(@task_scheduler.get_task(@task)).to be_a(WIN32OLE)
     end
-
     it 'raises an error post task deletion' do
       delete_task
       expect{ @task_scheduler.get_task(@task) }.to raise_error(Win32::TaskScheduler::Error)
@@ -278,7 +271,6 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
       @task_scheduler.instance_variable_set(:@task, nil)
       expect{ @task_scheduler.enabled? }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'returns true for enabled task' do
       create_task
       expect(@task_scheduler.enabled?).to eql(true)
@@ -289,21 +281,17 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     it 'requires an argument' do
       expect{ @task_scheduler.activate }.to raise_error(ArgumentError)
     end
-
     it 'raises an error when a string is not passed' do
       expect{ @task_scheduler.activate(1) }.to raise_error(TypeError)
     end
-
     it 'raises an error when a task is not found' do
       expect{ @task_scheduler.activate(dummy_task_name) }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'enables the specified task' do
       create_task
       expect(@task_scheduler.activate(@task)).to be_a(WIN32OLE)
       expect(@task_scheduler.enabled?).to be(true)
     end
-
     it 'raises an error post task deletion' do
       delete_task
       expect{ @task_scheduler.activate(@task) }.to raise_error(Win32::TaskScheduler::Error)
@@ -314,15 +302,12 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     it 'requires an argument' do
       expect{ @task_scheduler.delete }.to raise_error(ArgumentError)
     end
-
     it 'raises an error when a string is not passed' do
       expect{ @task_scheduler.delete(1) }.to raise_error(TypeError)
     end
-
     it 'raises an error when a task is not found' do
       expect{ @task_scheduler.delete(@task) }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'deletes the specified task' do
       create_task
       expect(delete_task).to be_nil
@@ -343,17 +328,14 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     it 'setter raises an error when a string is not passed' do
       expect{ @task_scheduler.application_name=(1) }.to raise_error(TypeError)
     end
-
     it 'raises an error when a task is not found' do
       @task_scheduler.instance_variable_set(:@task, nil)
       expect{ @task_scheduler.application_name=('app') }.to raise_error(Win32::TaskScheduler::Error)
       expect{ @task_scheduler.application_name }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter raises an error if no active tasks' do
       expect{ @task_scheduler.application_name }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter and setter are working successfully' do
       create_task
       expect(@task_scheduler.application_name=(test_app)).to eql(test_app)
@@ -366,17 +348,14 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     it 'setter raises an error when a string is not passed' do
       expect{ @task_scheduler.parameters=(1) }.to raise_error(TypeError)
     end
-
     it 'raises an error when a task is not found' do
       @task_scheduler.instance_variable_set(:@task, nil)
       expect{ @task_scheduler.parameters=('app') }.to raise_error(Win32::TaskScheduler::Error)
       expect{ @task_scheduler.parameters }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter raises an error if no active tasks' do
       expect{ @task_scheduler.parameters }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter and setter are working successfully' do
       create_task
       expect(@task_scheduler.parameters=(test_app)).to eql(test_app)
@@ -389,17 +368,14 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     it 'setter raises an error when a string is not passed' do
       expect{ @task_scheduler.working_directory=(1) }.to raise_error(TypeError)
     end
-
     it 'raises an error when a task is not found' do
       @task_scheduler.instance_variable_set(:@task, nil)
       expect{ @task_scheduler.working_directory=('app') }.to raise_error(Win32::TaskScheduler::Error)
       expect{ @task_scheduler.working_directory }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter raises an error if no active tasks' do
       expect{ @task_scheduler.working_directory }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter and setter are working successfully' do
       create_task
       expect(@task_scheduler.working_directory=(test_dir)).to eql(test_dir)
@@ -412,17 +388,14 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     it 'setter raises an error when an integer is not passed' do
       expect{ @task_scheduler.priority=('highest') }.to raise_error(TypeError)
     end
-
     it 'raises an error when a task is not found' do
       @task_scheduler.instance_variable_set(:@task, nil)
       expect{ @task_scheduler.priority=(priority_val) }.to raise_error(Win32::TaskScheduler::Error)
       expect{ @task_scheduler.priority }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter raises an error if no active tasks' do
       expect{ @task_scheduler.priority }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter and setter are working successfully' do
       create_task
       expect(@task_scheduler.priority=(priority_val)).to eql(priority_val)
@@ -435,23 +408,19 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     it 'setter raises an error when a String is not passed' do
       expect{ @task_scheduler.comment=(1) }.to raise_error(TypeError)
     end
-
     it 'raises an error when a task is not found' do
       @task_scheduler.instance_variable_set(:@task, nil)
       expect{ @task_scheduler.comment=(comment_val) }.to raise_error(Win32::TaskScheduler::Error)
       expect{ @task_scheduler.comment }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter raises an error if no active tasks' do
       expect{ @task_scheduler.comment }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter and setter are working successfully' do
       create_task
       expect(@task_scheduler.comment=(comment_val)).to eql(comment_val)
       expect(@task_scheduler.comment).to eql(comment_val)
     end
-
     it 'is an alias for description' do
       create_task
       expect(@task_scheduler.description=(comment_val)).to eql(comment_val)
@@ -464,13 +433,11 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     it 'setter raises an error when an integer is not passed' do
       expect{ @task_scheduler.max_run_time=('time') }.to raise_error(TypeError)
     end
-
     it 'raises an error when a task is not found' do
       @task_scheduler.instance_variable_set(:@task, nil)
       expect{ @task_scheduler.max_run_time=(max_run_time_val) }.to raise_error(Win32::TaskScheduler::Error)
       expect{ @task_scheduler.max_run_time }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter raises an error if no active tasks' do
       expect{ @task_scheduler.max_run_time }.to raise_error(Win32::TaskScheduler::Error)
     end
@@ -490,12 +457,10 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     it 'returns nil when a task is not found' do
       expect(@task_scheduler.account_information).to be_nil
     end
-
     it 'returns User ID for the task' do
       create_task
       expect(@task_scheduler.account_information).to be_a(String)
     end
-
     it 'returns nil post task deletion' do
       skip 'instance variable @task needs to be set as nil in #delete_task in taskscheduler.rb'
       delete_task
@@ -549,24 +514,20 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     it 'setter requires String argument' do
       expect{ @task_scheduler.author=(123) }.to raise_error(TypeError)
     end
-
     it 'raises an error when a task is not found' do
       @task_scheduler.instance_variable_set(:@task, nil)
       expect{ @task_scheduler.author=(author_id) }.to raise_error(Win32::TaskScheduler::Error)
       expect{ @task_scheduler.author }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter raises an error if no active tasks' do
       @task_scheduler.instance_variable_set(:@task, nil)
       expect{ @task_scheduler.author }.to raise_error(Win32::TaskScheduler::Error)
     end
-
     it 'getter and setter are working successfully' do
       create_task
       expect(@task_scheduler.author=(author_id)).to eql(author_id)
       expect(@task_scheduler.author).to eql(author_id)
     end
-
     it 'is an alias with #creator' do
       create_task
       expect(@task_scheduler.creator=(author_id)).to eql(author_id)
@@ -574,6 +535,126 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
     end
   end
 
+  context '#trigger_count' do
+    it 'raises an error when task is not found' do
+      @task_scheduler.instance_variable_set(:@task, nil)
+      expect{ @task_scheduler.trigger_count }.to raise_error(Win32::TaskScheduler::Error)
+    end
+    it 'returns no of trigger of a task' do
+      create_task
+      expect(@task_scheduler.trigger_count).to eql(1)
+    end
+  end
+
+  context '#trigger_string' do
+    it 'requires an integer argument' do
+      expect{ @task_scheduler.trigger_string("First") }.to raise_error(TypeError)
+    end
+    it 'raises an error when task is not found' do
+      @task_scheduler.instance_variable_set(:@task, nil)
+      expect{ @task_scheduler.trigger_string(1) }.to raise_error(Win32::TaskScheduler::Error)
+    end
+    it 'returns trigger string' do
+      create_task
+      expect(@task_scheduler.trigger_string(0)).to be_a(String)
+    end
+    it 'returns error for invalid index' do
+      create_task
+      expect{ @task_scheduler.trigger_string(2) }.to raise_error(Win32::TaskScheduler::Error)
+    end
+  end
+
+  context '#trigger' do
+    let(:index){ 0 }
+    it 'getter requires Numeric argument' do
+      expect{ @task_scheduler.trigger("First") }.to raise_error(TypeError)
+    end
+    it 'setter requires a Hash argument' do
+      expect{ @task_scheduler.trigger=("First") }.to raise_error(TypeError)
+    end
+    it 'raises an error when a task is not found' do
+      @task_scheduler.instance_variable_set(:@task, nil)
+      expect{ @task_scheduler.trigger(index) }.to raise_error(Win32::TaskScheduler::Error)
+    end
+    it 'getter and setter are working successfully' do
+      create_task
+      expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+      expect(@task_scheduler.trigger(index)).to be_a(Hash)
+      expect(@task_scheduler.trigger(index)).not_to be_empty
+    end
+    context 'ONCE' do
+      before do
+        trigger[:trigger_type] = Win32::TaskScheduler::ONCE
+        @task_scheduler.new_work_item(@task, trigger)
+      end
+      after { trigger[:trigger_type] = nil }
+      let(:time_limit) { 20 }
+      it 'supports the param random_minutes_interval' do
+        trigger[:random_minutes_interval] = time_limit
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).to include(random_minutes_interval: time_limit)
+      end
+    end
+    context 'DAILY' do
+      before do
+        trigger[:trigger_type] = Win32::TaskScheduler::DAILY
+        @task_scheduler.new_work_item(@task, trigger)
+      end
+      after { trigger[:trigger_type] = nil }
+      let(:time_limit) { 20 }
+      it 'supports the param days_interval within type' do
+        trigger[:type] = {days_interval: time_limit}
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).to include(type: {days_interval: time_limit})
+      end
+      it 'supports the param random_minutes_interval' do
+        trigger[:random_minutes_interval] = time_limit
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).to include(random_minutes_interval: time_limit)
+      end
+    end
+    context 'WEEKLY' do
+      let(:time_limit) { 20 }
+      let(:weekday) { Win32::TaskScheduler::SUNDAY }
+      before do
+        trigger[:trigger_type] = Win32::TaskScheduler::WEEKLY
+        trigger[:type] = {days_of_week: weekday}
+        @task_scheduler.new_work_item(@task, trigger)
+      end
+      after { trigger[:trigger_type] = nil }
+      it 'requires the param days_of_week within type' do
+        trigger[:type] = {days_of_week: nil}
+        expect{@task_scheduler.trigger=(trigger)}.to raise_error(Win32::TaskScheduler::Error)
+      end
+      it 'supports the param weeks_interval within type' do
+        week_type = {weeks_interval: time_limit, days_of_week: weekday}
+        trigger[:type] = week_type
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).to include(type: week_type)
+      end
+      it 'supports the param random_minutes_interval' do
+        trigger[:random_minutes_interval] = time_limit
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).to include(random_minutes_interval: time_limit)
+      end
+    end
+    # WIP:
+    context 'MONTHLYDATE' do
+
+    end
+    context 'MONTHLYDOW' do
+
+    end
+    context 'AT_LOGON' do
+
+    end
+    context 'AT_SYSTEMSTART' do
+
+    end
+    context 'ON_IDLE' do
+
+    end
+  end
 
   private
   def create_task
