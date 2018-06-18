@@ -565,7 +565,16 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
   end
 
   context '#trigger' do
+    let(:user_id) { (ENV['USERDOMAIN'] && ENV['USERNAME']) ? (ENV['USERDOMAIN'] + '\\' + ENV['USERNAME']) : "SYSTEM" }
     let(:index){ 0 }
+    let(:time_limit) { 20 }
+    let(:day) { Win32::TaskScheduler::FIRST }
+    let(:sunday) { Win32::TaskScheduler::SUNDAY }
+    let(:monday) { Win32::TaskScheduler::MONDAY }
+    let(:january) { Win32::TaskScheduler::JANUARY }
+    let(:february) { Win32::TaskScheduler::FEBRUARY }
+    let(:first_week) { Win32::TaskScheduler::FIRST_WEEK }
+    let(:second_week) { Win32::TaskScheduler::SECOND_WEEK }
     it 'getter requires Numeric argument' do
       expect{ @task_scheduler.trigger("First") }.to raise_error(TypeError)
     end
@@ -588,7 +597,6 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
         @task_scheduler.new_work_item(@task, trigger)
       end
       after { trigger[:trigger_type] = nil }
-      let(:time_limit) { 20 }
       it 'supports the param random_minutes_interval' do
         trigger[:random_minutes_interval] = time_limit
         expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
@@ -601,7 +609,6 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
         @task_scheduler.new_work_item(@task, trigger)
       end
       after { trigger[:trigger_type] = nil }
-      let(:time_limit) { 20 }
       it 'supports the param days_interval within type' do
         trigger[:type] = {days_interval: time_limit}
         expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
@@ -614,20 +621,18 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
       end
     end
     context 'WEEKLY' do
-      let(:time_limit) { 20 }
-      let(:weekday) { Win32::TaskScheduler::SUNDAY }
       before do
         trigger[:trigger_type] = Win32::TaskScheduler::WEEKLY
-        trigger[:type] = {days_of_week: weekday}
+        trigger[:type] = {days_of_week: sunday}
         @task_scheduler.new_work_item(@task, trigger)
       end
-      after { trigger[:trigger_type] = nil }
+      after { trigger[:trigger_type] = nil, trigger[:type] = nil }
       it 'requires the param days_of_week within type' do
         trigger[:type] = {days_of_week: nil}
         expect{@task_scheduler.trigger=(trigger)}.to raise_error(Win32::TaskScheduler::Error)
       end
       it 'supports the param weeks_interval within type' do
-        week_type = {weeks_interval: time_limit, days_of_week: weekday}
+        week_type = {weeks_interval: time_limit, days_of_week: sunday}
         trigger[:type] = week_type
         expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
         expect(@task_scheduler.trigger(index)).to include(type: week_type)
@@ -638,21 +643,132 @@ RSpec.describe Win32::TaskScheduler, :windows_only  do
         expect(@task_scheduler.trigger(index)).to include(random_minutes_interval: time_limit)
       end
     end
-    # WIP:
     context 'MONTHLYDATE' do
-
+      before do
+        trigger[:trigger_type] = Win32::TaskScheduler::MONTHLYDATE
+        trigger[:type] = {months: january, days: day}
+        @task_scheduler.new_work_item(@task, trigger)
+      end
+      after { trigger[:trigger_type] = nil, trigger[:type] = nil}
+      it 'requires the param months and days within type' do
+        trigger[:type] = {months: nil, days: nil}
+        expect{@task_scheduler.trigger=(trigger)}.to raise_error(Win32::TaskScheduler::Error)
+      end
+      it 'supports the param random_minutes_interval' do
+        trigger[:random_minutes_interval] = time_limit
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).to include(random_minutes_interval: time_limit)
+      end
     end
     context 'MONTHLYDOW' do
-
+      before do
+        trigger[:trigger_type] = Win32::TaskScheduler::MONTHLYDOW
+        @task_scheduler.new_work_item(@task, trigger)
+      end
+      after { trigger[:trigger_type] = nil, trigger[:type] = nil}
+      it 'defaults to Sunday in First Week of January' do
+        month_type = {months: january, days_of_week: sunday, weeks_of_month: first_week}
+        expect(@task_scheduler.trigger(index)).to include(type: month_type)
+      end
+      it 'can specify months, weekday, and week of the month within type' do
+        month_type = {months: february, days_of_week: monday, weeks_of_month: second_week}
+        trigger[:type] = month_type
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).to include(type: month_type)
+      end
+      it 'supports the param random_minutes_interval' do
+        trigger[:random_minutes_interval] = time_limit
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).to include(random_minutes_interval: time_limit)
+      end
     end
     context 'AT_LOGON' do
-
+      before do
+        trigger[:trigger_type] = Win32::TaskScheduler::AT_LOGON
+        @task_scheduler.new_work_item(@task, trigger)
+      end
+      after { trigger[:trigger_type] = nil }
+      it 'returns user_id only if it is passed along with trigger' do
+        trigger[:user_id] = nil
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).not_to include(:user_id)
+        trigger[:user_id] = user_id
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).to include(user_id: user_id)
+      end
+      it 'supports the param delay_duration' do
+        trigger[:delay_duration] = time_limit
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).to include(delay_duration: time_limit)
+      end
     end
     context 'AT_SYSTEMSTART' do
-
+      before do
+        trigger[:trigger_type] = Win32::TaskScheduler::AT_SYSTEMSTART
+        @task_scheduler.new_work_item(@task, trigger)
+      end
+      after { trigger[:trigger_type] = nil }
+      it 'supports the param delay_duration' do
+        trigger[:delay_duration] = time_limit
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).to include(delay_duration: time_limit)
+      end
     end
     context 'ON_IDLE' do
+      before do
+        trigger[:trigger_type] = Win32::TaskScheduler::ON_IDLE
+        @task_scheduler.new_work_item(@task, trigger)
+      end
+      after { trigger[:trigger_type] = nil }
+      it 'supports the param execution_time_limit' do
+        trigger[:execution_time_limit] = time_limit
+        expect(@task_scheduler.trigger=(trigger)).to eql(trigger)
+        expect(@task_scheduler.trigger(index)).to include(execution_time_limit: time_limit)
+      end
+    end
+  end
 
+  context '#principals' do
+    let(:principals){ { id: "Author", display_name: "DispName", logon_type: Win32::TaskScheduler::TASK_LOGON_SERVICE_ACCOUNT,
+                        run_level: Win32::TaskScheduler::TASK_RUNLEVEL_HIGHEST } }
+    it 'raises an error when a task is not found' do
+      @task_scheduler.instance_variable_set(:@task, nil)
+      expect{ @task_scheduler.configure_principals(principals) }.to raise_error(Win32::TaskScheduler::Error)
+      expect{ @task_scheduler.principals }.to raise_error(Win32::TaskScheduler::Error)
+    end
+    it 'getter and setter are working successfully' do
+      create_task
+      expect(@task_scheduler.configure_principals(principals)).to eql(principals)
+      expect(@task_scheduler.principals).to include(principals)
+    end
+  end
+
+  context '#settings' do
+    let(:settings){ { allow_demand_start: true, restart_interval: "",
+                      restart_count: 0, multiple_instances: 2, stop_if_going_on_batteries: true,
+                      disallow_start_if_on_batteries: true, allow_hard_terminate: true,
+                      start_when_available: false, run_only_if_network_available: false,
+                      enabled: true, delete_expired_task_after: "", 
+                      priority: 7, compatibility: 2, hidden: false, 
+                      run_only_if_idle: false, wake_to_run: false,
+                      disallow_start_on_remote_app_session: false, use_unified_scheduling_engine: false,
+                      maintenance_settings: nil, volatile: false, 
+                      # SKIP: Comenting below options since they are not working properly
+                      # execution_time_limit: 20,
+                      # network_settings: { name: "", id: "" },
+                      # idle_settings: { idle_duration: 10, wait_timeout: 1, 
+                      #                  stop_on_idle_end: true, restart_on_idle: false }
+                    }
+                  }
+    it 'raises an error when a task is not found' do
+      @task_scheduler.instance_variable_set(:@task, nil)
+      expect{ @task_scheduler.configure_settings(settings) }.to raise_error(Win32::TaskScheduler::Error)
+      expect{ @task_scheduler.settings }.to raise_error(Win32::TaskScheduler::Error)
+    end
+    it 'getter and setter are working successfully' do
+      create_task
+      expect(@task_scheduler.configure_settings(settings)).to eql(settings)
+      expect(@task_scheduler.settings).to include(settings)
     end
   end
 
