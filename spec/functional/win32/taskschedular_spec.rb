@@ -263,6 +263,175 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
   end
 
+  describe '#parameters' do
+    before { create_task }
+    it 'Returns the parameters of task' do
+      check = String.new
+      expect(@ts.parameters).to eq(check)
+    end
+
+    it 'Sets the parameters of task' do
+      check = 'cmd.exe'
+      expect(@ts.parameters = check).to eq(check)
+      expect(@ts.parameters).to eq(check)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.parameters }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#working_directory' do
+    before { create_task }
+    it 'Returns the working directory of task' do
+      check = String.new
+      expect(@ts.working_directory).to eq(check)
+    end
+
+    it 'Sets the working directory of task' do
+      check = Dir.pwd
+      expect(@ts.working_directory = check).to eq(check)
+      expect(@ts.working_directory).to eq(check)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.working_directory }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#priority' do
+    before { create_task }
+    it 'Returns the priority of task' do
+      check = 'below normal'
+      expect(@ts.priority).to eq(check)
+    end
+
+    it 'Sets the priority of task' do
+      check = 4
+      expect(@ts.priority = check).to eq(check)
+      expect(@ts.priority).to eq('normal')
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.priority }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#comment' do
+    before { create_task }
+    it 'Returns the comment of task' do
+      check = 'Sample task for testing purpose'
+      expect(@ts.comment).to eq(check)
+    end
+
+    it 'Sets the Comment(Description) of task' do
+      check = 'Description To Test'
+      expect(@ts.comment = check).to eq(check)
+      expect(@ts.comment).to eq(check)
+    end
+
+    it 'alias with Description' do
+      check = 'Description To Test'
+      expect(@ts.description = check).to eq(check)
+      expect(@ts.comment).to eq(check)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.comment }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#author' do
+    before { create_task }
+    it 'Returns the author of task' do
+      check = 'Rspec'
+      expect(@ts.author).to eq(check)
+    end
+
+    it 'Sets the Author of task' do
+      check = 'Author'
+      expect(@ts.author = check).to eq(check)
+      expect(@ts.author).to eq(check)
+    end
+
+    it 'alias with Creator' do
+      check = 'Description To Test'
+      expect(@ts.creator = check).to eq(check)
+      expect(@ts.author).to eq(check)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.author }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#max_run_time' do
+    before { create_task }
+    it 'Returns the Execution Time Limit of task' do
+      check = (72 * 60 * 60) # Task: PT72H
+      expect(@ts.max_run_time).to eq(check)
+    end
+
+    it 'Sets the max_run_time of task' do
+      check = 1244145000000
+      expect(@ts.max_run_time = check).to eq(check)
+      expect(@ts.max_run_time).to eq(check)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.max_run_time }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#enabled?' do
+    before { create_task }
+    it 'Returns true when Task is enabled' do
+      expect(@ts.enabled?).to be_truthy
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.enabled? }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#next_run_time' do
+    before { create_task }
+    it 'Returns a Time object that indicates the next time the task will run' do
+      expect(@ts.next_run_time).to be_a(Time)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.next_run_time }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#most_recent_run_time' do
+    before { create_task }
+    
+    it 'Returns nil if the task has never run' do
+      expect(@ts.most_recent_run_time).to be_nil
+    end
+
+    it 'Retuurns Time object indicating the most recent time the task ran or' do
+      @ts.run
+      expect(@ts.most_recent_run_time).to be_a(Time)
+      @ts.stop
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.most_recent_run_time }.to raise_error(tasksch_err)
+    end
+  end
+
   private
 
   def load_task_variables
