@@ -123,6 +123,10 @@ module Win32
     attr_accessor :password
     attr_reader :host
 
+    def root_path(path = '\\')
+      path
+    end
+
     # Returns a new TaskScheduler object, attached to +folder+. If that
     # folder does not exist, but the +force+ option is set to true, then
     # it will be created. Otherwise an error will be raised. The default
@@ -131,7 +135,7 @@ module Win32
     # If +task+ and +trigger+ are present, then a new task is generated
     # as well. This is effectively the same as .new + #new_work_item.
     #
-    def initialize(task = nil, trigger = nil, folder = "\\", force = false)
+    def initialize(task = nil, trigger = nil, folder = root_path, force = false)
       @folder = folder
       @force  = force
 
@@ -153,14 +157,13 @@ module Win32
 
       @service.Connect
 
-      if folder != "\\"
+      if folder != root_path
         begin
           @root = @service.GetFolder(folder)
         rescue WIN32OLERuntimeError => err
           if force
-            @root = @service.GetFolder("\\")
-            @root.CreateFolder(folder)
-            @root = @service.GetFolder(folder)
+            @root = @service.GetFolder(root_path)
+            @root = @root.CreateFolder(folder)
           else
             raise ArgumentError, "folder '#{folder}' not found"
           end
@@ -196,15 +199,15 @@ module Win32
     def exists?(full_task_path)
       path = nil
       task_name = nil
-
       # Used the splat operator to put all folder elements into path and leave only the task name`
-      if full_task_path.include?("\\")
-        *path, task_name = full_task_path.split("\\")
+      if full_task_path.include?('\\')
+        full_task_path = root_path + full_task_path
+        *path, task_name = full_task_path.split('\\')
       else
         task_name = full_task_path
       end
 
-      folder = path.nil? ? "\\" : path.join("\\")
+      folder = path.nil? ? root_path : path.join('\\')
 
       begin
         root = @service.GetFolder(folder)
