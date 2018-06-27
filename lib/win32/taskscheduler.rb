@@ -205,7 +205,7 @@ module Win32
         task_name = full_task_path
       end
 
-      folder = path.nil? ? "\\" : path.join("\\")
+      folder = path.nil? ? root_path : path.join("\\")
 
       begin
         root = @service.GetFolder(folder)
