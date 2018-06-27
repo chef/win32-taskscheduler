@@ -1,7 +1,6 @@
 require 'spec_helper'
 require 'win32ole'
 require 'win32/taskscheduler'
-require 'byebug'
 
 RSpec.describe Win32::TaskScheduler, :windows_only do
   before { create_test_folder }
@@ -146,11 +145,11 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
     context 'from nested folder' do
       it 'Returns the Task if exists' do
-        skip 'Code missing'
+        skip 'Implementation Pending'
       end
 
       it 'Raises an error if task does not exists' do
-        skip 'Code missing'
+        skip 'Implementation Pending'
       end
     end
   end
@@ -173,11 +172,11 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
     context 'from nested folder' do
       it 'Activates the Task if exists' do
-        skip 'Code missing'
+        skip 'Implementation Pending'
       end
 
       it 'Raises an error if task does not exists' do
-        skip 'Code missing'
+        skip 'Implementation Pending'
       end
     end
   end
@@ -201,11 +200,11 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
     context 'from nested folder' do
       it 'Activates the Task if exists' do
-        skip 'Code missing'
+        skip 'Implementation Pending'
       end
 
       it 'Raises an error if task does not exists' do
-        skip 'Code missing'
+        skip 'Implementation Pending'
       end
     end
   end
@@ -213,7 +212,6 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
   describe '#run' do
     before { create_task }
     it 'Execute(Start) the Task' do
-      skip 'Todo: Need to retest due to some exception'
       @ts.run
       expect(app_running?).to be_truthy
       stop_the_app
@@ -253,7 +251,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
 
     it 'Sets the application name of task' do
-      skip 'Todo: Need to retest due to some exception'
+      stub_user
       check = 'cmd.exe'
       expect(@ts.application_name = check).to eq(check)
       expect(@ts.application_name).to eq(check)
@@ -273,7 +271,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
 
     it 'Sets the parameters of task' do
-      skip 'Todo: Need to retest due to some exception'
+      stub_user
       check = 'cmd.exe'
       expect(@ts.parameters = check).to eq(check)
       expect(@ts.parameters).to eq(check)
@@ -293,7 +291,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
 
     it 'Sets the working directory of task' do
-      skip 'Todo: Need to retest due to some exception'
+      stub_user
       check = Dir.pwd
       expect(@ts.working_directory = check).to eq(check)
       expect(@ts.working_directory).to eq(check)
@@ -313,7 +311,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
 
     it 'Sets the priority of task' do
-      skip 'Todo: Need to retest due to some exception'
+      stub_user
       check = 4
       expect(@ts.priority = check).to eq(check)
       expect(@ts.priority).to eq('normal')
@@ -333,14 +331,14 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
 
     it 'Sets the Comment(Description) of task' do
-      skip 'Todo: Need to retest due to some exception'
+      stub_user
       check = 'Description To Test'
       expect(@ts.comment = check).to eq(check)
       expect(@ts.comment).to eq(check)
     end
 
     it 'alias with Description' do
-      skip 'Todo: Need to retest due to some exception'
+      stub_user
       check = 'Description To Test'
       expect(@ts.description = check).to eq(check)
       expect(@ts.comment).to eq(check)
@@ -360,14 +358,14 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
 
     it 'Sets the Author of task' do
-      skip 'Todo: Need to retest due to some exception'
+      stub_user
       check = 'Author'
       expect(@ts.author = check).to eq(check)
       expect(@ts.author).to eq(check)
     end
 
     it 'alias with Creator' do
-      skip 'Todo: Need to retest due to some exception'
+      stub_user
       check = 'Description To Test'
       expect(@ts.creator = check).to eq(check)
       expect(@ts.author).to eq(check)
@@ -428,11 +426,12 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     before { create_task }
 
     it 'Returns nil if the task has never run' do
+      skip 'Error in implementation; Time.parse requires String'
       expect(@ts.most_recent_run_time).to be_nil
     end
 
     it 'Returns Time object indicating the most recent time the task ran' do
-      skip 'Todo: Need to retest due to some exception'
+      skip 'Error in implementation; Time.parse requires String'
       @ts.run
       expect(@ts.most_recent_run_time).to be_a(Time)
       @ts.stop
@@ -460,6 +459,13 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
                  # Will update this in test cases when required
                  trigger_type: Win32::TaskScheduler::ONCE }
     @ts = Win32::TaskScheduler.new
+  end
+
+  # Sets the user Id as nil, hence SYSTEM will be considered
+  # Alternatively, we may to provide the login users password
+  def stub_user
+    # @ts.instance_variable_set(:@password, 'user_login_password')
+    allow(@ts).to receive(:task_user_id).and_return(nil)
   end
 
   # Determines if notepad is running

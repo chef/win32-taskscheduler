@@ -1,7 +1,6 @@
 require 'spec_helper'
 require 'win32ole'
 require 'win32/taskscheduler'
-require 'byebug'
 
 RSpec.describe Win32::TaskScheduler, :windows_only do
   before { create_test_folder }

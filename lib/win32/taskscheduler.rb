@@ -1316,6 +1316,9 @@ module Win32
       symbolize_keys(settings_hash)
     end
 
+    def task_user_id(definition)
+      definition.Principal.UserId
+    end
     private
 
     # Returns a camle-case string to its underscore format
@@ -1347,7 +1350,7 @@ module Win32
     end
 
     def update_task_definition(definition)
-      user = definition.Principal.UserId
+      user = task_user_id(definition) || 'SYSTEM'
 
       @task = @root.RegisterTaskDefinition(
         @task.Path,
