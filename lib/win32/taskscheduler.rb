@@ -1,6 +1,7 @@
 require_relative 'windows/helper'
 require_relative 'windows/time_calc_helper'
 require_relative 'windows/constants'
+require_relative 'taskscheduler/version'
 require 'win32ole'
 require 'socket'
 require 'time'
@@ -14,9 +15,6 @@ module Win32
     include Windows::TaskSchedulerHelper
     include Windows::TimeCalcHelper
     include Windows::TaskSchedulerConstants
-
-    # The version of the win32-taskscheduler library
-    VERSION = '0.4.1'.freeze
 
     # The Error class is typically raised if any TaskScheduler methods fail.
     class Error < StandardError; end
@@ -207,7 +205,7 @@ module Win32
         task_name = full_task_path
       end
 
-      folder = path.nil? ? root_path : path.join('\\')
+      folder = path.nil? ? "\\" : path.join("\\")
 
       begin
         root = @service.GetFolder(folder)
