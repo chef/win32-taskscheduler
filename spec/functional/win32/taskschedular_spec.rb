@@ -7,7 +7,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
   after { clear_them }
   before { load_task_variables }
 
-  describe '#Constructor' do
+  describe '#constructor' do
     let(:ts) { Win32::TaskScheduler }
     context 'Task' do
       it 'Does not creates task when default(nil)' do
@@ -87,7 +87,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
   end
 
-  describe '#Tasks' do
+  describe '#tasks' do
     before { create_task }
     it 'Returns Task Names' do
       expect(@ts.tasks).to include(@task)
@@ -440,6 +440,84 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     it 'Raises an error if task does not exists' do
       @ts.instance_variable_set(:@task, nil)
       expect { @ts.most_recent_run_time }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#account_information' do
+    before { create_task }
+    it 'System users may not require any password' do
+      user = 'SYSTEM'
+      password = nil
+      expect(@ts.set_account_information(user, password)). to be_truthy
+      expect(@ts.account_information).to eq(user)
+    end
+
+    it 'User will require a password' do
+      user = ENV['user']
+      password = nil
+      expect { @ts.set_account_information(user, password) }. to raise_error(TypeError)
+      expect(@ts.account_information).to eq(user)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      user = 'User'
+      password = 'XXXX'
+      expect { @ts.set_account_information(user, password) }. to raise_error(tasksch_err)
+      expect(@ts.account_information).to be_nil
+    end
+  end
+
+  describe '#status' do
+    before { create_task }
+    it 'Returns tasks status' do
+      expect(@ts.status).to be_a(String)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.status }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#exit_code' do
+    before { create_task }
+    it 'Returns the exit code from the last scheduled run' do
+      expect(@ts.exit_code).to be_a(Integer)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.exit_code }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#trigger_count' do
+    before { create_task }
+    it 'Returns No of triggers associated with the task' do
+      expect(@ts.trigger_count).to eq(1)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.trigger_count }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#trigger_string' do
+    before { create_task }
+    it 'Returns a string that describes the current trigger at '\
+       'the specified index for the active task' do
+      expect(@ts.trigger_string(0)).to be_a(String)
+    end
+
+    it 'Raises an error if trigger is not found at the given index' do
+      expect { @ts.trigger_string(1) }.to raise_error(tasksch_err)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.trigger_string(0) }.to raise_error(tasksch_err)
     end
   end
 
