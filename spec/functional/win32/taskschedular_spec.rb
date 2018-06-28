@@ -521,6 +521,134 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
   end
 
+  describe '#idle_settings' do
+    before { create_task }
+    it 'Returns a hash containing idle settings of the current task' do
+      settings = @ts.idle_settings
+      expect(settings).to be_a(Hash)
+      expect(settings).to include(stop_on_idle_end: true)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.idle_settings }. to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#network_settings' do
+    before { create_task }
+    it 'Returns a hash containing network settings of the current task' do
+      settings = @ts.network_settings
+      expect(settings).to be_a(Hash)
+      expect(settings).to include(name: '')
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.network_settings }. to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#settings' do
+    before { create_task }
+    it 'Returns a hash containing all the settings of the current task' do
+      settings = @ts.settings
+      expect(settings).to be_a(Hash)
+      expect(settings).to include(enabled: true)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.settings }. to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#configure_settings' do
+    before { create_task }
+    before { stub_user }
+
+    it 'Sets idle settings of the task' do
+      skip 'Functionality is not working'
+      # Seems like it accepts time in minutes; but returns the result in ISO8601 format
+      settings = { idle_duration: 'PT11M',
+                   wait_timeout: 'PT2H',
+                   stop_on_idle_end: true,
+                   restart_on_idle: false }
+      @ts.configure_settings(settings)
+      expect(@ts.idle_settings).to eq(settings)
+    end
+
+    it 'Sets network settings of the task' do
+      skip 'Functionality is not working'
+      settings = { network_settings: { name: 'NET1' } }
+      @ts.configure_settings(settings)
+      expect(@ts.network_settings).to eq(settings)
+    end
+
+    it 'Configures the settings of the task' do
+      skip 'Functionality is not working properly'
+      settings = @ts.settings
+      settings[:allow_demand_start] = false
+      settings[:execution_time_limit] = 'PT70H'
+      @ts.configure_settings(settings)
+      expect(@ts.settings).to eq(settings)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.settings }. to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#principals' do
+    before { create_task }
+    it 'Returns a hash containing all the principal information of the current task' do
+      principals = @ts.principals
+      expect(principals).to be_a(Hash)
+      expect(principals).to include(id: 'Author')
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.principals }. to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#principals' do
+    before { create_task }
+    it 'Returns a hash containing all the principal information of the current task' do
+      principals = @ts.principals
+      expect(principals).to be_a(Hash)
+      expect(principals).to include(id: 'Author')
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.principals }. to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#configure_principals' do
+    before { create_task }
+    before { stub_user }
+
+    it 'Sets the principals for current active task' do
+      principals = @ts.principals
+      principals[:user_id] = 'SYSTEM'
+      principals[:display_name] = 'Rspec'
+      principals[:run_level] = Win32::TaskScheduler::TASK_RUNLEVEL_HIGHEST
+      principals[:logon_type] = Win32::TaskScheduler::TASK_LOGON_SERVICE_ACCOUNT
+
+      @ts.configure_principals(principals)
+      expect(@ts.principals).to eq(principals)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.principals }. to raise_error(tasksch_err)
+    end
+  end
+
   private
 
   def load_task_variables
