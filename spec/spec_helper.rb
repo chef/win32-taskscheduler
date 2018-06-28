@@ -132,3 +132,93 @@ end
 def tasksch_err
   Win32::TaskScheduler::Error
 end
+
+# Methods to build all types of triggers and their values
+
+def all_triggers
+  all_triggers = {}
+
+  %w[ONCE DAILY WEEKLY MONTHLYDATE MONTHLYDOW
+     ON_IDLE AT_SYSTEMSTART AT_LOGON].each do |trig_type|
+    trigger = {}
+    trigger[:trigger_type] = Win32::TaskScheduler.class_eval(trig_type)
+    start_end_params(trigger)
+    other_trigger_params(trig_type, trigger)
+    all_triggers[trig_type] = trigger
+  end
+
+  all_triggers
+end
+
+def start_end_params(trigger)
+  %i[start_year end_year].each do |t|
+    trigger[t] = '2030'
+  end
+
+  %i[start_month start_day start_hour start_minute].each do |t|
+    trigger[t] = '02'
+  end
+
+  %i[end_day end_month].each do |t|
+    trigger[t] = '03'
+  end
+
+  %i[minutes_duration minutes_interval].each do |t|
+    trigger[t] = 2
+  end
+end
+
+def other_trigger_params(trig_type, trigger)
+  type = {}
+  case trig_type
+  when 'ONCE'
+    trigger[:type] = type
+    type[:once] = nil
+    trigger[:random_minutes_interval] = 2
+  when 'DAILY'
+    trigger[:type] = type
+    type[:days_interval] = 2
+    trigger[:random_minutes_interval] = 2
+  when 'WEEKLY'
+    trigger[:type] = type
+    type[:weeks_interval] = 2
+    type[:days_of_week] = sunday
+    trigger[:random_minutes_interval] = 2
+  when 'MONTHLYDATE'
+    trigger[:type] = type
+    type[:months] = january
+    type[:days] = first_day
+    trigger[:run_on_last_day_of_month] = false
+    trigger[:random_minutes_interval] = 2
+  when 'MONTHLYDOW'
+    trigger[:type] = type
+    type[:months] = january
+    type[:days_of_week] = sunday
+    type[:weeks_of_month] = first_week
+    trigger[:run_on_last_week_of_month] = false
+    trigger[:random_minutes_interval] = 2
+  when 'ON_IDLE'
+    trigger[:execution_time_limit] = 2
+  when 'AT_SYSTEMSTART'
+    trigger[:delay_duration] = 2
+  when 'AT_LOGON'
+    trigger[:user_id] = 'SYSTEM'
+    trigger[:delay_duration] = 2
+  end
+end
+
+def sunday
+  Win32::TaskScheduler::SUNDAY
+end
+
+def january
+  Win32::TaskScheduler::JANUARY
+end
+
+def first_day
+  Win32::TaskScheduler::FIRST
+end
+
+def first_week
+  Win32::TaskScheduler::FIRST_WEEK
+end

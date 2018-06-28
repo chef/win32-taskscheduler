@@ -649,6 +649,80 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
   end
 
+  describe '#trigger' do
+    before { create_task }
+
+    it 'Returns a hash that describes the trigger '\
+       'at the given index for the current task' do
+      trigger = @ts.trigger(0)
+      expect(trigger).to be_a(Hash)
+      expect(trigger).not_to be_empty
+    end
+
+    it 'Raises an error if trigger is not found at the given index' do
+      expect { @ts.trigger(1) }.to raise_error(tasksch_err)
+    end
+
+    it 'Raises an error if task does not exists' do
+      @ts.instance_variable_set(:@task, nil)
+      expect { @ts.trigger(0) }.to raise_error(tasksch_err)
+    end
+  end
+
+  describe '#trigger=' do
+    before { create_task }
+    before { stub_user }
+    all_triggers.each do |type, trigger_hash|
+      it "Updates the first trigger for type: #{type}" do
+        @ts.trigger = trigger_hash
+        returned_trigger = @ts.trigger(0)
+        expect(returned_trigger).to eq(trigger_hash)
+        expect(@ts.trigger_count).to eq(1)
+      end
+
+      it "Updates the trigger at given index for type: #{type}" do
+        skip 'Implementation Pending'
+        @ts.trigger = trigger_hash
+        returned_trigger = @ts.trigger(0)
+        expect(returned_trigger).to eq(trigger_hash)
+        expect(@ts.trigger_count).to eq(1)
+      end
+
+      it 'Raises an error if task does not exists' do
+        @ts.instance_variable_set(:@task, nil)
+        expect { @ts.trigger = trigger_hash }.to raise_error(tasksch_err)
+      end
+    end
+  end
+
+  describe '#new_work_item' do
+    before { create_task }
+    context 'Creates a new task' do
+      all_triggers.each do |type, trigger_hash|
+        it "for the triger: #{type}" do
+          task_count = 1 # One task already exists
+          expect(@ts.new_work_item("Task_#{type}", trigger_hash)).to be_a(@current_task.class)
+          task_count += 1
+          expect(no_of_tasks).to eq(task_count)
+        end
+      end
+    end
+
+    context 'Updates the existing task' do
+      all_triggers.each do |type, trigger_hash|
+        it "for the triger: #{type}" do
+          expect(@ts.new_work_item(@task, trigger_hash)).to be_a(@current_task.class)
+          expect(no_of_tasks).to eq(1)
+        end
+
+        it 'Raises an error if task does not exists' do
+          @ts.instance_variable_set(:@task, nil)
+          expect { @ts.trigger = trigger_hash }.to raise_error(tasksch_err)
+        end
+      end
+    end
+  end
+
   private
 
   def load_task_variables
