@@ -4,17 +4,18 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release 1.0.3 -->
-## [win32-taskscheduler-1.0.3](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.3) (2018-06-30)
+<!-- latest_release 1.0.4 -->
+## [win32-taskscheduler-1.0.4](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.4) (2018-06-30)
 
 #### Merged Pull Requests
-- MSYS-835 Setup appveyor [#55](https://github.com/chef/win32-taskscheduler/pull/55) ([Vasu1105](https://github.com/Vasu1105))
+- Remove the cert [#53](https://github.com/chef/win32-taskscheduler/pull/53) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=1.0.2 -->
 ### Changes since 1.0.2 release
 
 #### Merged Pull Requests
+- Remove the cert [#53](https://github.com/chef/win32-taskscheduler/pull/53) ([tas50](https://github.com/tas50)) <!-- 1.0.4 -->
 - MSYS-835 Setup appveyor [#55](https://github.com/chef/win32-taskscheduler/pull/55) ([Vasu1105](https://github.com/Vasu1105)) <!-- 1.0.3 -->
 <!-- release_rollup -->
 
