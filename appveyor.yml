@@ -1,0 +1,40 @@
+version: "ole-{build}"
+
+os: Windows server 2012
+platform:
+  - x64
+
+cache:
+  - vendor/bundle
+
+clone_folder: c:\projects\win32-taskscheduler
+clone_depth: 1
+branches:
+  only:
+    - ole
+
+environment:
+  matrix:
+    - ruby_version: "25-x64"
+    - ruby_version: "25"
+    - ruby_version: "24-x64"
+    - ruby_version: "24"
+
+install:
+  - systeminfo
+  - winrm quickconfig -q
+  - SET PATH=C:\Ruby%ruby_version%\bin;%PATH%
+  - echo %PATH%
+  - bundle config --local path vendor/bundle # use the cache we define above
+
+build_script:
+  - bundle install || bundle install || bundle install
+
+before_test:
+  - ruby --version
+  - gem --version
+  - bundler --version
+  - bundle env
+
+test_script:
+  - bundle exec rake spec
