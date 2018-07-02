@@ -24,7 +24,6 @@ Gem::Specification.new do |spec|
     "README.md",
     "CHANGELOG.md",
     "RELEASE_NOTES.md",
-    "MANIFEST",
   ]
 
   spec.description = <<-EOF
