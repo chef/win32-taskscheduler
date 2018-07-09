@@ -211,10 +211,13 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
   describe '#run' do
     before { create_task }
+    after { stop_the_app }
+
     it 'Execute(Start) the Task' do
       @ts.run
-      expect(app_running?).to be_truthy
-      stop_the_app
+      expect(@ts.status).to eq('running').
+                         or eq('queued').
+                         or eq('ready') # It takes time to load sometimes
     end
 
     it 'Raises an error if task does not exists' do
@@ -225,16 +228,16 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
   describe '#terminate' do
     before { create_task }
+    after { stop_the_app }
+
     it 'terminates the Task if exists' do
-      @ts.run
       @ts.terminate
-      expect(app_running?).to be_falsy
+      expect(@ts.status).to eq('ready')
     end
 
     it 'has an alias stop' do
-      @ts.run
-      @ts.terminate
-      expect(app_running?).to be_falsy
+      @ts.stop
+      expect(@ts.status).to eq('ready')
     end
 
     it 'Raises an error if task does not exists' do
@@ -456,7 +459,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
       user = ENV['user']
       password = nil
       expect { @ts.set_account_information(user, password) }. to raise_error(TypeError)
-      expect(@ts.account_information).to eq(user)
+      expect(@ts.account_information).to include(user)
     end
 
     it 'Raises an error if task does not exists' do
@@ -729,7 +732,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     time = Time.now
     # Ensuring root path will be test path
     allow_any_instance_of(Win32::TaskScheduler).to receive(:root_path).and_return(@test_path)
-    @app = 'notepad.exe'
+    @app = 'iexplore.exe'
     @task = 'test_task'
     @folder = @test_path
     @force = false
@@ -748,13 +751,9 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     allow(@ts).to receive(:task_user_id).and_return(nil)
   end
 
-  # Determines if notepad is running
-  def app_running?
-    status = `tasklist | find "notepad.exe"`
-    !status.empty?
-  end
-
+  # Will stop the appliaction only if it is running
   def stop_the_app
-    `taskkill /IM notepad.exe`
+    `tasklist /FI "IMAGENAME eq #{@app}" 2>NUL | find /I /N "#{@app}">NUL
+    if "%ERRORLEVEL%"=="0" taskkill /f /im #{@app}`
   end
 end
