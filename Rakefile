@@ -1,6 +1,7 @@
 require 'rake'
 require 'rake/clean'
 require 'rake/testtask'
+require 'rspec/core/rake_task'
 
 CLEAN.include("**/*.gem", "**/*.rbc")
 
@@ -22,6 +23,10 @@ end
 desc 'Run the example code'
 task :example do
   ruby '-Iib examples/taskscheduler_example.rb'
+end
+
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.pattern = FileList["spec/**/*_spec.rb", "spec/**/**/*_spec.rb"].to_a
 end
 
 desc 'Run the test suite for the win32-taskscheduler library'
