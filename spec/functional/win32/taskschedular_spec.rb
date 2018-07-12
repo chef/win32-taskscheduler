@@ -308,16 +308,86 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
   describe '#priority' do
     before { create_task }
-    it 'Returns the priority of task' do
-      check = 'below_normal'
+    it 'Returns default priority of task' do
+      check = 'below_normal_7'
       expect(@ts.priority).to eq(check)
     end
 
-    it 'Sets the priority of task' do
+    it '0 Sets the priority of task to critical' do
+      stub_user
+      check = 0
+      expect(@ts.priority = check).to eq(check)
+      expect(@ts.priority).to eq('critical')
+    end
+
+    it '1 Sets the priority of task to highest' do
+      stub_user
+      check = 1
+      expect(@ts.priority = check).to eq(check)
+      expect(@ts.priority).to eq('highest')
+    end
+
+    it '2 Sets the priority of task to above_normal_2' do
+      stub_user
+      check = 2
+      expect(@ts.priority = check).to eq(check)
+      expect(@ts.priority).to eq('above_normal_2')
+    end
+
+    it '3 Sets the priority of task to above_normal_3' do
+      stub_user
+      check = 3
+      expect(@ts.priority = check).to eq(check)
+      expect(@ts.priority).to eq('above_normal_3')
+    end
+
+    it '4 Sets the priority of task to normal_4' do
       stub_user
       check = 4
       expect(@ts.priority = check).to eq(check)
-      expect(@ts.priority).to eq('normal')
+      expect(@ts.priority).to eq('normal_4')
+    end
+
+    it '5 Sets the priority of task to normal_5' do
+      stub_user
+      check = 5
+      expect(@ts.priority = check).to eq(check)
+      expect(@ts.priority).to eq('normal_5')
+    end
+
+    it '6 Sets the priority of task to normal_6' do
+      stub_user
+      check = 6
+      expect(@ts.priority = check).to eq(check)
+      expect(@ts.priority).to eq('normal_6')
+    end
+
+    it '7 Sets the priority of task to below_normal_7' do
+      stub_user
+      check = 7
+      expect(@ts.priority = check).to eq(check)
+      expect(@ts.priority).to eq('below_normal_7')
+    end
+
+    it '8 Sets the priority of task to below_normal_8' do
+      stub_user
+      check = 8
+      expect(@ts.priority = check).to eq(check)
+      expect(@ts.priority).to eq('below_normal_8')
+    end
+
+    it '9 Sets the priority of task to lowest' do
+      stub_user
+      check = 9
+      expect(@ts.priority = check).to eq(check)
+      expect(@ts.priority).to eq('lowest')
+    end
+
+    it '10 Sets the priority of task to idle' do
+      stub_user
+      check = 10
+      expect(@ts.priority = check).to eq(check)
+      expect(@ts.priority).to eq('idle')
     end
 
     it 'Raises an error if task does not exists' do
