@@ -479,19 +479,19 @@ module Win32
         when 1
           priority = 'highest'
         when 2
-          priority = 'above_normal'
+          priority = 'above_normal_2'
         when 3
-          priority = 'above_normal'
+          priority = 'above_normal_3'
         when 4
-          priority = 'normal'
+          priority = 'normal_4'
         when 5
-          priority = 'normal'
+          priority = 'normal_5'
         when 6
-          priority = 'normal'
+          priority = 'normal_6'
         when 7
-          priority = 'below_normal'
+          priority = 'below_normal_7'
         when 8
-          priority = 'below_normal'
+          priority = 'below_normal_8'
         when 9
           priority = 'lowest'
         when 10
