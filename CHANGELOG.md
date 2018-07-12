@@ -4,17 +4,18 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release 1.0.6 -->
-## [win32-taskscheduler-1.0.6](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.6) (2018-07-05)
+<!-- latest_release 1.0.7 -->
+## [win32-taskscheduler-1.0.7](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.7) (2018-07-12)
 
 #### Merged Pull Requests
-- Remove the Manifest file and add a gitignore file [#57](https://github.com/chef/win32-taskscheduler/pull/57) ([tas50](https://github.com/tas50))
+- [MSYS-827] Add functional test cases  [#58](https://github.com/chef/win32-taskscheduler/pull/58) ([Nimesh-Msys](https://github.com/Nimesh-Msys))
 <!-- latest_release -->
 
 <!-- release_rollup since=1.0.2 -->
 ### Changes since 1.0.2 release
 
 #### Merged Pull Requests
+- [MSYS-827] Add functional test cases  [#58](https://github.com/chef/win32-taskscheduler/pull/58) ([Nimesh-Msys](https://github.com/Nimesh-Msys)) <!-- 1.0.7 -->
 - Remove the Manifest file and add a gitignore file [#57](https://github.com/chef/win32-taskscheduler/pull/57) ([tas50](https://github.com/tas50)) <!-- 1.0.6 -->
 - Add github templates and codeowners file [#52](https://github.com/chef/win32-taskscheduler/pull/52) ([tas50](https://github.com/tas50)) <!-- 1.0.5 -->
 - Remove the cert [#53](https://github.com/chef/win32-taskscheduler/pull/53) ([tas50](https://github.com/tas50)) <!-- 1.0.4 -->
