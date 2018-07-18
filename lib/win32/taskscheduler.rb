@@ -1183,7 +1183,7 @@ module Win32
       definition.Settings.AllowHardTerminate = allow_hard_terminate if allow_hard_terminate
       definition.Settings.Compatibility = compatibility if compatibility
       definition.Settings.DeleteExpiredTaskAfter = delete_expired_task_after if delete_expired_task_after
-      definition.Settings.DisallowStartIfOnBatteries = disallow_start_if_on_batteries
+      definition.Settings.DisallowStartIfOnBatteries = disallow_start_if_on_batteries if !disallow_start_if_on_batteries.nil?
       definition.Settings.Enabled = enabled if enabled
       definition.Settings.ExecutionTimeLimit = execution_time_limit if execution_time_limit
       definition.Settings.Hidden = hidden if hidden
@@ -1198,7 +1198,7 @@ module Win32
       definition.Settings.RunOnlyIfIdle = run_only_if_idle if run_only_if_idle
       definition.Settings.RunOnlyIfNetworkAvailable = run_only_if_network_available if run_only_if_network_available
       definition.Settings.StartWhenAvailable = start_when_available if start_when_available
-      definition.Settings.StopIfGoingOnBatteries = stop_if_going_on_batteries
+      definition.Settings.StopIfGoingOnBatteries  = stop_if_going_on_batteries if !stop_if_going_on_batteries.nil?
       definition.Settings.WakeToRun = wake_to_run if wake_to_run
       definition.Settings.XmlText = xml_text if xml_text
 
