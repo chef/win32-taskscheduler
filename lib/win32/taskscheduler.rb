@@ -466,9 +466,9 @@ module Win32
       dir
     end
 
-    # Returns the task's priority level. Possible values are 'idle',
-    # 'normal', 'high', 'realtime', 'below_normal', 'above_normal',
-    # and 'unknown'.
+    # Returns the task's priority level. Possible values are 'idle', 'lowest'.
+    # 'below_normal_8', 'below_normal_7', 'normal_6', 'normal_5', 'normal_4',
+    # 'above_normal_3', 'above_normal_2', 'highest', 'critical' and 'unknown'.
     #
     def priority
       check_for_active_task
