@@ -4,17 +4,18 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release 1.0.8 -->
-## [win32-taskscheduler-1.0.8](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.8) (2018-07-23)
+<!-- latest_release 1.0.9 -->
+## [win32-taskscheduler-1.0.9](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.9) (2018-07-23)
 
 #### Merged Pull Requests
-- Add DisallowStartIfOnBatteries and StopIfGoingOnBatteries task configs [#61](https://github.com/chef/win32-taskscheduler/pull/61) ([dheerajd-msys](https://github.com/dheerajd-msys))
+- Fix priority should return unique value. [#60](https://github.com/chef/win32-taskscheduler/pull/60) ([Vasu1105](https://github.com/Vasu1105))
 <!-- latest_release -->
 
 <!-- release_rollup since=1.0.2 -->
 ### Changes since 1.0.2 release
 
 #### Merged Pull Requests
+- Fix priority should return unique value. [#60](https://github.com/chef/win32-taskscheduler/pull/60) ([Vasu1105](https://github.com/Vasu1105)) <!-- 1.0.9 -->
 - Add DisallowStartIfOnBatteries and StopIfGoingOnBatteries task configs [#61](https://github.com/chef/win32-taskscheduler/pull/61) ([dheerajd-msys](https://github.com/dheerajd-msys)) <!-- 1.0.8 -->
 - [MSYS-827] Add functional test cases  [#58](https://github.com/chef/win32-taskscheduler/pull/58) ([Nimesh-Msys](https://github.com/Nimesh-Msys)) <!-- 1.0.7 -->
 - Remove the Manifest file and add a gitignore file [#57](https://github.com/chef/win32-taskscheduler/pull/57) ([tas50](https://github.com/tas50)) <!-- 1.0.6 -->
