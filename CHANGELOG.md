@@ -4,21 +4,19 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release 1.0.10 -->
+<!-- latest_release -->
+<!-- latest_release -->
+
+<!-- release_rollup -->
+<!-- release_rollup -->
+
+<!-- latest_stable_release -->
 ## [win32-taskscheduler-1.0.10](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.10) (2018-07-24)
 
 #### Merged Pull Requests
 - Fix exists? method breaking task full path search [#62](https://github.com/chef/win32-taskscheduler/pull/62) ([Vasu1105](https://github.com/Vasu1105))
-<!-- latest_release -->
-
-<!-- release_rollup since=1.0.9 -->
-### Changes since 1.0.9 release
-
-#### Merged Pull Requests
-- Fix exists? method breaking task full path search [#62](https://github.com/chef/win32-taskscheduler/pull/62) ([Vasu1105](https://github.com/Vasu1105)) <!-- 1.0.10 -->
-<!-- release_rollup -->
-
 <!-- latest_stable_release -->
+
 ## [win32-taskscheduler-1.0.9](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.9) (2018-07-23)
 
 #### Merged Pull Requests
@@ -29,7 +27,6 @@ prior to release 0.4.0, please visit the [source repository](https://github.com/
 - [MSYS-827] Add functional test cases  [#58](https://github.com/chef/win32-taskscheduler/pull/58) ([Nimesh-Msys](https://github.com/Nimesh-Msys))
 - Add DisallowStartIfOnBatteries and StopIfGoingOnBatteries task configs [#61](https://github.com/chef/win32-taskscheduler/pull/61) ([dheerajd-msys](https://github.com/dheerajd-msys))
 - Fix priority should return unique value. [#60](https://github.com/chef/win32-taskscheduler/pull/60) ([Vasu1105](https://github.com/Vasu1105))
-<!-- latest_stable_release -->
 
 ## [win32-taskscheduler-1.0.2](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.2) (2018-06-13)
 - Fix for exists? method returning false for task without full path. [#43](https://github.com/chef/win32-taskscheduler/pull/43)([#Vasu1105](https://github.com/Vasu1105))
