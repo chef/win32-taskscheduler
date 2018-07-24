@@ -110,7 +110,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
       it 'at nested folder' do
         @ts = Win32::TaskScheduler.new(@task, @trigger, folder, force)
-        task = folder + '\\' + @task
+        task = @test_path + folder + '\\' + @task
         expect(@ts.exists?(task)).to be_truthy
       end
     end
