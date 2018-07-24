@@ -199,9 +199,7 @@ module Win32
       path = nil
       task_name = nil
 
-      # Used the splat operator to put all folder elements into path and leave only the task name`
       if full_task_path.include?("\\")
-        full_task_path = root_path + full_task_path
         *path, task_name = full_task_path.split('\\')
       else
         task_name = full_task_path
