@@ -640,31 +640,57 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     before { create_task }
     before { stub_user }
 
+    it 'Require a hash' do
+      expect { @ts.configure_settings("XYZ") }. to raise_error(TypeError)
+      expect(@ts.configure_settings({})).to eq({})
+    end
+
+    it 'Raises an error if invalid setting is passed' do
+      expect { @ts.configure_settings(invalid: true) }. to raise_error(TypeError)
+    end
+
+    it 'Sets settings of the task and returns a hash' do
+      settings = { allow_demand_start: false,
+                   disallow_start_if_on_batteries: false,
+                   enabled: false,
+                   stop_if_going_on_batteries: false }
+
+      expect(@ts.configure_settings(settings)).to eq(settings)
+      expect(@ts.settings).to include(settings)
+    end
+
     it 'Sets idle settings of the task' do
-      skip 'Functionality is not working'
-      # Seems like it accepts time in minutes; but returns the result in ISO8601 format
-      settings = { idle_duration: 'PT11M',
-                   wait_timeout: 'PT2H',
+      # It accepts time in minutes
+      # and returns the result in ISO8601 format
+      settings = { idle_duration: 11,
+                   wait_timeout: 10,
                    stop_on_idle_end: true,
                    restart_on_idle: false }
+
+      result_settings = { idle_duration: 'PT11M',
+                          wait_timeout: 'PT10M',
+                          stop_on_idle_end: true,
+                          restart_on_idle: false }
+
       @ts.configure_settings(settings)
-      expect(@ts.idle_settings).to eq(settings)
+      expect(@ts.idle_settings).to eq(result_settings)
     end
 
-    it 'Sets network settings of the task' do
-      skip 'Functionality is not working'
-      settings = { network_settings: { name: 'NET1' } }
-      @ts.configure_settings(settings)
-      expect(@ts.network_settings).to eq(settings)
-    end
+    it 'Set settings and idle settings of the task' do
+      settings = {
+        allow_demand_start: false,
+        disallow_start_if_on_batteries: false,
+        stop_if_going_on_batteries: false
+      }
 
-    it 'Configures the settings of the task' do
-      skip 'Functionality is not working properly'
-      settings = @ts.settings
-      settings[:allow_demand_start] = false
-      settings[:execution_time_limit] = 'PT70H'
-      @ts.configure_settings(settings)
-      expect(@ts.settings).to eq(settings)
+      idle_settings = {
+        stop_on_idle_end: true,
+        restart_on_idle: false
+      }
+
+      @ts.configure_settings(settings.merge(idle_settings))
+      expect(@ts.settings).to include(settings)
+      expect(@ts.idle_settings).to include(idle_settings)
     end
 
     it 'Raises an error if task does not exists' do
