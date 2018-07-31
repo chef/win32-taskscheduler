@@ -1,28 +1,32 @@
 require 'rake'
-require 'rake/testtask'
 require 'rake/clean'
-require 'rbconfig'
-include Config
+require 'rake/testtask'
+require 'rspec/core/rake_task'
 
-CLEAN.include("**/*.gem", "**/*.rbc", ".rbx")
+CLEAN.include("**/*.gem", "**/*.rbc")
 
 namespace 'gem' do
-  desc 'Create the win32-taskscheduler gem'
+  desc 'Build the win32-taskscheduler gem'
   task :create => [:clean] do
+    require 'rubygems/package'
     spec = eval(IO.read('win32-taskscheduler.gemspec'))
-    Gem::Builder.new(spec).build
+    Gem::Package.build(spec, true)
   end
 
   desc 'Install the win32-taskscheduler library as a gem'
   task :install => [:create] do
     file = Dir['win32-taskscheduler*.gem'].first
-    sh "gem install #{file}"
+    sh "gem install -l #{file}"
   end
 end
 
 desc 'Run the example code'
 task :example do
   ruby '-Iib examples/taskscheduler_example.rb'
+end
+
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.pattern = FileList["spec/**/*_spec.rb", "spec/**/**/*_spec.rb"].to_a
 end
 
 desc 'Run the test suite for the win32-taskscheduler library'

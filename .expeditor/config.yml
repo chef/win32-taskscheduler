@@ -12,17 +12,13 @@ github:
   delete_branch_on_merge: true
   # The tag format to use (e.g. v1.0.0)
   version_tag_format: "win32-taskscheduler-{{version}}"
-  # The Github Team primarily responsible for handling incoming Pull Requests.
-  maintainer_group: chef/msys-developers
   release_branch:
     - master:
-        version_constraint: "0.*"
-    - ole:
         version_constraint: "1.*"
 promote:
-  action:
-    - built_in:publish_rubygems
+  actions:
     - built_in:rollover_changelog
+    - built_in:publish_rubygems
 
 # These actions are taken, in order they are specified, anytime a Pull Request is merged.
 merge_actions:
