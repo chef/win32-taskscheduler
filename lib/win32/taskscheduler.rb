@@ -1,95 +1,23 @@
-require 'windows/com'
-require 'windows/unicode'
-require 'windows/error'
-require 'windows/process'
-require 'windows/msvcrt/buffer'
+require_relative 'windows/helper'
+require_relative 'windows/time_calc_helper'
+require_relative 'windows/constants'
+require_relative 'taskscheduler/version'
+require 'win32ole'
+require 'socket'
+require 'time'
+require 'structured_warnings'
 
 # The Win32 module serves as a namespace only
 module Win32
-  # The TaskScheduler class encapsulates taskscheduler settings and behavior
+
+  # The TaskScheduler class encapsulates a Windows scheduled task
   class TaskScheduler
-    include Windows::COM
-    include Windows::Unicode
-    include Windows::Process
-    include Windows::Error
-    include Windows::MSVCRT::Buffer
+    include Windows::TaskSchedulerHelper
+    include Windows::TimeCalcHelper
+    include Windows::TaskSchedulerConstants
 
-    # The version of the win32-taskscheduler library
-    VERSION = '0.2.2'
-
-    # The error class raised if any task scheduler specific calls fail.
+    # The Error class is typically raised if any TaskScheduler methods fail.
     class Error < StandardError; end
-
-    private
-
-    # :stopdoc:
-
-    TASK_TIME_TRIGGER_ONCE            = 0
-    TASK_TIME_TRIGGER_DAILY           = 1
-    TASK_TIME_TRIGGER_WEEKLY          = 2
-    TASK_TIME_TRIGGER_MONTHLYDATE     = 3
-    TASK_TIME_TRIGGER_MONTHLYDOW      = 4
-    TASK_EVENT_TRIGGER_ON_IDLE        = 5
-    TASK_EVENT_TRIGGER_AT_SYSTEMSTART = 6
-    TASK_EVENT_TRIGGER_AT_LOGON       = 7
-
-    TASK_SUNDAY       = 0x1
-    TASK_MONDAY       = 0x2
-    TASK_TUESDAY      = 0x4
-    TASK_WEDNESDAY    = 0x8
-    TASK_THURSDAY     = 0x10
-    TASK_FRIDAY       = 0x20
-    TASK_SATURDAY     = 0x40
-    TASK_FIRST_WEEK   = 1
-    TASK_SECOND_WEEK  = 2
-    TASK_THIRD_WEEK   = 3
-    TASK_FOURTH_WEEK  = 4
-    TASK_LAST_WEEK    = 5
-    TASK_JANUARY      = 0x1
-    TASK_FEBRUARY     = 0x2
-    TASK_MARCH        = 0x4
-    TASK_APRIL        = 0x8
-    TASK_MAY          = 0x10
-    TASK_JUNE         = 0x20
-    TASK_JULY         = 0x40
-    TASK_AUGUST       = 0x80
-    TASK_SEPTEMBER    = 0x100
-    TASK_OCTOBER      = 0x200
-    TASK_NOVEMBER     = 0x400
-    TASK_DECEMBER     = 0x800
-
-    TASK_FLAG_INTERACTIVE                  = 0x1
-    TASK_FLAG_DELETE_WHEN_DONE             = 0x2
-    TASK_FLAG_DISABLED                     = 0x4
-    TASK_FLAG_START_ONLY_IF_IDLE           = 0x10
-    TASK_FLAG_KILL_ON_IDLE_END             = 0x20
-    TASK_FLAG_DONT_START_IF_ON_BATTERIES   = 0x40
-    TASK_FLAG_KILL_IF_GOING_ON_BATTERIES   = 0x80
-    TASK_FLAG_RUN_ONLY_IF_DOCKED           = 0x100
-    TASK_FLAG_HIDDEN                       = 0x200
-    TASK_FLAG_RUN_IF_CONNECTED_TO_INTERNET = 0x400
-    TASK_FLAG_RESTART_ON_IDLE_RESUME       = 0x800
-    TASK_FLAG_SYSTEM_REQUIRED              = 0x1000
-    TASK_FLAG_RUN_ONLY_IF_LOGGED_ON        = 0x2000
-    TASK_TRIGGER_FLAG_HAS_END_DATE         = 0x1
-    TASK_TRIGGER_FLAG_KILL_AT_DURATION_END = 0x2
-    TASK_TRIGGER_FLAG_DISABLED             = 0x4
-
-    TASK_MAX_RUN_TIMES = 1440
-    TASKS_TO_RETRIEVE  = 5
-
-    # COM
-
-    CLSCTX_INPROC_SERVER  = 0x1
-    CLSID_CTask = [0x148BD520,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
-    CLSID_CTaskScheduler = [0x148BD52A,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
-    IID_ITaskScheduler = [0x148BD527,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
-    IID_ITask = [0x148BD524,0xA2AB,0x11CE,0xB1,0x1F,0x00,0xAA,0x00,0x53,0x05,0x03].pack('LSSC8')
-    IID_IPersistFile = [0x0000010b,0x0000,0x0000,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46].pack('LSSC8')
-
-    public
-
-    # :startdoc:
 
     # Shorthand constants
 
@@ -154,444 +82,316 @@ module Win32
 
     MAX_RUN_TIMES = TASK_MAX_RUN_TIMES
 
-    # Returns a new TaskScheduler object. If a work_item (and possibly the
-    # the trigger) are passed as arguments then a new work item is created and
-    # associated with that trigger, although you can still activate other tasks
-    # with the same handle.
+    FIRST = TASK_FIRST
+    SECOND = TASK_SECOND
+    THIRD = TASK_THIRD
+    FOURTH = TASK_FOURTH
+    FIFTH = TASK_FIFTH
+    SIXTH = TASK_SIXTH
+    SEVENTH = TASK_SEVENTH
+    EIGHTH = TASK_EIGHTH
+    NINETH = TASK_NINETH
+    TENTH = TASK_TENTH
+    ELEVENTH = TASK_ELEVENTH
+    TWELFTH = TASK_TWELFTH
+    THIRTEENTH = TASK_THIRTEENTH
+    FOURTEENTH = TASK_FOURTEENTH
+    FIFTEENTH = TASK_FIFTEENTH
+    SIXTEENTH = TASK_SIXTEENTH
+    SEVENTEENTH = TASK_SEVENTEENTH
+    EIGHTEENTH = TASK_EIGHTEENTH
+    NINETEENTH = TASK_NINETEENTH
+    TWENTIETH = TASK_TWENTIETH
+    TWENTY_FIRST = TASK_TWENTY_FIRST
+    TWENTY_SECOND = TASK_TWENTY_SECOND
+    TWENTY_THIRD = TASK_TWENTY_THIRD
+    TWENTY_FOURTH = TASK_TWENTY_FOURTH
+    TWENTY_FIFTH = TASK_TWENTY_FIFTH
+    TWENTY_SIXTH = TASK_TWENTY_SIXTH
+    TWENTY_SEVENTH = TASK_TWENTY_SEVENTH
+    TWENTY_EIGHTH = TASK_TWENTY_EIGHTH
+    TWENTY_NINTH = TASK_TWENTY_NINTH
+    THIRTYETH = TASK_THIRTYETH
+    THIRTY_FIRST = TASK_THIRTY_FIRST
+    LAST = TASK_LAST
+
+
+    # :startdoc:
+
+    attr_accessor :password
+    attr_reader :host
+
+
+    def root_path(path = '\\')
+      path
+    end
+
+    # Returns a new TaskScheduler object, attached to +folder+. If that
+    # folder does not exist, but the +force+ option is set to true, then
+    # it will be created. Otherwise an error will be raised. The default
+    # is to use the root folder.
     #
-    # This is really just a bit of convenience. Passing arguments to the
-    # constructor is the same as calling TaskScheduler.new plus
-    # TaskScheduler#new_work_item.
+    # If +task+ and +trigger+ are present, then a new task is generated
+    # as well. This is effectively the same as .new + #new_work_item.
     #
-    def initialize(work_item=nil, trigger=nil)
-      @pITS   = nil
-      @pITask = nil
+    def initialize(task = nil, trigger = nil, folder = root_path, force = false)
+      @folder = folder
+      @force  = force
 
-      hr = CoInitialize(0)
+      @host     = Socket.gethostname
+      @task     = nil
+      @password = nil
 
-      if SUCCEEDED(hr)
-        ptr = 0.chr * 4
+      raise ArgumentError, "invalid folder" unless folder.include?("\\")
 
-        hr = CoCreateInstance(
-          CLSID_CTaskScheduler,
-          nil,
-          CLSCTX_INPROC_SERVER,
-          IID_ITaskScheduler,
-          ptr
-        )
-
-        if FAILED(hr)
-          raise Error, get_last_error
-        end
-
-        @pITS = ptr.unpack('L').first
-      else
-        raise Error, get_last_error
+      unless [TrueClass, FalseClass].include?(force.class)
+        raise TypeError, "invalid force value"
       end
 
-      if work_item
-        if trigger
-          raise TypeError unless trigger.is_a?(Hash)
-          new_work_item(work_item, trigger)
+      begin
+        @service = WIN32OLE.new('Schedule.Service')
+      rescue WIN32OLERuntimeError => err
+        raise Error, err.inspect
+      end
+
+      @service.Connect
+
+      if folder != root_path
+        begin
+          @root = @service.GetFolder(folder)
+        rescue WIN32OLERuntimeError => err
+          if force
+            @root = @service.GetFolder(root_path)
+            @root = @root.CreateFolder(folder)
+          else
+            raise ArgumentError, "folder '#{folder}' not found"
+          end
         end
+      else
+        @root = @service.GetFolder(folder)
+      end
+
+      if task && trigger
+        new_work_item(task, trigger)
       end
     end
 
     # Returns an array of scheduled task names.
     #
     def enum
-      raise Error, 'null pointer' if @pITS.nil?
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 24
-
-      memcpy(lpVtbl, @pITS, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 24)
-      table = table.unpack('L*')
-
-      enum = Win32::API::Function.new(table[5], 'PP', 'L')
-
-      ptr = 0.chr * 4
-      hr  = enum.call(@pITS, ptr)
-
-      raise Error, get_last_error if hr != S_OK
-
-      pIEnum = ptr.unpack('L').first
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 16
-
-      memcpy(lpVtbl, pIEnum, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 16)
-      table = table.unpack('L*')
-
-      _next   = Win32::API::Function.new(table[3], 'PLPP', 'L')
-      release = Win32::API::Function.new(table[2], 'P', 'L')
+      # Get the task folder that contains the tasks.
+      taskCollection = @root.GetTasks(0)
 
       array = []
-      fetched_tasks = 0.chr * 4
-      pnames = 0.chr * 4
 
-      while (_next.call(pIEnum, TASKS_TO_RETRIEVE, pnames, fetched_tasks) >= S_OK) &&
-        (fetched_tasks.unpack('L').first != 0)
-
-        tasks = fetched_tasks.unpack('L').first
-        names = 0.chr * 4 * tasks
-        memcpy(names, pnames.unpack('L').first, 4 * tasks)
-
-        for i in 0 ... tasks
-          str = 0.chr * 256
-          wcscpy(str, names[i*4, 4].unpack('L').first)
-          array.push(wide_to_multi(str))
-          CoTaskMemFree(names[i*4, 4].unpack('L').first)
-        end
-
-        CoTaskMemFree(pnames.unpack('L').first)
+      taskCollection.each do |registeredTask|
+        array << registeredTask.Name
       end
-
-      release.call(pIEnum)
 
       array
     end
 
-    alias :tasks :enum
+    alias tasks enum
+
+    # Returns whether or not the specified task exists.
+    #
+    def exists?(full_task_path)
+      path = nil
+      task_name = nil
+
+      if full_task_path.include?("\\")
+        *path, task_name = full_task_path.split('\\')
+      else
+        task_name = full_task_path
+      end
+
+      folder = path.nil? ? root_path : path.join("\\")
+
+      begin
+        root = @service.GetFolder(folder)
+      rescue WIN32OLERuntimeError => err
+        return false
+      end
+
+      if root.nil?
+        return false
+      else
+        begin
+          task = root.GetTask(task_name)
+          return task && task.Name == task_name
+        rescue WIN32OLERuntimeError => err
+          return false
+        end
+      end
+    end
+
+    # Return the sepcified task if exist
+    #
+    def get_task(task)
+      raise TypeError unless task.is_a?(String)
+
+      begin
+        registeredTask = @root.GetTask(task)
+        @task = registeredTask
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('activate', err)
+      end
+    end
 
     # Activate the specified task.
     #
     def activate(task)
-      raise Error, 'null pointer' if @pITS.nil?
       raise TypeError unless task.is_a?(String)
 
-      task = multi_to_wide(task)
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 28
-
-      memcpy(lpVtbl, @pITS, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 28)
-      table = table.unpack('L*')
-
-      activate = Win32::API::Function.new(table[6], 'PPPP', 'L')
-
-      ptr = 0.chr * 4
-      hr  = activate.call(@pITS, task, IID_ITask, ptr)
-
-      if hr != S_OK
-        raise Error, get_last_error
+      begin
+        registeredTask = @root.GetTask(task)
+        registeredTask.Enabled = 1
+        @task = registeredTask
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('activate', err)
       end
-
-      @pITask = ptr.unpack('L').first
     end
 
     # Delete the specified task name.
     #
     def delete(task)
-      raise Error, 'null pointer' if @pITS.nil?
       raise TypeError unless task.is_a?(String)
 
-      task = multi_to_wide(task)
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 32
-
-      memcpy(lpVtbl, @pITS, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 32)
-      table = table.unpack('L*')
-
-      delete = Win32::API::Function.new(table[7], 'PP', 'L')
-
-      hr = delete.call(@pITS,task)
-
-      if hr != S_OK
-        raise Error, get_last_error
+      begin
+        @root.DeleteTask(task, 0)
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('DeleteTask', err)
       end
     end
 
     # Execute the current task.
     #
     def run
-      raise Error, 'null pointer' if @pITask.nil?
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 52
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 52)
-      table = table.unpack('L*')
-
-      run = Win32::API::Function.new(table[12], 'P', 'L')
-
-      hr = run.call(@pITask)
-
-      if hr != S_OK
-        raise Error,get_last_error
-      end
+      check_for_active_task
+      @task.run(nil)
     end
 
-    # Saves the current task. Tasks must be saved before they can be activated.
-    # The .job file itself is typically stored in the C:\WINDOWS\Tasks folder.
-    #
-    # If +file+ (an absolute path) is specified then the job is saved to that
-    # file instead. A '.job' extension is recommended but not enforced.
-    #
-    # Note that calling TaskScheduler#save also resets the TaskScheduler object
-    # so that there is no currently active task.
+    # This method no longer has any effect. It is a no-op that remains for
+    # backwards compatibility. It will be removed in 0.4.0.
     #
     def save(file = nil)
-      raise Error, 'null pointer' if @pITask.nil?
-      file = multi_to_wide(file) if file
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 12
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 12)
-      table = table.unpack('L*')
-
-      queryinterface = Win32::API::Function.new(table[0],'PPP','L')
-      release = Win32::API::Function.new(table[2],'P','L')
-
-      ptr = 0.chr * 4
-
-      hr = queryinterface.call(@pITask, IID_IPersistFile, ptr)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
-
-      pIPersistFile = ptr.unpack('L').first
-
-      lpVtbl = 0.chr * 4
-      table = 0.chr * 28
-
-      memcpy(lpVtbl, pIPersistFile,4)
-      memcpy(table, lpVtbl.unpack('L').first, 28)
-      table = table.unpack('L*')
-
-      save = Win32::API::Function.new(table[6],'PPL','L')
-      release = Win32::API::Function.new(table[2],'P','L')
-
-      hr = save.call(pIPersistFile,file,1)
-
-      if hr != S_OK
-        raise Error,get_last_error
-      end
-
-      release.call(pIPersistFile)
-
-      CoUninitialize()
-      hr = CoInitialize(nil)
-
-      if hr >= 0
-        ptr = 0.chr * 4
-
-        hr = CoCreateInstance(
-          CLSID_CTaskScheduler,
-          nil,
-          CLSCTX_INPROC_SERVER,
-          IID_ITaskScheduler,
-          ptr
-        )
-
-        if hr != S_OK
-          CoUninitialize()
-          raise Error, get_last_error
-        end
-
-        @pITS = ptr.unpack('L').first
-      else
-        raise Error,get_last_error
-      end
-
-      release.call(@pITask)
-      @pITask = nil
+      warn DeprecatedMethodWarning, "this method is no longer necessary"
+      check_for_active_task
+      # Do nothing, deprecated.
     end
 
-    # Terminate the current task.
+    # Terminate (stop) the current task.
     #
     def terminate
-      raise Error, 'null pointer' if @pITask.nil?
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 56
-
-      memcpy(lpVtbl,@pITask,4)
-      memcpy(table,lpVtbl.unpack('L').first,56)
-      table = table.unpack('L*')
-
-      teriminate = Win32::API::Function.new(table[13],'P','L')
-      hr = teriminate.call(@pITask)
-
-      if hr != S_OK
-        raise Error,get_last_error
-      end
+      check_for_active_task
+      @task.stop(nil)
     end
 
+    alias stop terminate
+
     # Set the host on which the various TaskScheduler methods will execute.
+    # This method may require administrative privileges.
     #
     def machine=(host)
-      raise Error, 'null pointer' if @pITS.nil?
       raise TypeError unless host.is_a?(String)
 
-      host_w = multi_to_wide(host)
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 16
-
-      memcpy(lpVtbl, @pITS, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 16)
-      table = table.unpack('L*')
-
-      setTargetComputer = Win32::API::Function.new(table[3], 'PP', 'L')
-
-      hr = setTargetComputer.call(@pITS, host_w)
-
-      if hr != S_OK
-        raise Error, get_last_error
+      begin
+        @service.Connect(host)
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('Connect', err)
       end
 
+      @host = host
       host
     end
 
-    alias :host= :machine=
+    # Similar to the TaskScheduler#machine= method, this method also allows
+    # you to pass a user, domain and password as needed. This method may
+    # require administrative privileges.
+    #
+    def set_machine(host, user = nil, domain = nil, password = nil)
+      raise TypeError unless host.is_a?(String)
+
+      begin
+        @service.Connect(host, user, domain, password)
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('Connect', err)
+      end
+
+      @host = host
+      host
+    end
+
+    alias host= machine=
+    alias machine host
+    alias set_host set_machine
 
     # Sets the +user+ and +password+ for the given task. If the user and
     # password are set properly then true is returned.
-    #
-    # In some cases the job may be created, but the account information was
-    # bad. In this case the task is created but a warning is generated and
-    # false is returned.
-    #
+    # throws TypeError if password is not provided for other than system users
     def set_account_information(user, password)
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
+      raise TypeError unless user.is_a?(String)
+      unless SYSTEM_USERS.include?(user.upcase)
+        raise TypeError unless password.is_a?(String)
+      end
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 124
+      @password = password
 
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 124)
-      table = table.unpack('L*')
-
-      setAccountInformation = Win32::API::Function.new(table[30],'PPP','L')
-
-      if (user.nil? || user=="") && (password.nil? || password=="")
-        hr = setAccountInformation.call(@pITask, multi_to_wide(""), nil)
-      else
-        user = multi_to_wide(user)
-        password = multi_to_wide(password)
-        hr = setAccountInformation.call(@pITask, user, password)
+      begin
+        @task = @root.RegisterTaskDefinition(
+          @task.Path,
+          @task.Definition,
+          TASK_CREATE_OR_UPDATE,
+          user,
+          password,
+          password ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
+        )
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('RegisterTaskDefinition', err)
       end
 
-      bool = true
-
-      case hr
-        when S_OK
-          return true
-        when 0x80070005 # E_ACCESSDENIED
-          raise Error, 'access denied'
-        when 0x80070057 # E_INVALIDARG
-          raise Error, 'invalid argument'
-        when 0x8007000E # E_OUTOFMEMORY
-          raise Error, 'out of memory'
-        when 0x80041312 # SCHED_E_NO_SECURITY_SERVICES
-          raise Error, 'no security services on this platform'
-        when 0x80041314 # SCHED_E_UNSUPPORTED_ACCOUNT_OPTION
-          raise Error, 'unsupported account option'
-        when 0x8004130F # SCHED_E_ACCOUNT_INFORMATION_NOT_SET
-          warn 'job created, but password was invalid'
-          bool = false
-        else
-          raise Error, 'unknown error'
-      end
-
-      bool
+      true
     end
 
     # Returns the user associated with the task or nil if no user has yet
     # been associated with the task.
     #
     def account_information
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 128
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table,lpVtbl.unpack('L').first, 128)
-      table = table.unpack('L*')
-
-      getAccountInformation = Win32::API::Function.new(table[31], 'PP', 'L')
-
-      ptr = 0.chr * 4
-      hr = getAccountInformation.call(@pITask, ptr)
-
-      if hr == 0x8004130F # SCHED_E_ACCOUNT_INFORMATION_NOT_SET
-        user = nil
-      elsif hr >= 0 && hr != 0x80041312 # SCHED_E_NO_SECURITY_SERVICES
-        str = 0.chr * 256
-        wcscpy(str, ptr.unpack('L').first)
-        CoTaskMemFree(ptr.unpack('L').first)
-        user = wide_to_multi(str)
-      else
-        CoTaskMemFree(p.unpack('L').first)
-        raise Error,get_last_error(hr)
-      end
-
-      user
+      @task.nil? ? nil : @task.Definition.Principal.UserId
     end
 
-    # Returns the name of the application associated with the task.
+    # Returns the name of the application associated with the task. If
+    # no application is associated with the task then nil is returned.
     #
     def application_name
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 136
+      app = nil
 
-      memcpy(lpVtbl, @pITask,4)
-      memcpy(table, lpVtbl.unpack('L').first, 136)
-      table = table.unpack('L*')
-
-      getApplicationName = Win32::API::Function.new(table[33],'PP','L')
-
-      ptr = 0.chr * 4
-      hr  = getApplicationName.call(@pITask, ptr)
-
-      if hr >= S_OK
-        str = 0.chr * 256
-        wcscpy(str, ptr.unpack('L').first)
-        app = wide_to_multi(str)
-        CoTaskMemFree(ptr.unpack('L').first)
-      else
-        raise Error, get_last_error
+      @task.Definition.Actions.each do |action|
+        if action.Type == 0 # TASK_ACTION_EXEC
+          app = action.Path
+          break
+        end
       end
 
       app
     end
 
-    # Sets the application name associated with the task.
+    # Sets the name of the application associated with the task.
     #
     def application_name=(app)
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
       raise TypeError unless app.is_a?(String)
+      check_for_active_task
 
-      app_w = multi_to_wide(app)
+      definition = @task.Definition
 
-      lpVtbl = 0.chr * 4
-      table = 0.chr * 132
-      memcpy(lpVtbl,@pITask,4)
-      memcpy(table,lpVtbl.unpack('L').first,132)
-      table = table.unpack('L*')
-      setApplicationName = Win32::API::Function.new(table[32],'PP','L')
-
-      hr = setApplicationName.call(@pITask,app_w)
-
-      if hr != S_OK
-        raise Error,get_last_error(hr)
+      definition.Actions.each do |action|
+        action.Path = app if action.Type == 0
       end
+
+      update_task_definition(definition)
 
       app
     end
@@ -599,27 +399,12 @@ module Win32
     # Returns the command line parameters for the task.
     #
     def parameters
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 144
+      param = nil
 
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 144)
-      table = table.unpack('L*')
-
-      getParameters = Win32::API::Function.new(table[35], 'PP', 'L')
-      ptr = 0.chr * 4
-      hr = getParameters.call(@pITask, ptr)
-
-      if hr >= S_OK
-        str = 0.chr * 256
-        wcscpy(str, ptr.unpack('L').first)
-        param = wide_to_multi(str)
-        CoTaskMemFree(ptr.unpack('L').first)
-      else
-        raise Error, get_last_error
+      @task.Definition.Actions.each do |action|
+        param = action.Arguments if action.Type == 0
       end
 
       param
@@ -628,27 +413,20 @@ module Win32
     # Sets the parameters for the task. These parameters are passed as command
     # line arguments to the application the task will run. To clear the command
     # line parameters set it to an empty string.
+    #--
+    # NOTE: Again, it seems the task must be reactivated to be picked up.
     #
     def parameters=(param)
-      raise Error, 'null pointer(ts_set_parameters)' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
       raise TypeError unless param.is_a?(String)
+      check_for_active_task
 
-      param_w = multi_to_wide(param)
+      definition = @task.Definition
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 140
-
-      memcpy(lpVtbl,@pITask,4)
-      memcpy(table,lpVtbl.unpack('L').first,140)
-      table = table.unpack('L*')
-
-      setParameters = Win32::API::Function.new(table[34],'PP','L')
-      hr = setParameters.call(@pITask,param_w)
-
-      if hr != S_OK
-        raise Error, get_last_error(hr)
+      definition.Actions.each do |action|
+        action.Arguments = param if action.Type == 0
       end
+
+      update_task_definition(definition)
 
       param
     end
@@ -656,98 +434,68 @@ module Win32
     # Returns the working directory for the task.
     #
     def working_directory
-      raise Error,"fatal error: null pointer(ts_get_parameters)" if @pITS.nil?
-      raise Error,"No currently active task" if @pITask.nil?
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 152
+      dir = nil
 
-      memcpy(lpVtbl, @pITask,4)
-      memcpy(table, lpVtbl.unpack('L').first,152)
-      table = table.unpack('L*')
-
-      getWorkingDirectory = Win32::API::Function.new(table[37],'PP','L')
-
-      ptr = 0.chr * 4
-      hr  = getWorkingDirectory.call(@pITask, ptr)
-
-      if hr >= S_OK
-        str = 0.chr * 256
-        wcscpy(str, ptr.unpack('L').first)
-        dir = wide_to_multi(str)
-        CoTaskMemFree(ptr.unpack('L').first)
-      else
-        raise Error, get_last_error
+      @task.Definition.Actions.each do |action|
+        dir = action.WorkingDirectory if action.Type == 0
       end
 
       dir
     end
 
     # Sets the working directory for the task.
+    #--
+    # TODO: Why do I have to reactivate the task to see the change?
     #
     def working_directory=(dir)
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
       raise TypeError unless dir.is_a?(String)
+      check_for_active_task
 
-      dir_w = multi_to_wide(dir)
+      definition = @task.Definition
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 148
-
-      memcpy(lpVtbl, @pITask,4)
-      memcpy(table, lpVtbl.unpack('L').first, 148)
-      table = table.unpack('L*')
-
-      setWorkingDirectory = Win32::API::Function.new(table[36], 'PP', 'L')
-      hr = setWorkingDirectory.call(@pITask, dir_w)
-
-      if hr != S_OK
-        raise Error, get_last_error(hr)
+      definition.Actions.each do |action|
+        action.WorkingDirectory = dir if action.Type == 0
       end
+
+      update_task_definition(definition)
 
       dir
     end
 
-    # Returns the task's priority level. Possible values are 'idle',
-    # 'normal', 'high', 'realtime', 'below_normal', 'above_normal',
-    # and 'unknown'.
+    # Returns the task's priority level. Possible values are 'idle', 'lowest'.
+    # 'below_normal_8', 'below_normal_7', 'normal_6', 'normal_5', 'normal_4',
+    # 'above_normal_3', 'above_normal_2', 'highest', 'critical' and 'unknown'.
     #
     def priority
-      raise Error, 'null pointer(ts_get_priority)' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 160
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 160)
-      table = table.unpack('L*')
-
-      getPriority = Win32::API::Function.new(table[39], 'PP', 'L')
-
-      ptr = 0.chr * 4
-      hr  = getPriority.call(@pITask, ptr)
-
-      if hr >= S_OK
-        pri = ptr.unpack('L').first
-        if (pri & IDLE_PRIORITY_CLASS) != 0
+      case @task.Definition.Settings.Priority
+        when 0
+          priority = 'critical'
+        when 1
+          priority = 'highest'
+        when 2
+          priority = 'above_normal_2'
+        when 3
+          priority = 'above_normal_3'
+        when 4
+          priority = 'normal_4'
+        when 5
+          priority = 'normal_5'
+        when 6
+          priority = 'normal_6'
+        when 7
+          priority = 'below_normal_7'
+        when 8
+          priority = 'below_normal_8'
+        when 9
+          priority = 'lowest'
+        when 10
           priority = 'idle'
-        elsif (pri & NORMAL_PRIORITY_CLASS) != 0
-          priority = 'normal'
-        elsif (pri & HIGH_PRIORITY_CLASS) != 0
-          priority = 'high'
-        elsif (pri & REALTIME_PRIORITY_CLASS) != 0
-          priority = 'realtime'
-        elsif (pri & BELOW_NORMAL_PRIORITY_CLASS) != 0
-          priority = 'below_normal'
-        elsif (pri & ABOVE_NORMAL_PRIORITY_CLASS) != 0
-          priority = 'above_normal'
         else
           priority = 'unknown'
-        end
-      else
-        raise Error, get_last_error
       end
 
       priority
@@ -757,23 +505,13 @@ module Win32
     # priority constant value.
     #
     def priority=(priority)
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
       raise TypeError unless priority.is_a?(Numeric)
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 156
+      definition = @task.Definition
+      definition.Settings.Priority = priority
 
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 156)
-      table = table.unpack('L*')
-
-      setPriority = Win32::API::Function.new(table[38], 'PL', 'L')
-      hr = setPriority.call(@pITask, priority)
-
-      if hr != S_OK
-        raise Error, get_last_error(hr)
-      end
+      update_task_definition(definition)
 
       priority
     end
@@ -782,224 +520,164 @@ module Win32
     # trigger variable is a hash of options that define when the scheduled
     # job should run.
     #
-    def new_work_item(task, trigger)
+    def new_work_item(task, trigger, userinfo = { user: nil, password: nil })
+      raise TypeError unless userinfo.is_a?(Hash)
+      raise TypeError unless task.is_a?(String)
       raise TypeError unless trigger.is_a?(Hash)
-      raise Error, 'null pointer' if @pITS.nil?
 
-      # I'm working around github issue #1 here.
-      enum.each{ |name|
-        if name.downcase == task.downcase + '.job'
-          raise Error, "task '#{task}' already exists"
+      unless userinfo[:user].nil?
+        raise TypeError unless userinfo[:user].is_a?(String)
+        unless SYSTEM_USERS.include?(userinfo[:user])
+          raise TypeError unless userinfo[:password].is_a?(String)
         end
-      }
-
-      trigger = transform_and_validate(trigger)
-
-      if @pITask
-        lpVtbl = 0.chr * 4
-        table  = 0.chr * 12
-
-        memcpy(lpVtbl, @pITask, 4)
-        memcpy(table, lpVtbl.unpack('L').first, 12)
-        table = table.unpack('L*')
-
-        release = Win32::API::Function.new(table[2], 'P', 'L')
-        release.call(@pITask)
-
-        @pITask = nil
       end
 
-      task = multi_to_wide(task)
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 36
+      taskDefinition = @service.NewTask(0)
+      taskDefinition.RegistrationInfo.Description = ''
+      taskDefinition.RegistrationInfo.Author = ''
+      taskDefinition.Settings.StartWhenAvailable = false
+      taskDefinition.Settings.Enabled  = true
+      taskDefinition.Settings.Hidden = false
 
-      memcpy(lpVtbl, @pITS, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 36)
-      table = table.unpack('L*')
 
-      newWorkItem = Win32::API::Function.new(table[8], 'PPPPP', 'L')
 
-      ptr = 0.chr * 4
+      unless trigger.empty?
+        raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
+        validate_trigger(trigger)
 
-      hr = newWorkItem.call(@pITS, task, CLSID_CTask, IID_ITask, ptr)
+        startTime = "%04d-%02d-%02dT%02d:%02d:00" % [
+          trigger[:start_year], trigger[:start_month], trigger[:start_day],
+          trigger[:start_hour], trigger[:start_minute]
+        ]
 
-      if FAILED(hr)
-        raise Error, get_last_error
+        # Set defaults
+        trigger[:end_year]  ||= 0
+        trigger[:end_month] ||= 0
+        trigger[:end_day]   ||= 0
+
+        endTime = "%04d-%02d-%02dT00:00:00" % [
+          trigger[:end_year], trigger[:end_month], trigger[:end_day]
+        ]
+
+        trig = taskDefinition.Triggers.Create(trigger[:trigger_type].to_i)
+        trig.Id = "RegistrationTriggerId#{taskDefinition.Triggers.Count}"
+        trig.StartBoundary = startTime if startTime != '0000-00-00T00:00:00'
+        trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
+        trig.Enabled = true
+
+        repetitionPattern = trig.Repetition
+
+        if trigger[:minutes_duration].to_i > 0
+          repetitionPattern.Duration = "PT#{trigger[:minutes_duration]||0}M"
+        end
+
+        if trigger[:minutes_interval].to_i > 0
+          repetitionPattern.Interval = "PT#{trigger[:minutes_interval]||0}M"
+        end
+
+        tmp = trigger[:type]
+        tmp = nil unless tmp.is_a?(Hash)
+
+        case trigger[:trigger_type]
+          when TASK_TIME_TRIGGER_DAILY
+            trig.DaysInterval = tmp[:days_interval] if tmp && tmp[:days_interval]
+            if trigger[:random_minutes_interval].to_i > 0
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]}M"
+            end
+          when TASK_TIME_TRIGGER_WEEKLY
+            trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+            trig.WeeksInterval = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
+            if trigger[:random_minutes_interval].to_i > 0
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            end
+          when TASK_TIME_TRIGGER_MONTHLYDATE
+            trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
+            trig.DaysOfMonth = tmp[:days] if tmp && tmp[:days]
+            if trigger[:random_minutes_interval].to_i > 0
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            end
+            trig.RunOnLastDayOfMonth = trigger[:run_on_last_day_of_month] if trigger[:run_on_last_day_of_month]
+          when TASK_TIME_TRIGGER_MONTHLYDOW
+            trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
+            trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+            trig.WeeksOfMonth = tmp[:weeks_of_month] if tmp && tmp[:weeks_of_month]
+            if trigger[:random_minutes_interval].to_i>0
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            end
+            trig.RunOnLastWeekOfMonth = trigger[:run_on_last_week_of_month] if trigger[:run_on_last_week_of_month]
+          when TASK_TIME_TRIGGER_ONCE
+            if trigger[:random_minutes_interval].to_i > 0
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            end
+          when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+            trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+          when TASK_EVENT_TRIGGER_AT_LOGON
+            trig.UserId = trigger[:user_id] if trigger[:user_id]
+            trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+        end
       end
 
-      @pITask = ptr.unpack('L').first
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 16
+      act = taskDefinition.Actions.Create(0)
+      act.Path = 'cmd'
 
-      # Without the 'enum.include?' check above the code segfaults here if the
-      # task already exists. This should probably be handled properly instead
-      # of simply avoiding the issue.
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 16)
-      table = table.unpack('L*')
-
-      createTrigger = Win32::API::Function.new(table[3], 'PPP', 'L')
-      p1 = 0.chr * 4
-      p2 = 0.chr * 4
-
-      hr = createTrigger.call(@pITask, p1, p2)
-
-      if hr != S_OK
-        raise Error, get_last_error
+      @password = userinfo[:password]
+      begin
+        @task = @root.RegisterTaskDefinition(
+          task,
+          taskDefinition,
+          TASK_CREATE_OR_UPDATE,
+          userinfo[:user].nil? || userinfo[:user].empty? ? 'SYSTEM': userinfo[:user],
+          userinfo[:password],
+          userinfo[:password] ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
+        )
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('RegisterTaskDefinition', err)
       end
 
-      pITaskTrigger = p2.unpack('L').first
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 16
-
-      memcpy(lpVtbl, pITaskTrigger, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 16)
-      table = table.unpack('L*')
-
-      release = Win32::API::Function.new(table[2], 'P', 'L')
-      setTrigger = Win32::API::Function.new(table[3], 'PP', 'L')
-
-      type1 = 0
-      type2 = 0
-      tmp = trigger['type']
-      tmp = nil unless tmp.is_a?(Hash)
-
-      case trigger['trigger_type']
-        when TASK_TIME_TRIGGER_DAILY
-          if tmp && tmp['days_interval']
-            type1 = [tmp['days_interval'],0].pack('SS').unpack('L').first
-          end
-        when TASK_TIME_TRIGGER_WEEKLY
-          if tmp && tmp['weeks_interval'] && tmp['days_of_week']
-            type1 = [tmp['weeks_interval'],tmp['days_of_week']].pack('SS').unpack('L').first
-          end
-        when TASK_TIME_TRIGGER_MONTHLYDATE
-          if tmp && tmp['months'] && tmp['days']
-            type2 = [tmp['months'],0].pack('SS').unpack('L').first
-            type1 = tmp['days']
-          end
-        when TASK_TIME_TRIGGER_MONTHLYDOW
-          if tmp && tmp['weeks'] && tmp['days_of_week'] && tmp['months']
-            type1 = [tmp['weeks'],tmp['days_of_week']].pack('SS').unpack('L').first
-            type2 = [tmp['months'],0].pack('SS').unpack('L').first
-          end
-        when TASK_TIME_TRIGGER_ONCE
-          # Do nothing. The Type member of the TASK_TRIGGER struct is ignored.
-        else
-          raise Error, 'Unknown trigger type'
-      end
-
-      pTrigger = [
-        48,
-        0,
-        trigger['start_year'] || 0,
-        trigger['start_month'] || 0,
-        trigger['start_day'] || 0,
-        trigger['end_year'] || 0,
-        trigger['end_month'] || 0,
-        trigger['end_day'] || 0,
-        trigger['start_hour'] || 0,
-        trigger['start_minute'] || 0,
-        trigger['minutes_duration'] || 0,
-        trigger['minutes_interval'] || 0,
-        trigger['flags'] || 0,
-        trigger['trigger_type'] || 0,
-        type1,
-        type2,
-        0,
-        trigger['random_minutes_interval'] || 0
-      ].pack('S10L4LLSS')
-
-      hr = setTrigger.call(pITaskTrigger, pTrigger)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
-
-      release.call(pITaskTrigger)
+      @task = @root.GetTask(task)
     end
 
-    alias :new_task :new_work_item
+    alias new_task new_work_item
 
     # Returns the number of triggers associated with the active task.
     #
     def trigger_count
-      raise Error, "null pointer" if @pITS.nil?
-      raise Error, "No currently active task" if @pITask.nil?
+      raise Error, "No currently active task" if @task.nil?
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 24
-
-      memcpy(lpVtbl, @pITask,4)
-      memcpy(table, lpVtbl.unpack('L').first, 24)
-      table = table.unpack('L*')
-
-      getTriggerCount = Win32::API::Function.new(table[5], 'PP', 'L')
-      ptr = 0.chr * 4
-      hr  = getTriggerCount.call(@pITask, ptr)
-
-      if hr >= S_OK
-        count = ptr.unpack('L').first
-      else
-        raise Error, get_last_error
-      end
-
-      count
+      @task.Definition.Triggers.Count
     end
 
     # Returns a string that describes the current trigger at the specified
     # index for the active task.
     #
-    # Example: "At 7:14 AM every day, starting 4/11/2009"
+    # Example: "At 7:14 AM every day, starting 4/11/2015"
     #
     def trigger_string(index)
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
       raise TypeError unless index.is_a?(Numeric)
+      check_for_active_task
+      index += 1  # first item index is 1
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 32
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 32)
-      table = table.unpack('L*')
-
-      getTriggerString = Win32::API::Function.new(table[7], 'PLP', 'L')
-      ptr = 0.chr * 4
-      hr  = getTriggerString.call(@pITask, index, ptr)
-
-      if hr == S_OK
-        str = 0.chr * 256
-        wcscpy(str, ptr.unpack('L').first)
-        trigger = wide_to_multi(str)
-        CoTaskMemFree(ptr.unpack('L').first)
-      else
-        raise Error, get_last_error
+      begin
+        trigger = @task.Definition.Triggers.Item(index)
+      rescue WIN32OLERuntimeError
+        raise Error, "No trigger found at index '#{index}'"
       end
 
-      trigger
+      "Starting #{trigger.StartBoundary}"
     end
 
     # Deletes the trigger at the specified index.
+    #--
+    # TODO: Fix.
     #
     def delete_trigger(index)
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
+      raise TypeError unless index.is_a?(Numeric)
+      check_for_active_task
+      index += 1  # first item index is 1
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 20
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 20)
-      table = table.unpack('L*')
-
-      deleteTrigger = Win32::API::Function.new(table[4], 'PL', 'L')
-      hr = deleteTrigger.call(@pITask,index)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
+      definition = @task.Definition
+      definition.Triggers.Remove(index)
+      update_task_definition(definition)
 
       index
     end
@@ -1008,189 +686,181 @@ module Win32
     # current task.
     #
     def trigger(index)
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
+      raise TypeError unless index.is_a?(Numeric)
+      check_for_active_task
+      index += 1  # first item index is 1
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 28
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 28)
-      table = table.unpack('L*')
-
-      getTrigger = Win32::API::Function.new(table[6], 'PLP', 'L')
-      ptr = 0.chr * 4
-      hr = getTrigger.call(@pITask, index, ptr)
-
-      if hr != S_OK
-        raise Error, get_last_error
+      begin
+        trig = @task.Definition.Triggers.Item(index)
+      rescue WIN32OLERuntimeError => err
+        raise Error, ole_error('Item', err)
       end
-
-      pITaskTrigger = ptr.unpack('L').first
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 20
-
-      memcpy(lpVtbl, pITaskTrigger, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 20)
-      table = table.unpack('L*')
-
-      release = Win32::API::Function.new(table[2], 'P', 'L')
-      getTrigger = Win32::API::Function.new(table[4], 'PP', 'L')
-
-      pTrigger = [48].pack('S') + 0.chr * 46
-      hr = getTrigger.call(pITaskTrigger, pTrigger)
-
-      if hr != S_OK
-        error = get_last_error
-        release.call(pITaskTrigger)
-        raise Error, error
-      end
-
-      tr = pTrigger.unpack('S10L4LLSS')
 
       trigger = {}
-      trigger['start_year'] = tr[2]
-      trigger['start_month'] = tr[3]
-      trigger['start_day'] = tr[4]
-      trigger['end_year'] = tr[5]
-      trigger['end_month'] = tr[6]
-      trigger['end_day'] = tr[7]
-      trigger['start_hour'] = tr[8]
-      trigger['start_minute'] = tr[9]
-      trigger['minutes_duration'] = tr[10]
-      trigger['minutes_interval'] = tr[11]
-      trigger['flags'] = tr[12]
-      trigger['trigger_type'] = tr[13]
-      trigger['random_minutes_interval'] = tr[17]
 
-      case tr[13]
+      case trig.Type
         when TASK_TIME_TRIGGER_DAILY
           tmp = {}
-          tmp['days_interval'] = [tr[14]].pack('L').unpack('SS').first
-          trigger['type'] = tmp
+          tmp[:days_interval] = trig.DaysInterval
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = time_in_minutes(trig.RandomDelay)
         when TASK_TIME_TRIGGER_WEEKLY
           tmp = {}
-          tmp['weeks_interval'],tmp['days_of_week'] = [tr[14]].pack('L').unpack('SS')
-          trigger['type'] = tmp
+          tmp[:weeks_interval] = trig.WeeksInterval
+          tmp[:days_of_week] = trig.DaysOfWeek
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = time_in_minutes(trig.RandomDelay)
         when TASK_TIME_TRIGGER_MONTHLYDATE
           tmp = {}
-          tmp['days'] = tr[14]
-          tmp['months'] = [tr[15]].pack('L').unpack('SS').first
-          trigger['type'] = tmp
+          tmp[:months] = trig.MonthsOfYear
+          tmp[:days] = trig.DaysOfMonth
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = time_in_minutes(trig.RandomDelay)
+          trigger[:run_on_last_day_of_month] = trig.RunOnLastDayOfMonth
         when TASK_TIME_TRIGGER_MONTHLYDOW
           tmp = {}
-          tmp['weeks'],tmp['days_of_week'] = [tr[14]].pack('L').unpack('SS')
-          tmp['months'] = [tr[15]].pack('L').unpack('SS').first
-          trigger['type'] = tmp
+          tmp[:months] = trig.MonthsOfYear
+          tmp[:days_of_week] = trig.DaysOfWeek
+          tmp[:weeks_of_month] = trig.WeeksOfMonth
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = time_in_minutes(trig.RandomDelay)
+          trigger[:run_on_last_week_of_month] = trig.RunOnLastWeekOfMonth
         when TASK_TIME_TRIGGER_ONCE
           tmp = {}
-          tmp['once'] = nil
-          trigger['type'] = tmp
+          tmp[:once] = nil
+          trigger[:type] = tmp
+          trigger[:random_minutes_interval] = time_in_minutes(trig.RandomDelay)
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+          trigger[:delay_duration] = time_in_minutes(trig.Delay)
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          trigger[:user_id] = trig.UserId if trig.UserId.to_s != ""
+          trigger[:delay_duration] = time_in_minutes(trig.Delay)
+        when TASK_EVENT_TRIGGER_ON_IDLE
+          trigger[:execution_time_limit] = time_in_minutes(trig.ExecutionTimeLimit)
         else
           raise Error, 'Unknown trigger type'
       end
 
-      release.call(pITaskTrigger)
+      trigger[:start_year], trigger[:start_month], trigger[:start_day],
+      trigger[:start_hour], trigger[:start_minute] = trig.StartBoundary.scan(/(\d+)-(\d+)-(\d+)T(\d+):(\d+)/).first
+
+      trigger[:end_year], trigger[:end_month],
+      trigger[:end_day] = trig.EndBoundary.scan(/(\d+)-(\d+)-(\d+)T/).first
+
+      trigger[:minutes_duration] = time_in_minutes(trig.Repetition.Duration)
+      trigger[:minutes_interval] = time_in_minutes(trig.Repetition.Interval)
+      trigger[:trigger_type] = trig.Type
 
       trigger
     end
 
-    # Sets the trigger for the currently active task.
+    # Sets the trigger for the currently active task. The +trigger+ is a hash
+    # with the following possible options:
+    #
+    # * days
+    # * days_interval
+    # * days_of_week
+    # * end_day
+    # * end_month
+    # * end_year
+    # * flags
+    # * minutes_duration
+    # * minutes_interval
+    # * months
+    # * random_minutes_interval
+    # * start_day
+    # * start_hour
+    # * start_minute
+    # * start_month
+    # * start_year
+    # * trigger_type
+    # * type
+    # * weeks
+    # * weeks_interval
     #
     def trigger=(trigger)
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
       raise TypeError unless trigger.is_a?(Hash)
+      raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
 
-      trigger = transform_and_validate(trigger)
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 16
+      validate_trigger(trigger)
 
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 16)
-      table = table.unpack('L*')
+      definition = @task.Definition
+      definition.Triggers.Clear()
 
-      createTrigger = Win32::API::Function.new(table[3], 'PPP', 'L')
+      startTime = "%04d-%02d-%02dT%02d:%02d:00" % [
+        trigger[:start_year], trigger[:start_month],
+        trigger[:start_day], trigger[:start_hour], trigger[:start_minute]
+      ]
 
-      p1 = 0.chr * 4
-      p2 = 0.chr * 4
+      endTime = "%04d-%02d-%02dT00:00:00" % [
+        trigger[:end_year], trigger[:end_month], trigger[:end_day]
+      ]
 
-      hr = createTrigger.call(@pITask, p1, p2)
+      trig = definition.Triggers.Create( trigger[:trigger_type].to_i )
+      trig.Id = "RegistrationTriggerId#{definition.Triggers.Count}"
+      trig.StartBoundary = startTime if startTime != '0000-00-00T00:00:00'
+      trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
+      trig.Enabled = true
 
-      if hr != S_OK
-        raise Error, get_last_error
+      repetitionPattern = trig.Repetition
+
+      if trigger[:minutes_duration].to_i > 0
+        repetitionPattern.Duration = "PT#{trigger[:minutes_duration]||0}M"
       end
 
-      pITaskTrigger = p2.unpack('L').first
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 16
+      if trigger[:minutes_interval].to_i > 0
+        repetitionPattern.Interval  = "PT#{trigger[:minutes_interval]||0}M"
+      end
 
-      memcpy(lpVtbl, pITaskTrigger, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 16)
-      table = table.unpack('L*')
-
-      release = Win32::API::Function.new(table[2], 'P', 'L')
-      setTrigger = Win32::API::Function.new(table[3], 'PP', 'L')
-
-      type1 = 0
-      type2 = 0
-      tmp = trigger['type']
+      tmp = trigger[:type]
       tmp = nil unless tmp.is_a?(Hash)
 
-      case trigger['trigger_type']
+      case trigger[:trigger_type]
         when TASK_TIME_TRIGGER_DAILY
-          if tmp && tmp['days_interval']
-            type1 = [tmp['days_interval'],0].pack('SS').unpack('L').first
+          trig.DaysInterval = tmp[:days_interval] if tmp && tmp[:days_interval]
+          if trigger[:random_minutes_interval].to_i > 0
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]}M"
           end
         when TASK_TIME_TRIGGER_WEEKLY
-          if tmp && tmp['weeks_interval'] && tmp['days_of_week']
-            type1 = [tmp['weeks_interval'],tmp['days_of_week']].pack('SS').unpack('L').first
+          trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+          trig.WeeksInterval = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
+          if trigger[:random_minutes_interval].to_i > 0
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
         when TASK_TIME_TRIGGER_MONTHLYDATE
-          if tmp && tmp['months'] && tmp['days']
-            type2 = [tmp['months'],0].pack('SS').unpack('L').first
-            type1 = tmp['days']
+          trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
+          trig.DaysOfMonth = tmp[:days] if tmp && tmp[:days]
+          if trigger[:random_minutes_interval].to_i > 0
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+          trig.RunOnLastDayOfMonth = trigger[:run_on_last_day_of_month] if trigger[:run_on_last_day_of_month]
         when TASK_TIME_TRIGGER_MONTHLYDOW
-          if tmp && tmp['weeks'] && tmp['days_of_week'] && tmp['months']
-            type1 = [tmp['weeks'],tmp['days_of_week']].pack('SS').unpack('L').first
-            type2 = [tmp['months'],0].pack('SS').unpack('L').first
+          trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
+          trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+          trig.WeeksOfMonth = tmp[:weeks_of_month] if tmp && tmp[:weeks_of_month]
+          if trigger[:random_minutes_interval].to_i > 0
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+          trig.RunOnLastWeekOfMonth = trigger[:run_on_last_week_of_month] if trigger[:run_on_last_week_of_month]
         when TASK_TIME_TRIGGER_ONCE
-          # Do nothing. The Type member of the TASK_TRIGGER struct is ignored.
-        else
-          raise Error, 'Unknown trigger type'
+          if trigger[:random_minutes_interval].to_i > 0
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+          end
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          trig.UserId = trigger[:user_id] if trigger[:user_id]
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+        when TASK_EVENT_TRIGGER_ON_IDLE
+          # for setting execution time limit Ref : https://msdn.microsoft.com/en-us/library/windows/desktop/aa380724(v=vs.85).aspx
+          if trigger[:execution_time_limit].to_i > 0
+            trig.ExecutionTimeLimit = "PT#{trigger[:execution_time_limit]||0}M"
+          end
       end
 
-      pTrigger = [
-        48,
-        0,
-        trigger['start_year'] || 0,
-        trigger['start_month'] || 0,
-        trigger['start_day'] || 0,
-        trigger['end_year'] || 0,
-        trigger['end_month'] || 0,
-        trigger['end_day'] || 0,
-        trigger['start_hour'] || 0,
-        trigger['start_minute'] || 0,
-        trigger['minutes_duration'] || 0,
-        trigger['minutes_interval'] || 0,
-        trigger['flags'] || 0,
-        trigger['trigger_type'] || 0,
-        type1,
-        type2,
-        0,
-        trigger['random_minutes_interval'] || 0
-      ].pack('S10L4LLSS')
-
-      hr = setTrigger.call(pITaskTrigger, pTrigger)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
-
-      release.call(pITaskTrigger)
+      update_task_definition(definition)
 
       trigger
     end
@@ -1198,493 +868,500 @@ module Win32
     # Adds a trigger at the specified index.
     #
     def add_trigger(index, trigger)
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
+      raise TypeError unless index.is_a?(Numeric)
       raise TypeError unless trigger.is_a?(Hash)
+      raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
 
-      trigger = transform_and_validate(trigger)
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 28
+      definition = @task.Definition
 
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 28)
-      table = table.unpack('L*')
+      startTime = "%04d-%02d-%02dT%02d:%02d:00" % [
+        trigger[:start_year], trigger[:start_month], trigger[:start_day],
+        trigger[:start_hour], trigger[:start_minute]
+      ]
 
-      getTrigger = Win32::API::Function.new(table[6], 'PLP', 'L')
-      ptr = 0.chr * 4
-      hr = getTrigger.call(@pITask, index, ptr)
+      # Set defaults
+      trigger[:end_year]  ||= 0
+      trigger[:end_month] ||= 0
+      trigger[:end_day]   ||= 0
 
-      if hr != S_OK
-        raise Error, get_last_error
+      endTime = "%04d-%02d-%02dT00:00:00" % [
+        trigger[:end_year], trigger[:end_month], trigger[:end_day]
+      ]
+
+      trig = definition.Triggers.Create( trigger[:trigger_type].to_i )
+      trig.Id = "RegistrationTriggerId#{definition.Triggers.Count}"
+      trig.StartBoundary = startTime if startTime != '0000-00-00T00:00:00'
+      trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
+      trig.Enabled = true
+
+      repetitionPattern = trig.Repetition
+
+      if trigger[:minutes_duration].to_i > 0
+        repetitionPattern.Duration = "PT#{trigger[:minutes_duration]||0}M"
       end
 
-      pITaskTrigger = ptr.unpack('L').first
-      lpVtbl = 0.chr * 4
-      table = 0.chr * 16
+      if trigger[:minutes_interval].to_i > 0
+        repetitionPattern.Interval  = "PT#{trigger[:minutes_interval]||0}M"
+      end
 
-      memcpy(lpVtbl, pITaskTrigger,4)
-      memcpy(table, lpVtbl.unpack('L').first,16)
-      table = table.unpack('L*')
-
-      release = Win32::API::Function.new(table[2], 'P', 'L')
-      setTrigger = Win32::API::Function.new(table[3], 'PP', 'L')
-
-      type1 = 0
-      type2 = 0
-      tmp = trigger['type']
+      tmp = trigger[:type]
       tmp = nil unless tmp.is_a?(Hash)
 
-      case trigger['trigger_type']
+      case trigger[:trigger_type]
         when TASK_TIME_TRIGGER_DAILY
-          if tmp && tmp['days_interval']
-            type1 = [tmp['days_interval'],0].pack('SS').unpack('L').first
+          trig.DaysInterval = tmp[:days_interval] if tmp && tmp[:days_interval]
+          if trigger[:random_minutes_interval].to_i > 0
+          trig.RandomDelay = "PT#{trigger[:random_minutes_interval]}M"
           end
         when TASK_TIME_TRIGGER_WEEKLY
-          if tmp && tmp['weeks_interval'] && tmp['days_of_week']
-            type1 = [tmp['weeks_interval'],tmp['days_of_week']].pack('SS').unpack('L').first
+          trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+          trig.WeeksInterval = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
+          if trigger[:random_minutes_interval].to_i > 0
+          trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
         when TASK_TIME_TRIGGER_MONTHLYDATE
-          if tmp && tmp['months'] && tmp['days']
-            type2 = [tmp['months'],0].pack('SS').unpack('L').first
-            type1 = tmp['days']
+          trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
+          trig.DaysOfMonth = tmp[:days] if tmp && tmp[:days]
+          if trigger[:random_minutes_interval].to_i > 0
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+          trig.RunOnLastDayOfMonth = trigger[:run_on_last_day_of_month] if trigger[:run_on_last_day_of_month]
         when TASK_TIME_TRIGGER_MONTHLYDOW
-          if tmp && tmp['weeks'] && tmp['days_of_week'] && tmp['months']
-            type1 = [tmp['weeks'],tmp['days_of_week']].pack('SS').unpack('L').first
-            type2 = [tmp['months'],0].pack('SS').unpack('L').first
+          trig.MonthsOfYear  = tmp[:months] if tmp && tmp[:months]
+          trig.DaysOfWeek  = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+          trig.WeeksOfMonth  = tmp[:weeks_of_month] if tmp && tmp[:weeks_of_month]
+          if trigger[:random_minutes_interval].to_i > 0
+          trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
           end
+          trig.RunOnLastWeekOfMonth = trigger[:run_on_last_week_of_month] if trigger[:run_on_last_week_of_month]
         when TASK_TIME_TRIGGER_ONCE
-          # Do nothing. The Type member of the TASK_TRIGGER struct is ignored.
-        else
-          raise Error, 'Unknown trigger type'
+          if trigger[:random_minutes_interval].to_i > 0
+          trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+          end
+        when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+        when TASK_EVENT_TRIGGER_AT_LOGON
+          trig.UserId = trigger[:user_id] if trigger[:user_id]
+          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
       end
 
-      pTrigger = [
-        48,
-        0,
-        trigger['start_year'] || 0,
-        trigger['start_month'] || 0,
-        trigger['start_day'] || 0,
-        trigger['end_year'] || 0,
-        trigger['end_month'] || 0,
-        trigger['end_day'] || 0,
-        trigger['start_hour'] || 0,
-        trigger['start_minute'] || 0,
-        trigger['minutes_duration'] || 0,
-        trigger['minutes_interval'] || 0,
-        trigger['flags'] || 0,
-        trigger['trigger_type'] || 0,
-        type1,
-        type2,
-        0,
-        trigger['random_minutes_interval'] || 0
-      ].pack('S10L4LLSS')
+      update_task_definition(definition)
 
-      hr = setTrigger.call(pITaskTrigger, pTrigger)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
-
-      release.call(pITaskTrigger)
-    end
-
-    # Returns the flags (integer) that modify the behavior of the work item. You
-    # must OR the return value to determine the flags yourself.
-    #
-    def flags
-      raise Error, 'null pointer' if @pITask.nil?
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 120
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 120)
-      table = table.unpack('L*')
-
-      getFlags = Win32::API::Function.new(table[29], 'PP', 'L')
-      ptr = 0.chr * 4
-      hr = getFlags.call(@pITask, ptr)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
-
-      flags = ptr.unpack('L').first
-    end
-
-    # Sets an OR'd value of flags that modify the behavior of the work item.
-    #
-    def flags=(flags)
-      raise Error, 'null pointer' if @pITS.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 116
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 116)
-      table = table.unpack('L*')
-
-      setFlags = Win32::API::Function.new(table[28], 'PL', 'L')
-      hr = setFlags.call(@pITask, flags)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
-
-      flags
+      true
     end
 
     # Returns the status of the currently active task. Possible values are
     # 'ready', 'running', 'not scheduled' or 'unknown'.
     #
     def status
-      raise Error, 'null pointer' if @pITask.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 68
-
-      memcpy(lpVtbl,@pITask,4)
-      memcpy(table,lpVtbl.unpack('L').first,68)
-      table = table.unpack('L*')
-
-      getStatus = Win32::API::Function.new(table[16], 'PP', 'L')
-      ptr = 0.chr * 4
-      hr = getStatus.call(@pITask, ptr)
-
-      if hr != S_OK
-        raise Error,get_last_error
-      end
-
-      st = ptr.unpack('L').first
-
-      case st
-        when 0x00041300 # SCHED_S_TASK_READY
-           status = 'ready'
-        when 0x00041301 # SCHED_S_TASK_RUNNING
-           status = 'running'
-        when 0x00041305 # SCHED_S_TASK_NOT_SCHEDULED
-           status = 'not scheduled'
+      case @task.State
+        when 3
+          status = 'ready'
+        when 4
+          status = 'running'
+        when 2
+          status = 'queued'
+        when 1
+          status = 'not scheduled'
         else
-           status = 'unknown'
+          status = 'unknown'
       end
 
       status
     end
 
+    # Returns true if current task is enabled
+    def enabled?
+      check_for_active_task
+      @task.enabled
+    end
+
     # Returns the exit code from the last scheduled run.
     #
     def exit_code
-      raise Error, 'null pointer' if @pITask.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
-
-      lpVtbl = 0.chr * 4
-      table = 0.chr * 72
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 72)
-      table = table.unpack('L*')
-
-      getExitCode = Win32::API::Function.new(table[17], 'PP', 'L')
-      ptr = 0.chr * 4
-      hr = getExitCode.call(@pITask, ptr)
-
-      if hr > 0x80000000
-        raise Error, get_last_error
-      end
-
-      ptr.unpack('L').first
+      check_for_active_task
+      @task.LastTaskResult
     end
 
     # Returns the comment associated with the task, if any.
     #
     def comment
-      raise Error, 'null pointer' if @pITask.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 80
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 80)
-      table = table.unpack('L*')
-
-      getComment = Win32::API::Function.new(table[19], 'PP', 'L')
-      ptr = 0.chr * 4
-      hr = getComment.call(@pITask, ptr)
-
-      if hr != S_OK
-        raise Error,get_last_error
-      end
-
-      str = 0.chr * 256
-      wcscpy(str, ptr.unpack('L').first)
-      CoTaskMemFree(ptr.unpack('L').first)
-      wide_to_multi(str)
+      check_for_active_task
+      @task.Definition.RegistrationInfo.Description
     end
+
+    alias description comment
 
     # Sets the comment for the task.
     #
     def comment=(comment)
-      raise Error, 'null pointer' if @pITask.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
       raise TypeError unless comment.is_a?(String)
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 76
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 76)
-      table = table.unpack('L*')
-
-      setComment = Win32::API::Function.new(table[18], 'PP', 'L')
-      comment_w = multi_to_wide(comment)
-      hr = setComment.call(@pITask, comment_w)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
+      definition = @task.Definition
+      definition.RegistrationInfo.Description = comment
+      update_task_definition(definition)
 
       comment
     end
 
+    alias description= comment=
+
     # Returns the name of the user who created the task.
     #
     def creator
-      raise Error, 'null pointer' if @pITask.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 88
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 88)
-      table = table.unpack('L*')
-
-      getCreator = Win32::API::Function.new(table[21], 'PP', 'L')
-      ptr = 0.chr * 4
-      hr = getCreator.call(@pITask, ptr)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
-
-      str = 0.chr * 256
-      wcscpy(str, ptr.unpack('L').first)
-      CoTaskMemFree(ptr.unpack('L').first)
-      wide_to_multi(str)
+      check_for_active_task
+      @task.Definition.RegistrationInfo.Author
     end
+
+    alias author creator
 
     # Sets the creator for the task.
     #
     def creator=(creator)
-      raise Error, 'null pointer' if @pITask.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
       raise TypeError unless creator.is_a?(String)
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 84
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 84)
-      table = table.unpack('L*')
-
-      setCreator = Win32::API::Function.new(table[20], 'PP', 'L')
-      creator_w = multi_to_wide(creator)
-      hr = setCreator.call(@pITask, creator_w)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
+      definition = @task.Definition
+      definition.RegistrationInfo.Author = creator
+      update_task_definition(definition)
 
       creator
     end
 
+    alias author= creator=
+
     # Returns a Time object that indicates the next time the task will run.
     #
     def next_run_time
-      raise Error, 'null pointer' if @pITask.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
-
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 40
-
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 40)
-      table = table.unpack('L*')
-
-      getNextRunTime = Win32::API::Function.new(table[9], 'PP', 'L')
-      st = 0.chr * 16
-      hr = getNextRunTime.call(@pITask, st)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
-
-      a1,a2,_,a3,a4,a5,a6,a7 = st.unpack('S*')
-      a7 *= 1000
-
-      Time.local(a1,a2,a3,a4,a5,a6,a7)
+      check_for_active_task
+      @task.NextRunTime
     end
 
     # Returns a Time object indicating the most recent time the task ran or
     # nil if the task has never run.
     #
     def most_recent_run_time
-      raise Error, 'null pointer' if @pITask.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 64
+      time = nil
 
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 64)
-      table = table.unpack('L*')
-
-      getMostRecentRunTime = Win32::API::Function.new(table[15], 'PP', 'L')
-      st = 0.chr * 16
-      hr = getMostRecentRunTime.call(@pITask, st)
-
-      if hr == 0x00041303 # SCHED_S_TASK_HAS_NOT_RUN
-        time = nil
-      elsif hr == S_OK
-        a1, a2, _, a3, a4, a5, a6, a7 = st.unpack('S*')
-        a7 *= 1000
-        time = Time.local(a1, a2, a3, a4, a5, a6, a7)
-      else
-        raise Error, get_last_error
+      begin
+        time = Time.parse(@task.LastRunTime)
+      rescue
+        # Ignore
       end
 
       time
+    end
+
+    # Returns idle settings for current active task
+    #
+    def idle_settings
+      check_for_active_task
+      idle_settings = {}
+      idle_settings[:idle_duration] = @task.Definition.Settings.IdleSettings.IdleDuration
+      idle_settings[:stop_on_idle_end] = @task.Definition.Settings.IdleSettings.StopOnIdleEnd
+      idle_settings[:wait_timeout] = @task.Definition.Settings.IdleSettings.WaitTimeout
+      idle_settings[:restart_on_idle] = @task.Definition.Settings.IdleSettings.RestartOnIdle
+      idle_settings
+    end
+
+    # Returns the execution time limit for current active task
+    #
+    def execution_time_limit
+      check_for_active_task
+      @task.Definition.Settings.ExecutionTimeLimit
     end
 
     # Returns the maximum length of time, in milliseconds, that the task
     # will run before terminating.
     #
     def max_run_time
-      raise Error, 'null pointer' if @pITask.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 176
+      t = @task.Definition.Settings.ExecutionTimeLimit
+      year = t.scan(/(\d+?)Y/).flatten.first
+      month = t.scan(/(\d+?)M/).flatten.first
+      day = t.scan(/(\d+?)D/).flatten.first
+      hour = t.scan(/(\d+?)H/).flatten.first
+      min = t.scan(/T.*(\d+?)M/).flatten.first
+      sec = t.scan(/(\d+?)S/).flatten.first
 
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 176)
-      table = table.unpack('L*')
+      time = 0
+      time += year.to_i * 365 if year
+      time += month.to_i * 30 if month
+      time += day.to_i if day
+      time *= 24
+      time += hour.to_i if hour
+      time *= 60
+      time += min.to_i if min
+      time *= 60
+      time += sec.to_i if sec
+      time *= 1000
 
-      getMaxRunTime = Win32::API::Function.new(table[43], 'PP', 'L')
-
-      ptr = 0.chr * 4
-      hr = getMaxRunTime.call(@pITask, ptr)
-
-      if hr != S_OK
-        raise Error, get_last_error
-      end
-
-      max_run_time = ptr.unpack('L').first
+      time
     end
 
     # Sets the maximum length of time, in milliseconds, that the task can run
     # before terminating. Returns the value you specified if successful.
     #
     def max_run_time=(max_run_time)
-      raise Error, 'null pointer' if @pITask.nil?
-      raise Error, 'No currently active task' if @pITask.nil?
       raise TypeError unless max_run_time.is_a?(Numeric)
+      check_for_active_task
 
-      lpVtbl = 0.chr * 4
-      table  = 0.chr * 172
+      t = max_run_time
+      t /= 1000
+      limit ="PT#{t}S"
 
-      memcpy(lpVtbl, @pITask, 4)
-      memcpy(table, lpVtbl.unpack('L').first, 172)
-      table = table.unpack('L*')
-
-      setMaxRunTime = Win32::API::Function.new(table[42], 'PL', 'L')
-      hr = setMaxRunTime.call(@pITask, max_run_time)
-
-      if hr != S_OK
-        raise Error,get_last_error
-      end
+      definition = @task.Definition
+      definition.Settings.ExecutionTimeLimit = limit
+      update_task_definition(definition)
 
       max_run_time
     end
 
-    # Returns whether or not the scheduled task exists.
-    def exists?(job_name)
-      bool = false
-      Dir.foreach('C:/Windows/Tasks'){ |file|
-        if File.basename(file, '.job') == job_name
-          bool = true
-          break
-        end
-      }
-      bool
+    # Accepts a hash that lets you configure various task definition settings.
+    # The possible options are:
+    #
+    # * allow_demand_start
+    # * allow_hard_terminate
+    # * compatibility
+    # * delete_expired_task_after
+    # * disallowed_start_if_on_batteries
+    # * enabled
+    # * execution_time_limit (or max_run_time)
+    # * hidden
+    # * idle_settings
+    # * network_settings
+    # * priority
+    # * restart_count
+    # * restart_interval
+    # * run_only_if_idle
+    # * run_only_if_network_available
+    # * start_when_available
+    # * stop_if_going_on_batteries
+    # * wake_to_run
+    # * xml_text (or xml)
+    #
+    def configure_settings(hash)
+      raise TypeError unless hash.is_a?(Hash)
+      check_for_active_task
+
+      definition = @task.Definition
+
+      allow_demand_start = hash[:allow_demand_start]
+      allow_hard_terminate = hash[:allow_hard_terminate]
+      compatibility = hash[:compatibility]
+      delete_expired_task_after = hash[:delete_expired_task_after]
+      disallow_start_if_on_batteries = hash[:disallow_start_if_on_batteries]
+      enabled = hash[:enabled]
+      execution_time_limit = "PT#{hash[:execution_time_limit] || hash[:max_run_time] || 0}M"
+      hidden = hash[:hidden]
+      idle_duration = "PT#{hash[:idle_duration]||0}M"
+      stop_on_idle_end = hash[:stop_on_idle_end]
+      wait_timeout = "PT#{hash[:wait_timeout]||0}M"
+      restart_on_idle = hash[:restart_on_idle]
+      network_settings = hash[:network_settings]
+      priority = hash[:priority]
+      restart_count = hash[:restart_count]
+      restart_interval = hash[:restart_interval]
+      run_only_if_idle = hash[:run_only_if_idle]
+      run_only_if_network_available = hash[:run_only_if_network_available]
+      start_when_available = hash[:start_when_available]
+      stop_if_going_on_batteries = hash[:stop_if_going_on_batteries]
+      wake_to_run = hash[:wake_to_run]
+      xml_text = hash[:xml_text] || hash[:xml]
+
+      definition.Settings.AllowDemandStart = allow_demand_start if allow_demand_start
+      definition.Settings.AllowHardTerminate = allow_hard_terminate if allow_hard_terminate
+      definition.Settings.Compatibility = compatibility if compatibility
+      definition.Settings.DeleteExpiredTaskAfter = delete_expired_task_after if delete_expired_task_after
+      definition.Settings.DisallowStartIfOnBatteries = disallow_start_if_on_batteries if !disallow_start_if_on_batteries.nil?
+      definition.Settings.Enabled = enabled if enabled
+      definition.Settings.ExecutionTimeLimit = execution_time_limit if execution_time_limit
+      definition.Settings.Hidden = hidden if hidden
+      definition.Settings.IdleSettings.IdleDuration = idle_duration if idle_duration
+      definition.Settings.IdleSettings.StopOnIdleEnd = stop_on_idle_end if stop_on_idle_end
+      definition.Settings.IdleSettings.WaitTimeout = wait_timeout if wait_timeout
+      definition.Settings.IdleSettings.RestartOnIdle = restart_on_idle if restart_on_idle
+      definition.Settings.NetworkSettings = network_settings if network_settings
+      definition.Settings.Priority = priority if priority
+      definition.Settings.RestartCount = restart_count if restart_count
+      definition.Settings.RestartInterval = restart_interval if restart_interval
+      definition.Settings.RunOnlyIfIdle = run_only_if_idle if run_only_if_idle
+      definition.Settings.RunOnlyIfNetworkAvailable = run_only_if_network_available if run_only_if_network_available
+      definition.Settings.StartWhenAvailable = start_when_available if start_when_available
+      definition.Settings.StopIfGoingOnBatteries  = stop_if_going_on_batteries if !stop_if_going_on_batteries.nil?
+      definition.Settings.WakeToRun = wake_to_run if wake_to_run
+      definition.Settings.XmlText = xml_text if xml_text
+
+      update_task_definition(definition)
+
+      hash
+    end
+
+    # Set registration information options. The possible options are:
+    #
+    # * author
+    # * date
+    # * description (or comment)
+    # * documentation
+    # * security_descriptor (should be a Win32::Security::SID)
+    # * source
+    # * uri
+    # * version
+    # * xml_text (or xml)
+    #
+    # Note that most of these options have standalone methods as well,
+    # e.g. calling ts.configure_registration_info(:author => 'Dan') is
+    # the same as calling ts.author = 'Dan'.
+    #
+    def configure_registration_info(hash)
+      raise TypeError unless hash.is_a?(Hash)
+      check_for_active_task
+
+      definition = @task.Definition
+
+      author = hash[:author]
+      date = hash[:date]
+      description = hash[:description] || hash[:comment]
+      documentation = hash[:documentation]
+      security_descriptor = hash[:security_descriptor]
+      source = hash[:source]
+      uri = hash[:uri]
+      version = hash[:version]
+      xml_text = hash[:xml_text] || hash[:xml]
+
+      definition.RegistrationInfo.Author = author if author
+      definition.RegistrationInfo.Date = date if date
+      definition.RegistrationInfo.Description = description if description
+      definition.RegistrationInfo.Documentation = documentation if documentation
+      definition.RegistrationInfo.SecurityDescriptor = security_descriptor if security_descriptor
+      definition.RegistrationInfo.Source = source if source
+      definition.RegistrationInfo.URI = uri if uri
+      definition.RegistrationInfo.Version = version if version
+      definition.RegistrationInfo.XmlText = xml_text if xml_text
+
+      update_task_definition(definition)
+
+      hash
+    end
+
+    # Sets the principals for current active task. The principal is hash with following possible options.
+    # Expected principal hash: { id: STRING, display_name: STRING, user_id: STRING,
+    # logon_type: INTEGER, group_id: STRING, run_level: INTEGER }
+    #
+    def configure_principals(principals)
+      raise TypeError unless principals.is_a?(Hash)
+      check_for_active_task
+      definition = @task.Definition
+      definition.Principal.Id = principals[:id] if principals[:id].to_s != ""
+      definition.Principal.DisplayName = principals[:display_name] if principals[:display_name].to_s != ""
+      definition.Principal.UserId = principals[:user_id] if principals[:user_id].to_s != ""
+      definition.Principal.LogonType = principals[:logon_type] if principals[:logon_type].to_s != ""
+      definition.Principal.GroupId = principals[:group_id] if principals[:group_id].to_s != ""
+      definition.Principal.RunLevel = principals[:run_level] if principals[:run_level].to_s != ""
+      update_task_definition(definition)
+      principals
+    end
+
+    # Returns a hash containing all the principal information of the current task
+    def principals
+      check_for_active_task
+      principals_hash = {}
+      @task.Definition.Principal.ole_get_methods.each do |principal|
+        principals_hash[principal.name] = @task.Definition.Principal._getproperty(principal.dispid, [], [])
+      end
+      symbolize_keys(principals_hash)
+    end
+
+    # Returns a hash containing all settings of the current task
+    def settings
+      check_for_active_task
+      settings_hash = {}
+      @task.Definition.Settings.ole_get_methods.each do |setting|
+        next if setting.name == "XmlText" # not needed
+        settings_hash[setting.name] = @task.Definition.Settings._getproperty(setting.dispid, [], [])
+      end
+
+      settings_hash["IdleSettings"] = idle_settings
+      settings_hash["NetworkSettings"] = network_settings
+      symbolize_keys(settings_hash)
+    end
+
+    # Returns a hash of idle settings of the current task
+    def idle_settings
+      check_for_active_task
+      settings_hash = {}
+      @task.Definition.Settings.IdleSettings.ole_get_methods.each do |setting|
+        settings_hash[setting.name] = @task.Definition.Settings.IdleSettings._getproperty(setting.dispid, [], [])
+      end
+      symbolize_keys(settings_hash)
+    end
+
+    # Returns a hash of network settings of the current task
+    def network_settings
+      check_for_active_task
+      settings_hash = {}
+      @task.Definition.Settings.NetworkSettings.ole_get_methods.each do |setting|
+        settings_hash[setting.name] = @task.Definition.Settings.NetworkSettings._getproperty(setting.dispid, [], [])
+      end
+      symbolize_keys(settings_hash)
+    end
+
+    def task_user_id(definition)
+      definition.Principal.UserId
     end
 
     private
 
-    # :stopdoc:
+    # Returns a camle-case string to its underscore format
+    def underscore(string)
+      string.gsub(/([a-z\d])([A-Z])/, '\1_\2'.freeze).downcase
+    end
 
-    # Used for the new_work_item method
-    ValidTriggerKeys = [
-      'end_day',
-      'end_month',
-      'end_year',
-      'flags',
-      'minutes_duration',
-      'minutes_interval',
-      'random_minutes_interval',
-      'start_day',
-      'start_hour',
-      'start_minute',
-      'start_month',
-      'start_year',
-      'trigger_type',
-      'type'
-    ]
+    # Converts all the keys of a hash to underscored-symbol format
+    def symbolize_keys(hash)
+      hash.each_with_object({}) do |(k, v), h|
+        h[underscore(k.to_s).to_sym] = v.is_a?(Hash) ? symbolize_keys(v) : v
+      end
+    end
 
-    ValidTypeKeys = [
-       'days_interval',
-       'weeks_interval',
-       'days_of_week',
-       'months',
-       'days',
-       'weeks'
-    ]
+    def valid_trigger_option(trigger_type)
+      [ TASK_TIME_TRIGGER_ONCE, TASK_TIME_TRIGGER_DAILY, TASK_TIME_TRIGGER_WEEKLY,
+        TASK_TIME_TRIGGER_MONTHLYDATE, TASK_TIME_TRIGGER_MONTHLYDOW, TASK_EVENT_TRIGGER_ON_IDLE,
+        TASK_EVENT_TRIGGER_AT_SYSTEMSTART, TASK_EVENT_TRIGGER_AT_LOGON ].include?(trigger_type.to_i)
+    end
 
-    # Private method that validates keys, and converts all keys to lowercase
-    # strings.
-    #
-    def transform_and_validate(hash)
-      new_hash = {}
-
-      hash.each{ |key, value|
-        key = key.to_s.downcase
-        if key == 'type'
-          new_type_hash = {}
-          raise ArgumentError unless value.is_a?(Hash)
-          value.each{ |subkey, subvalue|
-            subkey = subkey.to_s.downcase
-            if ValidTypeKeys.include?(subkey)
-              new_type_hash[subkey] = subvalue
-            else
-              raise ArgumentError, "Invalid type key '#{subkey}'"
-            end
-          }
-          new_hash[key] = new_type_hash
-        else
-          if ValidTriggerKeys.include?(key)
-            new_hash[key] = value
-          else
-            raise ArgumentError, "Invalid key '#{key}'"
-          end
-        end
+    def validate_trigger(hash)
+      [:start_year, :start_month, :start_day].each{ |key|
+        raise ArgumentError, "#{key} must be set" unless hash[key]
       }
+    end
 
-      new_hash
+    def check_for_active_task
+      raise Error, 'No currently active task' if @task.nil?
+    end
+
+    def update_task_definition(definition)
+      user = task_user_id(definition) || 'SYSTEM'
+      @task = @root.RegisterTaskDefinition(
+        @task.Path,
+        definition,
+        TASK_CREATE_OR_UPDATE,
+        user,
+        @password,
+        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
+      )
+    rescue WIN32OLERuntimeError => err
+      method_name = caller_locations(1,1)[0].label
+      raise Error, ole_error(method_name, err)
     end
   end
+  # :stopdoc:
 end

@@ -1,25 +1,29 @@
 require 'rubygems'
-require_relative 'lib/win32/taskscheduler'
+require_relative 'lib/win32/taskscheduler/version'
 
 Gem::Specification.new do |spec|
   spec.name       = 'win32-taskscheduler'
   spec.version    = Win32::TaskScheduler::VERSION
   spec.authors    = ['Park Heesob', 'Daniel J. Berger']
-  spec.license    = 'Artistic 2.0'
+  spec.license    = 'Artistic-2.0'
   spec.email      = 'djberg96@gmail.com'
-  spec.homepage   = 'http://www.rubyforge.org/projects/win32utils'
-  spec.platform   = Gem::Platform::RUBY
+  spec.homepage   = 'http://github.com/chef/win32-taskscheduler'
   spec.summary    = 'A library for the Windows task scheduler'
   spec.test_files = Dir['test/test*']
   spec.files      = Dir['**/*'].reject{ |f| f.include?('git') }
 
-  spec.rubyforge_project = 'win32utils'
+  spec.add_dependency('ffi')
+  spec.add_dependency('structured_warnings')
+
+  spec.add_development_dependency('test-unit')
+  spec.add_development_dependency('rake')
+  spec.add_development_dependency('win32-security')
+  spec.add_development_dependency "rspec", "~>3.0"
 
   spec.extra_rdoc_files = [
-    'README',
-    'CHANGES',
-    'MANIFEST',
-    'doc/taskscheduler.txt'
+    "README.md",
+    "CHANGELOG.md",
+    "RELEASE_NOTES.md",
   ]
 
   spec.description = <<-EOF
