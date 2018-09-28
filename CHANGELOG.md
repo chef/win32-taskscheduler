@@ -4,10 +4,18 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release -->
+<!-- latest_release 1.0.11 -->
+## [win32-taskscheduler-1.0.11](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.11) (2018-09-28)
+
+#### Merged Pull Requests
+- Refactored configure_settings [#67](https://github.com/chef/win32-taskscheduler/pull/67) ([btm](https://github.com/btm))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=1.0.10 -->
+### Changes since 1.0.10 release
+
+#### Merged Pull Requests
+- Refactored configure_settings [#67](https://github.com/chef/win32-taskscheduler/pull/67) ([btm](https://github.com/btm)) <!-- 1.0.11 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
