@@ -1125,84 +1125,88 @@ module Win32
       max_run_time
     end
 
-    # Accepts a hash that lets you configure various task definition settings.
-    # The possible options are:
+    # The Idle settings of a task
     #
-    # * allow_demand_start
-    # * allow_hard_terminate
-    # * compatibility
-    # * delete_expired_task_after
-    # * disallowed_start_if_on_batteries
-    # * enabled
-    # * execution_time_limit (or max_run_time)
-    # * hidden
-    # * idle_settings
-    # * network_settings
-    # * priority
-    # * restart_count
-    # * restart_interval
-    # * run_only_if_idle
-    # * run_only_if_network_available
-    # * start_when_available
-    # * stop_if_going_on_batteries
-    # * wake_to_run
-    # * xml_text (or xml)
+    # @see https://docs.microsoft.com/en-us/windows/desktop/TaskSchd/idlesettings#properties
     #
-    def configure_settings(hash)
-      raise TypeError unless hash.is_a?(Hash)
-      check_for_active_task
+    IdleSettings = %i[idle_duration restart_on_idle stop_on_idle_end wait_timeout]
 
+    # Configures tasks settings
+    #
+    # @param [Hash] settings_hash The settings to configure a task
+    # @option settings_hash [Boolean] :allow_demand_start The subject
+    # @option settings_hash [Boolean] :allow_hard_terminate
+    # @option settings_hash [Boolean] :disallow_start_if_on_batteries
+    # @option settings_hash [Boolean] :disallow_start_on_remote_app_session
+    # @option settings_hash [Boolean] :enabled
+    # @option settings_hash [Boolean] :hidden
+    # @option settings_hash [Boolean] :run_only_if_idle
+    # @option settings_hash [Boolean] :run_only_if_network_available
+    # @option settings_hash [Boolean] :start_when_available
+    # @option settings_hash [Boolean] :stop_if_going_on_batteries
+    # @option settings_hash [Boolean] :use_unified_scheduling_engine
+    # @option settings_hash [Boolean] :volatile
+    # @option settings_hash [Boolean] :wake_to_run
+    # @option settings_hash [Boolean] :restart_on_idle The Idle Setting
+    # @option settings_hash [Boolean] :stop_on_idle_end The Idle Setting
+    # @option settings_hash [Integer] :compatibility
+    # @option settings_hash [Integer] :multiple_instances
+    # @option settings_hash [Integer] :priority
+    # @option settings_hash [Integer] :restart_count
+    # @option settings_hash [String] :delete_expired_task_after
+    # @option settings_hash [String] :execution_time_limit
+    # @option settings_hash [String] :restart_interval
+    # @option settings_hash [String] :idle_duration The Idle Setting
+    # @option settings_hash [String] :wait_timeout The Idle Setting
+    #
+    # @return [Hash] User input
+    #
+    # @see https://msdn.microsoft.com/en-us/library/windows/desktop/aa383480(v=vs.85).aspx#properties
+    #
+    def configure_settings(settings_hash)
+      raise TypeError, "User input settings are required in hash" unless settings_hash.is_a?(Hash)
+
+      check_for_active_task
       definition = @task.Definition
 
-      allow_demand_start = hash[:allow_demand_start]
-      allow_hard_terminate = hash[:allow_hard_terminate]
-      compatibility = hash[:compatibility]
-      delete_expired_task_after = hash[:delete_expired_task_after]
-      disallow_start_if_on_batteries = hash[:disallow_start_if_on_batteries]
-      enabled = hash[:enabled]
-      execution_time_limit = "PT#{hash[:execution_time_limit] || hash[:max_run_time] || 0}M"
-      hidden = hash[:hidden]
-      idle_duration = "PT#{hash[:idle_duration]||0}M"
-      stop_on_idle_end = hash[:stop_on_idle_end]
-      wait_timeout = "PT#{hash[:wait_timeout]||0}M"
-      restart_on_idle = hash[:restart_on_idle]
-      network_settings = hash[:network_settings]
-      priority = hash[:priority]
-      restart_count = hash[:restart_count]
-      restart_interval = hash[:restart_interval]
-      run_only_if_idle = hash[:run_only_if_idle]
-      run_only_if_network_available = hash[:run_only_if_network_available]
-      start_when_available = hash[:start_when_available]
-      stop_if_going_on_batteries = hash[:stop_if_going_on_batteries]
-      wake_to_run = hash[:wake_to_run]
-      xml_text = hash[:xml_text] || hash[:xml]
+      # Check for invalid setting
+      invalid_settings = settings_hash.keys - valid_settings_options
+      raise TypeError, "Invalid setting passed: #{invalid_settings.join(', ')}" unless invalid_settings.empty?
 
-      definition.Settings.AllowDemandStart = allow_demand_start if allow_demand_start
-      definition.Settings.AllowHardTerminate = allow_hard_terminate if allow_hard_terminate
-      definition.Settings.Compatibility = compatibility if compatibility
-      definition.Settings.DeleteExpiredTaskAfter = delete_expired_task_after if delete_expired_task_after
-      definition.Settings.DisallowStartIfOnBatteries = disallow_start_if_on_batteries if !disallow_start_if_on_batteries.nil?
-      definition.Settings.Enabled = enabled if enabled
-      definition.Settings.ExecutionTimeLimit = execution_time_limit if execution_time_limit
-      definition.Settings.Hidden = hidden if hidden
-      definition.Settings.IdleSettings.IdleDuration = idle_duration if idle_duration
-      definition.Settings.IdleSettings.StopOnIdleEnd = stop_on_idle_end if stop_on_idle_end
-      definition.Settings.IdleSettings.WaitTimeout = wait_timeout if wait_timeout
-      definition.Settings.IdleSettings.RestartOnIdle = restart_on_idle if restart_on_idle
-      definition.Settings.NetworkSettings = network_settings if network_settings
-      definition.Settings.Priority = priority if priority
-      definition.Settings.RestartCount = restart_count if restart_count
-      definition.Settings.RestartInterval = restart_interval if restart_interval
-      definition.Settings.RunOnlyIfIdle = run_only_if_idle if run_only_if_idle
-      definition.Settings.RunOnlyIfNetworkAvailable = run_only_if_network_available if run_only_if_network_available
-      definition.Settings.StartWhenAvailable = start_when_available if start_when_available
-      definition.Settings.StopIfGoingOnBatteries  = stop_if_going_on_batteries if !stop_if_going_on_batteries.nil?
-      definition.Settings.WakeToRun = wake_to_run if wake_to_run
-      definition.Settings.XmlText = xml_text if xml_text
+      # Some modification is required in user input
+      hash = settings_hash.dup
+
+      # Conversion of few settings
+      hash[:execution_time_limit] = hash[:max_run_time] unless hash[:max_run_time].nil?
+      %i[execution_time_limit idle_duration restart_interval wait_timeout].each do |setting|
+        hash[setting] = "PT#{hash[setting]}M" unless hash[setting].nil?
+      end
+
+      task_settings = definition.Settings
+
+      # Some Idle setting needs to be configured
+      if IdleSettings.any? { |setting| hash.key?(setting) }
+        idle_settings = task_settings.IdleSettings
+        IdleSettings.each do |setting|
+          unless hash[setting].nil?
+            idle_settings.setproperty(camelize(setting.to_s), hash[setting])
+            # This setting is not required to be configured now
+            hash.delete(setting)
+          end
+        end
+      end
+
+      # XML settings are not to be configured
+      %i[xml_text xml].map { |x| hash.delete(x) }
+
+      hash.each do |setting, value|
+        setting = camelize(setting.to_s)
+        definition.Settings.setproperty(setting, value)
+      end
 
       update_task_definition(definition)
 
-      hash
+      settings_hash
     end
 
     # Set registration information options. The possible options are:
@@ -1325,6 +1329,16 @@ module Win32
       string.gsub(/([a-z\d])([A-Z])/, '\1_\2'.freeze).downcase
     end
 
+    # Converts a snake-case string to camel-case format
+    #
+    # @param [String] str
+    #
+    # @return [String] In camel case format
+    #
+    def camelize(str)
+      str.split('_').map(&:capitalize).join
+    end
+
     # Converts all the keys of a hash to underscored-symbol format
     def symbolize_keys(hash)
       hash.each_with_object({}) do |(k, v), h|
@@ -1344,6 +1358,25 @@ module Win32
       }
     end
 
+    # Configurable settings options
+    #
+    # @note Logically, this is summation of
+    #  * Settings
+    #  * IdleSettings - [:idle_settings]
+    #  * :max_run_time, :xml
+    #
+    # @return [Array]
+    #
+    def valid_settings_options
+      %i[allow_demand_start allow_hard_terminate compatibility delete_expired_task_after
+         disallow_start_if_on_batteries disallow_start_on_remote_app_session enabled
+         execution_time_limit hidden idle_duration maintenance_settings max_run_time
+         multiple_instances network_settings priority restart_count restart_interval
+         restart_on_idle run_only_if_idle run_only_if_network_available
+         start_when_available stop_if_going_on_batteries stop_on_idle_end
+         use_unified_scheduling_engine volatile wait_timeout wake_to_run xml xml_text]
+    end
+
     def check_for_active_task
       raise Error, 'No currently active task' if @task.nil?
     end
@@ -1359,7 +1392,7 @@ module Win32
         @password ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
       )
     rescue WIN32OLERuntimeError => err
-      method_name = caller_locations(1,1)[0].label
+      method_name = caller_locations(1, 1)[0].label
       raise Error, ole_error(method_name, err)
     end
   end
