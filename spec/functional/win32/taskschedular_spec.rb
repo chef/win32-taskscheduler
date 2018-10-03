@@ -53,7 +53,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
         expect(no_of_tasks).to eq(0)
       end
 
-      it 'Raises error when path separators(\\\) are absent' do
+      it "Raises error when path separators(\\\) are absent" do
         invalid_path = 'Foo'
         expect { ts.new(@task, @trigger, invalid_path) }.to raise_error(ArgumentError)
         expect(no_of_tasks).to eq(0)
@@ -215,9 +215,9 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
     it 'Execute(Start) the Task' do
       @ts.run
-      expect(@ts.status).to eq('running').
-                         or eq('queued').
-                         or eq('ready') # It takes time to load sometimes
+      expect(@ts.status).to eq('running')
+        .or eq('queued')
+        .or eq('ready') # It takes time to load sometimes
     end
 
     it 'Raises an error if task does not exists' do
@@ -518,20 +518,48 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
   describe '#account_information' do
     before { create_task }
-    it 'System users may not require any password' do
-      user = 'SYSTEM'
-      password = nil
-      expect(@ts.set_account_information(user, password)). to be_truthy
-      expect(@ts.account_information).to eq(user)
+    context 'Service Account Users' do
+      let(:service_user) { 'LOCAL SERVICE' }
+      let(:password) { nil }
+      it 'Does not require any password' do
+        expect(@ts.set_account_information(service_user, password)). to be_truthy
+        expect(@ts.account_information.upcase).to eq(service_user)
+      end
+      it 'passing account_name will display account_simple_name' do
+        user = 'NT AUTHORITY\LOCAL SERVICE'
+        expect(@ts.set_account_information(user, password)). to be_truthy
+        expect(@ts.account_information.upcase).to eq(service_user)
+      end
+      it 'Raises an error if password is given' do
+        password = 'XYZ'
+        expect { @ts.set_account_information(service_user, password) }. to raise_error(tasksch_err)
+      end
     end
-
-    it 'User will require a password' do
-      user = ENV['user']
-      password = nil
-      expect { @ts.set_account_information(user, password) }. to raise_error(TypeError)
-      expect(@ts.account_information).to include(user)
+    context 'Built in Groups' do
+      let(:group_user) { 'USERS' }
+      let(:password) { nil }
+      it 'Does not require any password' do
+        expect(@ts.set_account_information(group_user, password)). to be_truthy
+        expect(@ts.account_information.upcase).to eq(group_user)
+      end
+      it 'passing account_name will display account_simple_name' do
+        user = 'BUILTIN\USERS'
+        expect(@ts.set_account_information(user, password)). to be_truthy
+        expect(@ts.account_information.upcase).to eq(group_user)
+      end
+      it 'Raises an error if password is given' do
+        password = 'XYZ'
+        expect { @ts.set_account_information(group_user, password) }. to raise_error(tasksch_err)
+      end
     end
-
+    context 'Non-system users' do
+      it 'Require a password' do
+        user = ENV['user']
+        password = nil
+        expect { @ts.set_account_information(user, password) }. to raise_error(tasksch_err)
+        expect(@ts.account_information).to include(user)
+      end
+    end
     it 'Raises an error if task does not exists' do
       @ts.instance_variable_set(:@task, nil)
       user = 'User'
@@ -641,7 +669,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     before { stub_user }
 
     it 'Require a hash' do
-      expect { @ts.configure_settings("XYZ") }. to raise_error(TypeError)
+      expect { @ts.configure_settings('XYZ') }. to raise_error(TypeError)
       expect(@ts.configure_settings({})).to eq({})
     end
 

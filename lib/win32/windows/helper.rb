@@ -8,10 +8,14 @@ module Windows
     FORMAT_MESSAGE_FROM_SYSTEM    = 0x00001000
     FORMAT_MESSAGE_MAX_WIDTH_MASK = 0x000000FF
 
-    ffi_lib :kernel32
+    ffi_lib :kernel32, :advapi32
 
     attach_function :FormatMessage, :FormatMessageA,
     [:ulong, :pointer, :ulong, :ulong, :pointer, :ulong, :pointer], :ulong
+
+    attach_function :ConvertStringSidToSidW, [ :pointer, :pointer ], :bool
+    attach_function :LookupAccountSidW, [ :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer ], :bool
+    attach_function :LocalFree, [ :pointer ], :pointer
 
     def win_error(function, err=FFI.errno)
       err_msg = ''

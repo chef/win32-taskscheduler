@@ -329,36 +329,26 @@ module Win32
     # Sets the +user+ and +password+ for the given task. If the user and
     # password are set properly then true is returned.
     # throws TypeError if password is not provided for other than system users
-    def set_account_information(user, password)
-      raise TypeError unless user.is_a?(String)
-      unless SYSTEM_USERS.include?(user.upcase)
-        raise TypeError unless password.is_a?(String)
-      end
+    def set_account_information(user_id, password)
+      check_credential_requirements(user_id, password)
       check_for_active_task
-
       @password = password
-
-      begin
-        @task = @root.RegisterTaskDefinition(
-          @task.Path,
-          @task.Definition,
-          TASK_CREATE_OR_UPDATE,
-          user,
-          password,
-          password ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
-        )
-      rescue WIN32OLERuntimeError => err
-        raise Error, ole_error('RegisterTaskDefinition', err)
-      end
-
+      register_task_definition(@task.Definition, @task.Path, user_id, password)
       true
     end
 
-    # Returns the user associated with the task or nil if no user has yet
-    # been associated with the task.
+    # Returns the user or group associated with the task or nil if no one has been associated with the task yet
+    #
+    # @return [String] user or group associated with the task
     #
     def account_information
-      @task.nil? ? nil : @task.Definition.Principal.UserId
+      if @task.nil?
+        nil
+      elsif !@task.Definition.Principal.UserId.empty?
+        @task.Definition.Principal.UserId
+      else
+        @task.Definition.Principal.GroupId
+      end
     end
 
     # Returns the name of the application associated with the task. If
@@ -391,7 +381,7 @@ module Win32
         action.Path = app if action.Type == 0
       end
 
-      update_task_definition(definition)
+      register_task_definition(definition)
 
       app
     end
@@ -426,7 +416,7 @@ module Win32
         action.Arguments = param if action.Type == 0
       end
 
-      update_task_definition(definition)
+      register_task_definition(definition)
 
       param
     end
@@ -459,7 +449,7 @@ module Win32
         action.WorkingDirectory = dir if action.Type == 0
       end
 
-      update_task_definition(definition)
+      register_task_definition(definition)
 
       dir
     end
@@ -511,7 +501,7 @@ module Win32
       definition = @task.Definition
       definition.Settings.Priority = priority
 
-      update_task_definition(definition)
+      register_task_definition(definition)
 
       priority
     end
@@ -521,16 +511,12 @@ module Win32
     # job should run.
     #
     def new_work_item(task, trigger, userinfo = { user: nil, password: nil })
-      raise TypeError unless userinfo.is_a?(Hash)
-      raise TypeError unless task.is_a?(String)
-      raise TypeError unless trigger.is_a?(Hash)
+      raise TypeError unless userinfo.is_a?(Hash) && task.is_a?(String) && trigger.is_a?(Hash)
 
-      unless userinfo[:user].nil?
-        raise TypeError unless userinfo[:user].is_a?(String)
-        unless SYSTEM_USERS.include?(userinfo[:user])
-          raise TypeError unless userinfo[:password].is_a?(String)
-        end
-      end
+      # If user ID is not given, consider it as a 'SYSTEM' user
+      userinfo[:user] = SERVICE_ACCOUNT_USERS.first if userinfo[:user].to_s.empty?
+
+      check_credential_requirements(userinfo[:user], userinfo[:password])
 
       taskDefinition = @service.NewTask(0)
       taskDefinition.RegistrationInfo.Description = ''
@@ -621,18 +607,8 @@ module Win32
       act.Path = 'cmd'
 
       @password = userinfo[:password]
-      begin
-        @task = @root.RegisterTaskDefinition(
-          task,
-          taskDefinition,
-          TASK_CREATE_OR_UPDATE,
-          userinfo[:user].nil? || userinfo[:user].empty? ? 'SYSTEM': userinfo[:user],
-          userinfo[:password],
-          userinfo[:password] ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
-        )
-      rescue WIN32OLERuntimeError => err
-        raise Error, ole_error('RegisterTaskDefinition', err)
-      end
+
+      register_task_definition(taskDefinition, task, userinfo[:user], userinfo[:password])
 
       @task = @root.GetTask(task)
     end
@@ -677,7 +653,7 @@ module Win32
 
       definition = @task.Definition
       definition.Triggers.Remove(index)
-      update_task_definition(definition)
+      register_task_definition(definition)
 
       index
     end
@@ -860,7 +836,7 @@ module Win32
           end
       end
 
-      update_task_definition(definition)
+      register_task_definition(definition)
 
       trigger
     end
@@ -947,7 +923,7 @@ module Win32
           trig.Delay = "PT#{trigger[:delay_duration]||0}M"
       end
 
-      update_task_definition(definition)
+      register_task_definition(definition)
 
       true
     end
@@ -1004,7 +980,7 @@ module Win32
 
       definition = @task.Definition
       definition.RegistrationInfo.Description = comment
-      update_task_definition(definition)
+      register_task_definition(definition)
 
       comment
     end
@@ -1028,7 +1004,7 @@ module Win32
 
       definition = @task.Definition
       definition.RegistrationInfo.Author = creator
-      update_task_definition(definition)
+      register_task_definition(definition)
 
       creator
     end
@@ -1057,18 +1033,6 @@ module Win32
       end
 
       time
-    end
-
-    # Returns idle settings for current active task
-    #
-    def idle_settings
-      check_for_active_task
-      idle_settings = {}
-      idle_settings[:idle_duration] = @task.Definition.Settings.IdleSettings.IdleDuration
-      idle_settings[:stop_on_idle_end] = @task.Definition.Settings.IdleSettings.StopOnIdleEnd
-      idle_settings[:wait_timeout] = @task.Definition.Settings.IdleSettings.WaitTimeout
-      idle_settings[:restart_on_idle] = @task.Definition.Settings.IdleSettings.RestartOnIdle
-      idle_settings
     end
 
     # Returns the execution time limit for current active task
@@ -1120,7 +1084,7 @@ module Win32
 
       definition = @task.Definition
       definition.Settings.ExecutionTimeLimit = limit
-      update_task_definition(definition)
+      register_task_definition(definition)
 
       max_run_time
     end
@@ -1204,7 +1168,7 @@ module Win32
         definition.Settings.setproperty(setting, value)
       end
 
-      update_task_definition(definition)
+      register_task_definition(definition)
 
       settings_hash
     end
@@ -1251,7 +1215,7 @@ module Win32
       definition.RegistrationInfo.Version = version if version
       definition.RegistrationInfo.XmlText = xml_text if xml_text
 
-      update_task_definition(definition)
+      register_task_definition(definition)
 
       hash
     end
@@ -1270,7 +1234,7 @@ module Win32
       definition.Principal.LogonType = principals[:logon_type] if principals[:logon_type].to_s != ""
       definition.Principal.GroupId = principals[:group_id] if principals[:group_id].to_s != ""
       definition.Principal.RunLevel = principals[:run_level] if principals[:run_level].to_s != ""
-      update_task_definition(definition)
+      register_task_definition(definition)
       principals
     end
 
@@ -1318,8 +1282,17 @@ module Win32
       symbolize_keys(settings_hash)
     end
 
+    # Returns the user or group associated with the task. If no one is associated, it returns the default user i.e., 'SYSTEM'
+    #
+    # @param [WIN32OLE] definition
+    #
+    # @return [String] user_id
+    #
     def task_user_id(definition)
-      definition.Principal.UserId
+      user_id = definition.Principal.UserId.to_s
+      user_id = definition.Principal.GroupId.to_s if user_id.empty?
+      user_id = SERVICE_ACCOUNT_USERS.first if user_id.empty?
+      user_id
     end
 
     private
@@ -1381,15 +1354,93 @@ module Win32
       raise Error, 'No currently active task' if @task.nil?
     end
 
-    def update_task_definition(definition)
-      user = task_user_id(definition) || 'SYSTEM'
+    # Checks if the user belongs to service accounts category
+    #
+    # @return  [Boolean] True or False
+    #
+    def service_account_user?(user)
+      SERVICE_ACCOUNT_USERS.include?(user.to_s.upcase)
+    end
+
+    # Checks if the user belongs to group accounts category
+    #
+    # @return [Boolean] True or False
+    #
+    def group_user?(user)
+      BUILT_IN_GROUPS.include?(user.to_s.upcase)
+    end
+
+    # Checks if the user belongs to system users category
+    #
+    # @return  [Boolean] True or False
+    #
+    def system_user?(user)
+      SYSTEM_USERS.include?(user.to_s.upcase)
+    end
+
+    # Checks whether the given set of user_id and password suits our requirements.
+    #
+    # Raises the error in case of any failures
+    #
+    # Password should be nil for System Users. For other users, it is required.
+    #
+    # @param [String] user_id
+    # @param [String] password
+    #
+    def check_credential_requirements(user_id, password)
+      user_id = user_id.to_s
+      password = password.to_s
+      # Password will be required for non-system users
+      if password.empty?
+        unless system_user?(user_id)
+          raise Error, 'Password is required for non-system users'
+        end
+      else
+        if system_user?(user_id)
+          raise Error, 'Password is not required for system users'
+        end
+      end
+    end
+
+    # Returns the applicable flag as per the given users and groups which is used while
+    # RegisterTaskDefinition
+    #
+    # @param [String] user_id
+    # @param [String] password
+    #
+    # @return [Integer] Logon Types
+    #
+    def logon_type(user_id, password)
+      if service_account_user?(user_id)
+        TASK_LOGON_SERVICE_ACCOUNT
+      elsif group_user?(user_id)
+        TASK_LOGON_GROUP
+      elsif !password.to_s.empty? # Password is present
+        TASK_LOGON_PASSWORD
+      else
+        TASK_LOGON_INTERACTIVE_TOKEN
+      end
+    end
+
+    # Uses RegisterTaskDefinition and creates or updates the task
+    #
+    # @param [WIN32OLE] definition
+    # @param [String] path
+    # @param [String] user_id
+    # @param [String] password
+    #
+    # @return [Integer] Logon Types
+    #
+    def register_task_definition(definition, path = nil, user_id = nil, password = nil)
+      user_id ||= task_user_id(definition)
+      path ||= @task.Path
       @task = @root.RegisterTaskDefinition(
-        @task.Path,
-        definition,
-        TASK_CREATE_OR_UPDATE,
-        user,
-        @password,
-        @password ? TASK_LOGON_PASSWORD : TASK_LOGON_SERVICE_ACCOUNT
+        path, # Path (name) of the task
+        definition, # definition of the task
+        TASK_CREATE_OR_UPDATE, # Equivalent to TASK_CREATE | TASK_UPDATE
+        user_id,
+        password,
+        logon_type(user_id, password)
       )
     rescue WIN32OLERuntimeError => err
       method_name = caller_locations(1, 1)[0].label
