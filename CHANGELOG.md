@@ -4,27 +4,24 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release 1.0.12 -->
-## [win32-taskscheduler-1.0.12](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.12) (2018-10-11)
-
-#### Merged Pull Requests
-- Fixing user registration at Non English version of windows [#69](https://github.com/chef/win32-taskscheduler/pull/69) ([Nimesh-Msys](https://github.com/Nimesh-Msys))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=1.0.10 -->
-### Changes since 1.0.10 release
-
-#### Merged Pull Requests
-- Fixing user registration at Non English version of windows [#69](https://github.com/chef/win32-taskscheduler/pull/69) ([Nimesh-Msys](https://github.com/Nimesh-Msys)) <!-- 1.0.12 -->
-- Refactored configure_settings [#67](https://github.com/chef/win32-taskscheduler/pull/67) ([btm](https://github.com/btm)) <!-- 1.0.11 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [win32-taskscheduler-1.0.12](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.12) (2018-10-11)
+
+#### Merged Pull Requests
+- Refactored configure_settings [#67](https://github.com/chef/win32-taskscheduler/pull/67) ([btm](https://github.com/btm))
+- Fixing user registration at Non English version of windows [#69](https://github.com/chef/win32-taskscheduler/pull/69) ([Nimesh-Msys](https://github.com/Nimesh-Msys))
+<!-- latest_stable_release -->
+
 ## [win32-taskscheduler-1.0.10](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.10) (2018-07-24)
 
 #### Merged Pull Requests
 - Fix exists? method breaking task full path search [#62](https://github.com/chef/win32-taskscheduler/pull/62) ([Vasu1105](https://github.com/Vasu1105))
-<!-- latest_stable_release -->
 
 ## [win32-taskscheduler-1.0.9](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.9) (2018-07-23)
 
