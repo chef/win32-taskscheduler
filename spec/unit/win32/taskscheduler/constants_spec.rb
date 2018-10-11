@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'win32/taskscheduler'
-require 'win32/windows/constants'
+require 'win32/taskscheduler/constants'
 
 RSpec.describe Win32::TaskScheduler, :windows_only do
   describe 'Ensuring trigger constants' do
