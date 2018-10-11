@@ -32,6 +32,7 @@ end
 module Win32
   class TaskScheduler
     module SID
+      extend Win32::TaskScheduler::Helper
       ERROR_INSUFFICIENT_BUFFER = 122
 
       def self.LocalSystem

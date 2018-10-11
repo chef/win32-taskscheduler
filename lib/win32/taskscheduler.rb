@@ -14,7 +14,7 @@ module Win32
   # The TaskScheduler class encapsulates a Windows scheduled task
   class TaskScheduler
     include Win32::TaskScheduler::Helper
-    include Win32::TaskScheduler::Constants
+    include Win32::TaskScheduler::TaskSchedulerConstants
     include Win32::TaskScheduler::TimeCalcHelper
     include Win32::TaskScheduler::SID
 

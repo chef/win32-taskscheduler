@@ -5,7 +5,7 @@ RSpec.describe Win32::TaskScheduler::TimeCalcHelper do
   let(:object) { klass.new }
   let(:klass) do
     Class.new do
-      include Win32::Taskscheduler::TimeCalcHelper
+      include Win32::TaskScheduler::TimeCalcHelper
     end
   end
 
