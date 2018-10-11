@@ -1,6 +1,7 @@
-require_relative 'windows/helper'
-require_relative 'windows/time_calc_helper'
-require_relative 'windows/constants'
+require_relative 'taskscheduler/sid'
+require_relative 'taskscheduler/helper'
+require_relative 'taskscheduler/time_calc_helper'
+require_relative 'taskscheduler/constants'
 require_relative 'taskscheduler/version'
 require 'win32ole'
 require 'socket'
@@ -12,9 +13,10 @@ module Win32
 
   # The TaskScheduler class encapsulates a Windows scheduled task
   class TaskScheduler
-    include Windows::TaskSchedulerHelper
-    include Windows::TimeCalcHelper
-    include Windows::TaskSchedulerConstants
+    include Win32::TaskScheduler::Helper
+    include Win32::TaskScheduler::TaskSchedulerConstants
+    include Win32::TaskScheduler::TimeCalcHelper
+    include Win32::TaskScheduler::SID
 
     # The Error class is typically raised if any TaskScheduler methods fail.
     class Error < StandardError; end

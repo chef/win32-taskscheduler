@@ -1,11 +1,11 @@
 require 'spec_helper'
-require 'win32/windows/time_calc_helper'
+require 'win32/taskscheduler/time_calc_helper'
 
-RSpec.describe Windows::TimeCalcHelper do
+RSpec.describe Win32::TaskScheduler::TimeCalcHelper do
   let(:object) { klass.new }
   let(:klass) do
     Class.new do
-      include Windows::TimeCalcHelper
+      include Win32::TaskScheduler::TimeCalcHelper
     end
   end
 
