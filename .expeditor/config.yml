@@ -18,7 +18,7 @@ github:
     - master:
         version_constraint: "0.*"
     - ole:
-        version_constraint: "1.*"
+        version_constraint: "2.*"
 promote:
   action:
     - built_in:rollover_changelog
