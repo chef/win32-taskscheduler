@@ -1,3 +1,4 @@
+require_relative 'taskscheduler/sid'
 require_relative 'taskscheduler/helper'
 require_relative 'taskscheduler/time_calc_helper'
 require_relative 'taskscheduler/constants'
