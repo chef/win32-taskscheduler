@@ -11,21 +11,23 @@ prior to release 0.4.0, please visit the [source repository](https://github.com/
 - Bump version to 2.0 [#71](https://github.com/chef/win32-taskscheduler/pull/71) ([btm](https://github.com/btm))
 <!-- latest_release -->
 
-<!-- release_rollup since=1.0.12 -->
-### Changes since 1.0.12 release
-
-#### Merged Pull Requests
-- Bump version to 2.0 [#71](https://github.com/chef/win32-taskscheduler/pull/71) ([btm](https://github.com/btm)) <!-- 2.0.0 -->
-- Move helpers under the Win32::TaskScheduler namespace [#70](https://github.com/chef/win32-taskscheduler/pull/70) ([btm](https://github.com/btm)) <!-- 1.0.13 -->
+<!-- release_rollup since=2.0.0 -->
+### Changes since 2.0.0 release
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [win32-taskscheduler-2.0.0](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-2.0.0) (2018-10-11)
+
+#### Merged Pull Requests
+- Move helpers under the Win32::TaskScheduler namespace [#70](https://github.com/chef/win32-taskscheduler/pull/70) ([btm](https://github.com/btm))
+- Bump version to 2.0 [#71](https://github.com/chef/win32-taskscheduler/pull/71) ([btm](https://github.com/btm))
+<!-- latest_stable_release -->
+
 ## [win32-taskscheduler-1.0.12](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.12) (2018-10-11)
 
 #### Merged Pull Requests
 - Refactored configure_settings [#67](https://github.com/chef/win32-taskscheduler/pull/67) ([btm](https://github.com/btm))
 - Fixing user registration at Non English version of windows [#69](https://github.com/chef/win32-taskscheduler/pull/69) ([Nimesh-Msys](https://github.com/Nimesh-Msys))
-<!-- latest_stable_release -->
 
 ## [win32-taskscheduler-1.0.10](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.10) (2018-07-24)
 
