@@ -4,17 +4,18 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release 1.0.11 -->
-## [win32-taskscheduler-1.0.11](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.11) (2018-09-28)
+<!-- latest_release 1.0.12 -->
+## [win32-taskscheduler-1.0.12](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-1.0.12) (2018-10-11)
 
 #### Merged Pull Requests
-- Refactored configure_settings [#67](https://github.com/chef/win32-taskscheduler/pull/67) ([btm](https://github.com/btm))
+- Fixing user registration at Non English version of windows [#69](https://github.com/chef/win32-taskscheduler/pull/69) ([Nimesh-Msys](https://github.com/Nimesh-Msys))
 <!-- latest_release -->
 
 <!-- release_rollup since=1.0.10 -->
 ### Changes since 1.0.10 release
 
 #### Merged Pull Requests
+- Fixing user registration at Non English version of windows [#69](https://github.com/chef/win32-taskscheduler/pull/69) ([Nimesh-Msys](https://github.com/Nimesh-Msys)) <!-- 1.0.12 -->
 - Refactored configure_settings [#67](https://github.com/chef/win32-taskscheduler/pull/67) ([btm](https://github.com/btm)) <!-- 1.0.11 -->
 <!-- release_rollup -->
 
