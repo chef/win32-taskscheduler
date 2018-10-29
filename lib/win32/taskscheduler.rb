@@ -512,7 +512,7 @@ module Win32
     # trigger variable is a hash of options that define when the scheduled
     # job should run.
     #
-    def new_work_item(task, trigger, userinfo = { user: nil, password: nil })
+    def new_work_item(task, trigger, userinfo = { user: nil, password: nil, interactive: false })
       raise TypeError unless userinfo.is_a?(Hash) && task.is_a?(String) && trigger.is_a?(Hash)
 
       # If user ID is not given, consider it as a 'SYSTEM' user
@@ -609,6 +609,7 @@ module Win32
       act.Path = 'cmd'
 
       @password = userinfo[:password]
+      @interactive = userinfo[:interactive]
 
       register_task_definition(taskDefinition, task, userinfo[:user], userinfo[:password])
 
@@ -1236,6 +1237,7 @@ module Win32
       definition.Principal.LogonType = principals[:logon_type] if principals[:logon_type].to_s != ""
       definition.Principal.GroupId = principals[:group_id] if principals[:group_id].to_s != ""
       definition.Principal.RunLevel = principals[:run_level] if principals[:run_level].to_s != ""
+      @interactive = true if principals[:logon_type] == TASK_LOGON_INTERACTIVE_TOKEN
       register_task_definition(definition)
       principals
     end
@@ -1417,8 +1419,12 @@ module Win32
         TASK_LOGON_SERVICE_ACCOUNT
       elsif group_user?(user_id)
         TASK_LOGON_GROUP
-      elsif !password.to_s.empty? # Password is present
-        TASK_LOGON_PASSWORD
+      elsif !user_id.to_s.empty? && !password.to_s.empty?
+        if @interactive
+          TASK_LOGON_INTERACTIVE_TOKEN
+        else
+          TASK_LOGON_PASSWORD
+        end
       else
         TASK_LOGON_INTERACTIVE_TOKEN
       end
@@ -1435,6 +1441,7 @@ module Win32
     #
     def register_task_definition(definition, path = nil, user_id = nil, password = nil)
       user_id ||= task_user_id(definition)
+      password ||= @password
       path ||= @task.Path
       @task = @root.RegisterTaskDefinition(
         path, # Path (name) of the task
