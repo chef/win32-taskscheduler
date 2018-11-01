@@ -4,15 +4,19 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release unreleased -->
-## Unreleased
+<!-- latest_release 2.0.1 -->
+## [win32-taskscheduler-2.0.1](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-2.0.1) (2018-11-01)
 
 #### Merged Pull Requests
+- Minor Fix for logon_type flag while task registration [#75](https://github.com/chef/win32-taskscheduler/pull/75) ([Nimesh-Msys](https://github.com/Nimesh-Msys))
 - Bump version to 2.0 [#71](https://github.com/chef/win32-taskscheduler/pull/71) ([btm](https://github.com/btm))
 <!-- latest_release -->
 
 <!-- release_rollup since=2.0.0 -->
 ### Changes since 2.0.0 release
+
+#### Merged Pull Requests
+- Minor Fix for logon_type flag while task registration [#75](https://github.com/chef/win32-taskscheduler/pull/75) ([Nimesh-Msys](https://github.com/Nimesh-Msys)) <!-- 2.0.1 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
