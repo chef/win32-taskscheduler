@@ -112,6 +112,43 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
   end
 
+  describe '#logon_type' do
+    let(:user_id) { 'User' }
+    context 'With Password' do
+      let(:password) { 'Password' }
+      it 'Returns PASSWORD flag for non-system users' do
+        expect(@ts.send(:logon_type, user_id, password)).to eq(Win32::TaskScheduler::TASK_LOGON_PASSWORD)
+      end
+
+      it 'Returns GROUP flag for group users' do
+        user_id = 'Guests'
+        expect(@ts.send(:logon_type, user_id, password)).to eq(Win32::TaskScheduler::TASK_LOGON_GROUP)
+      end
+
+      it 'Returns SERVICE_ACCOUNT flag for service-account users' do
+        user_id = 'System'
+        expect(@ts.send(:logon_type, user_id, password)).to eq(Win32::TaskScheduler::TASK_LOGON_SERVICE_ACCOUNT)
+      end
+    end
+
+    context 'Without Password' do
+      let(:password) { nil }
+      it 'Returns INTERACTIVE_TOKEN flag for non-system users' do
+        expect(@ts.send(:logon_type, user_id, password)).to eq(Win32::TaskScheduler::TASK_LOGON_INTERACTIVE_TOKEN)
+      end
+
+      it 'Returns GROUP flag for group users' do
+        user_id = 'Guests'
+        expect(@ts.send(:logon_type, user_id, password)).to eq(Win32::TaskScheduler::TASK_LOGON_GROUP)
+      end
+
+      it 'Returns SERVICE_ACCOUNT flag for service-account users' do
+        user_id = 'System'
+        expect(@ts.send(:logon_type, user_id, password)).to eq(Win32::TaskScheduler::TASK_LOGON_SERVICE_ACCOUNT)
+      end
+    end
+  end
+
   private
 
   def load_task_variables
