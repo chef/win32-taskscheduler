@@ -1,4 +1,4 @@
-# Description
+# win32-taskscheduler gem
 
 [![Gem Version](https://badge.fury.io/rb/win32-taskscheduler.svg)](https://badge.fury.io/rb/win32-taskscheduler)
 
