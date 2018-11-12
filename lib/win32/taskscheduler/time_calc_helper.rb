@@ -2,29 +2,44 @@ module Win32
   class TaskScheduler
     module TimeCalcHelper
 
-      # Returns actual no of days for given month;
-      # Array with a 0 is defined to give actual result without
-      # any manipulation. eg, DAYS_IN_A_MONTH[1] = 31
-      # 0(NUMBER) is kept to avoid exceptions during calculations
+      # No of days in given month. Deliberately placed 0 in the
+      # beginning to avoid any miscalculations
+      #
       DAYS_IN_A_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31].freeze
 
-      # Returns no of days in a given month of a year
+      # No of days in a month for given year
+      #
+      # @param [Integer] month
+      # @param [Integer] year
+      # @return [Integer] No of days
+      #
       def days_in_month(month, year)
-        (month == 2 && is_leap_year?(year)) ? 29 : DAYS_IN_A_MONTH[month]
+        month == 2 && is_leap_year?(year) ? 29 : DAYS_IN_A_MONTH[month]
       end
 
-      # Year is leap when it is a multiple of 4 and not a multiple of 100.
-      # But it can be a multiple of 400
+      # Checks weather the given year is a leap year or not
+      #
+      # @param [Integer] year
+      # @return [Boolean]
+      #
       def is_leap_year?(year)
         (((year % 4).zero? && !(year % 100).zero?) || (year % 400).zero?)
       end
 
-      # Returns total time duration in minutes
+      # Calculates the total minutes within given PTM format time
+      #
+      # @param [Integer] time_str
+      # @return [Integer] Time duration in minutes
+      #
       def time_in_minutes(time_str)
         time_in_seconds(time_str) / 60
       end
 
-      # Calculates total time duration in seconds
+      # Calculates the total seconds within given PTM format time
+      #
+      # @param [Integer] time_str the time in PTM format
+      # @return [Integer] Time duration in seconds
+      #
       def time_in_seconds(time_str)
         dt_tm_hash = time_details(time_str)
         curr_time = Time.now
@@ -54,17 +69,20 @@ module Win32
         future_time.to_i - curr_time.to_i
       end
 
-      # a will contain extra value of low_rank (in high_rank(eg min));
-      # b will hold actual low_rank value(ie sec) Example:
-      # low_rank = 65, high_rank = 2, div_val = 60
-      # Hence a = 1; b = 5
+      # Adjusts the overlapping seconds and returns actual minutes and seconds
+      #
+      # @example
+      #   extra_time(65, 2, 60) #=> => [5, 3]
+      #
       def extra_time(low_rank, high_rank, div_val)
         a, b = low_rank.divmod(div_val)
         high_rank += a; low_rank = b
         [low_rank, high_rank]
       end
 
-      def extra_months(month_count, year_count, init_month, init_year)
+      # Adjusts the overlapping months and returns actual month and year
+      #
+      def extra_months(month_count, year_count, _init_month, _init_year)
         year, month_count = month_count.divmod(12)
         if year.positive? && month_count.zero?
           month_count = 12
@@ -74,7 +92,8 @@ module Win32
         [month_count, year_count]
       end
 
-      # Returns no of actual days with all overloaded months & Years
+      # Adjusts the overlapping years and months and returns actual days, month and year
+      #
       def extra_days(days_count, month_count, year_count, init_month, init_year)
         # Will keep increamenting them with surplus days
         days = days_count
@@ -98,10 +117,14 @@ module Win32
         [days_count, month_count, year_count]
       end
 
-      # Extracts "P_Y_M_DT_H_M_S" format and
-      # Returns a hash with applicable values of
-      # (keys =>) [:year, :month, :day, :hour, :min, :sec]
-      # Example: "PT3S" => {sec: 3}
+      # Extracts a hash out of given PTM formatted time
+      #
+      # @param [String] time_str
+      # @return [Hash<:year, :month, :day, :hour, :min, :sec>] With their values in Integer
+      #
+      # @example
+      #   time_details("PT3S") #=> {sec: 3}
+      #
       def time_details(time_str)
         tm_detail = {}
         if time_str.to_s != ""
@@ -112,20 +135,28 @@ module Win32
           # Replacing strings
           if dt.to_s != ""
             dt["Y"] = "year" if dt["Y"]; dt["M"] = "month" if dt["M"]; dt["D"] = "day" if dt["D"]
-            dt_tm_array_to_hash(dt, tm_detail)
+            dt_tm_string_to_hash(dt, tm_detail)
           end
 
           if tm.to_s != ""
             tm["H"] = "hour" if tm["H"]; tm["M"] = "min" if tm["M"]; tm["S"] = "sec" if tm["S"]
-            dt_tm_array_to_hash(tm, tm_detail)
+            dt_tm_string_to_hash(tm, tm_detail)
           end
         end
         tm_detail
       end
 
-      # Method to convert date/time array to hash
-      def dt_tm_array_to_hash(arr, tm_detail)
-        arr.split(/(\d+)/)[1..-1].each_slice(2).inject(tm_detail) { |h, i| h[i.last.to_sym] = i.first; h }
+      # Converts the given date/time string to the hash
+      #
+      # @param [String] str
+      # @param [Hash] tm_detail May be loaded
+      # @return [Hash]
+      #
+      # @example
+      #   dt_tm_string_to_hash("10year3month", {}) #=> {:year=>"10", :month=>"3"}
+      #
+      def dt_tm_string_to_hash(str, tm_detail)
+        str.split(/(\d+)/)[1..-1].each_slice(2).each_with_object(tm_detail) { |i, h| h[i.last.to_sym] = i.first; }
       end
     end
   end

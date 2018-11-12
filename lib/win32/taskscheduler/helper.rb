@@ -12,11 +12,11 @@ module Win32
       ffi_lib :kernel32, :advapi32
 
       attach_function :FormatMessage, :FormatMessageA,
-      [:ulong, :pointer, :ulong, :ulong, :pointer, :ulong, :pointer], :ulong
+                      %i{ulong pointer ulong ulong pointer ulong pointer}, :ulong
 
-      attach_function :ConvertStringSidToSidW, [ :pointer, :pointer ], :bool
-      attach_function :LookupAccountSidW, [ :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer ], :bool
-      attach_function :LocalFree, [ :pointer ], :pointer
+      attach_function :ConvertStringSidToSidW, %i{pointer pointer}, :bool
+      attach_function :LookupAccountSidW, %i{pointer pointer pointer pointer pointer pointer pointer}, :bool
+      attach_function :LocalFree, [:pointer], :pointer
 
       def win_error(function, err = FFI.errno)
         err_msg = ""
@@ -28,7 +28,7 @@ module Win32
         # We use English for errors because Ruby uses English for errors.
 
         FFI::MemoryPointer.new(:char, 1024) do |buf|
-          len = FormatMessage(flags, nil, err , 0x0409, buf, buf.size, nil)
+          len = FormatMessage(flags, nil, err, 0x0409, buf, buf.size, nil)
           err_msg = function + ": " + buf.read_string(len).strip
         end
 

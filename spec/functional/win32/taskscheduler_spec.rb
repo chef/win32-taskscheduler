@@ -521,50 +521,113 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     context "Service Account Users" do
       let(:service_user) { "LOCAL SERVICE" }
       let(:password) { nil }
-      it "Does not require any password" do
-        expect(@ts.set_account_information(service_user, password)). to be_truthy
-        expect(@ts.account_information.upcase).to eq(service_user)
+      context "when task is Interactive" do
+        let(:interactive) { true }
+        it "Does not require any password" do
+          expect(@ts.set_account_information(service_user, password, interactive)). to be_truthy
+          expect(@ts.account_information.upcase).to eq(service_user)
+        end
+
+        it "passing account_name will display account_simple_name" do
+          user = 'NT AUTHORITY\LOCAL SERVICE'
+          expect(@ts.set_account_information(user, password, interactive)). to be_truthy
+          expect(@ts.account_information.upcase).to eq(service_user)
+        end
+
+        it "Raises an error if password is given" do
+          password = "XYZ"
+          expect { @ts.set_account_information(service_user, password, interactive) }. to raise_error(ArgumentError)
+        end
       end
-      it "passing account_name will display account_simple_name" do
-        user = 'NT AUTHORITY\LOCAL SERVICE'
-        expect(@ts.set_account_information(user, password)). to be_truthy
-        expect(@ts.account_information.upcase).to eq(service_user)
-      end
-      it "Raises an error if password is given" do
-        password = "XYZ"
-        expect { @ts.set_account_information(service_user, password) }. to raise_error(tasksch_err)
+
+      context "when task is Non-Interactive" do
+        let(:interactive) { false }
+        it "Does not require any password" do
+          expect(@ts.set_account_information(service_user, password, interactive)). to be_truthy
+          expect(@ts.account_information.upcase).to eq(service_user)
+        end
+
+        it "passing account_name will display account_simple_name" do
+          user = 'NT AUTHORITY\LOCAL SERVICE'
+          expect(@ts.set_account_information(user, password, interactive)). to be_truthy
+          expect(@ts.account_information.upcase).to eq(service_user)
+        end
+
+        it "Raises an error if password is given" do
+          password = "XYZ"
+          expect { @ts.set_account_information(service_user, password, interactive) }. to raise_error(ArgumentError)
+        end
       end
     end
+
     context "Built in Groups" do
       let(:group_user) { "USERS" }
       let(:password) { nil }
-      it "Does not require any password" do
-        expect(@ts.set_account_information(group_user, password)). to be_truthy
-        expect(@ts.account_information.upcase).to eq(group_user)
+      context "when task is Interactive" do
+        let(:interactive) { true }
+        it "Does not require any password" do
+          expect(@ts.set_account_information(group_user, password, interactive)). to be_truthy
+          expect(@ts.account_information.upcase).to eq(group_user)
+        end
+
+        it "passing account_name will display account_simple_name" do
+          user = 'BUILTIN\USERS'
+          expect(@ts.set_account_information(user, password, interactive)). to be_truthy
+          expect(@ts.account_information.upcase).to eq(group_user)
+        end
+
+        it "Raises an error if password is given" do
+          password = "XYZ"
+          expect { @ts.set_account_information(group_user, password, interactive) }. to raise_error(ArgumentError)
+        end
       end
-      it "passing account_name will display account_simple_name" do
-        user = 'BUILTIN\USERS'
-        expect(@ts.set_account_information(user, password)). to be_truthy
-        expect(@ts.account_information.upcase).to eq(group_user)
-      end
-      it "Raises an error if password is given" do
-        password = "XYZ"
-        expect { @ts.set_account_information(group_user, password) }. to raise_error(tasksch_err)
+
+      context "when task is Non-Interactive" do
+        let(:interactive) { false }
+        it "Does not require any password" do
+          expect(@ts.set_account_information(group_user, password, interactive)). to be_truthy
+          expect(@ts.account_information.upcase).to eq(group_user)
+        end
+
+        it "passing account_name will display account_simple_name" do
+          user = 'BUILTIN\USERS'
+          expect(@ts.set_account_information(user, password, interactive)). to be_truthy
+          expect(@ts.account_information.upcase).to eq(group_user)
+        end
+
+        it "Raises an error if password is given" do
+          password = "XYZ"
+          expect { @ts.set_account_information(group_user, password, interactive) }. to raise_error(ArgumentError)
+        end
       end
     end
+
     context "Non-system users" do
-      it "Require a password" do
-        user = ENV["user"]
-        password = nil
-        expect { @ts.set_account_information(user, password) }. to raise_error(tasksch_err)
-        expect(@ts.account_information).to include(user)
+      context "when task is Interactive" do
+        let(:interactive) { true }
+        it "Does not require any password" do
+          user = ENV["user"]
+          password = nil
+          expect(@ts.set_account_information(user, password, interactive)). to be_truthy
+          expect(@ts.account_information).to include(user)
+        end
+      end
+      context "when task is Non-Interactive" do
+        let(:interactive) { false }
+        it "Require a password" do
+          user = ENV["user"]
+          password = nil
+          expect { @ts.set_account_information(user, password, interactive) }. to raise_error(ArgumentError)
+          expect(@ts.account_information).to include(user)
+        end
       end
     end
     it "Raises an error if task does not exists" do
       @ts.instance_variable_set(:@task, nil)
       user = "User"
       password = "XXXX"
-      expect { @ts.set_account_information(user, password) }. to raise_error(tasksch_err)
+      interactive = false
+      expect { @ts.set_account_information(user, password, interactive) }. to raise_error(tasksch_err)
       expect(@ts.account_information).to be_nil
     end
   end

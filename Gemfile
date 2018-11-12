@@ -13,9 +13,9 @@ group :ci do
 end
 
 group :docs do
-  gem "yard"
-  gem "redcarpet"
   gem "github-markup"
+  gem "redcarpet"
+  gem "yard"
 end
 
 group :debug do
