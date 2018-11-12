@@ -21,8 +21,7 @@ Gem::Specification.new do |spec|
 
   spec.extra_rdoc_files = [
     "README.md",
-    "CHANGELOG.md",
-    "RELEASE_NOTES.md",
+    "CHANGELOG.md"
   ]
 
   spec.description = <<-EOF
