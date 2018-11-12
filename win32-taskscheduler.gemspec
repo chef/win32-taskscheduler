@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.email      = 'djberg96@gmail.com'
   spec.homepage   = 'http://github.com/chef/win32-taskscheduler'
   spec.summary    = 'A library for the Windows task scheduler'
-  spec.test_files = Dir['test/test*']
-  spec.files      = Dir['**/*'].reject{ |f| f.include?('git') }
+  spec.test_files = Dir["test/*, spec/**/*"]
+  spec.files      = Dir["lib/**/*"]
 
   spec.add_dependency('ffi')
   spec.add_dependency('structured_warnings')
@@ -18,11 +18,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('rake')
   spec.add_development_dependency('win32-security')
   spec.add_development_dependency "rspec", "~>3.0"
-
-  spec.extra_rdoc_files = [
-    "README.md",
-    "CHANGELOG.md"
-  ]
 
   spec.description = <<-EOF
     The win32-taskscheduler library provides an interface to the MS Windows
