@@ -1,4 +1,3 @@
-require 'rubygems'
 require_relative 'lib/win32/taskscheduler/version'
 
 Gem::Specification.new do |spec|
