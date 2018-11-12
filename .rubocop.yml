@@ -1,0 +1,31 @@
+# Offense count: 3
+Lint/UselessAssignment:
+  Exclude:
+    - 'lib/win32/taskscheduler.rb'
+
+# Offense count: 9
+Lint/Void:
+  Exclude:
+    - 'lib/win32/taskscheduler.rb'
+
+# Offense count: 6
+Naming/ConstantName:
+  Exclude:
+    - 'lib/win32/taskscheduler.rb'
+    - 'lib/win32/taskscheduler/constants.rb'
+
+# Offense count: 14
+Naming/VariableName:
+  Exclude:
+    - 'lib/win32/taskscheduler.rb'
+
+# Offense count: 1
+Security/Eval:
+  Exclude:
+    - 'Rakefile'
+
+# Offense count: 5
+Style/NumericPredicate:
+  Exclude:
+    - 'spec/**/*'
+    - 'lib/win32/taskscheduler/time_calc_helper.rb'

@@ -6,7 +6,7 @@ module Win32
       # Array with a 0 is defined to give actual result without
       # any manipulation. eg, DAYS_IN_A_MONTH[1] = 31
       # 0(NUMBER) is kept to avoid exceptions during calculations
-      DAYS_IN_A_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+      DAYS_IN_A_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31].freeze
 
       # Returns no of days in a given month of a year
       def days_in_month(month, year)
@@ -82,13 +82,13 @@ module Win32
         yr = init_year
 
         loop do
-         days -= days_in_month(mth, yr)
-         break if days <= 0
-         mth += 1
-         if mth > 12
-           mth = 1; yr += 1
-         end
-         days_count = days
+          days -= days_in_month(mth, yr)
+          break if days <= 0
+          mth += 1
+          if mth > 12
+            mth = 1; yr += 1
+          end
+          days_count = days
         end
 
         # Setting actual incremented values
@@ -104,19 +104,19 @@ module Win32
       # Example: "PT3S" => {sec: 3}
       def time_details(time_str)
         tm_detail = {}
-        if time_str.to_s != ''
+        if time_str.to_s != ""
           # time_str will be like "PxxYxxMxxDTxxHxxMxxS"
           # Ignoring 'P' and extracting date and time
-          dt, tm = time_str[1..-1].split('T')
+          dt, tm = time_str[1..-1].split("T")
 
           # Replacing strings
-          if dt.to_s != ''
-            dt['Y'] = 'year' if dt['Y']; dt['M'] = 'month' if dt['M']; dt['D'] = 'day' if dt['D']
+          if dt.to_s != ""
+            dt["Y"] = "year" if dt["Y"]; dt["M"] = "month" if dt["M"]; dt["D"] = "day" if dt["D"]
             dt_tm_array_to_hash(dt, tm_detail)
           end
 
-          if tm.to_s != ''
-            tm['H'] = 'hour' if tm['H']; tm['M'] = 'min' if tm['M']; tm['S'] = 'sec' if tm['S']
+          if tm.to_s != ""
+            tm["H"] = "hour" if tm["H"]; tm["M"] = "min" if tm["M"]; tm["S"] = "sec" if tm["S"]
             dt_tm_array_to_hash(tm, tm_detail)
           end
         end

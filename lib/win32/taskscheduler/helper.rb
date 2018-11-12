@@ -1,4 +1,4 @@
-require 'ffi'
+require "ffi"
 
 module Win32
   class TaskScheduler
@@ -18,8 +18,8 @@ module Win32
       attach_function :LookupAccountSidW, [ :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer ], :bool
       attach_function :LocalFree, [ :pointer ], :pointer
 
-      def win_error(function, err=FFI.errno)
-        err_msg = ''
+      def win_error(function, err = FFI.errno)
+        err_msg = ""
         flags = FORMAT_MESSAGE_IGNORE_INSERTS |
           FORMAT_MESSAGE_FROM_SYSTEM |
           FORMAT_MESSAGE_MAX_WIDTH_MASK
@@ -29,7 +29,7 @@ module Win32
 
         FFI::MemoryPointer.new(:char, 1024) do |buf|
           len = FormatMessage(flags, nil, err , 0x0409, buf, buf.size, nil)
-          err_msg = function + ': ' + buf.read_string(len).strip
+          err_msg = function + ": " + buf.read_string(len).strip
         end
 
         err_msg
@@ -43,7 +43,7 @@ module Win32
           error = match.captures.first.hex
           win_error(function, error)
         else
-          "#{function}: #{err.to_s}"
+          "#{function}: #{err}"
         end
       end
     end
