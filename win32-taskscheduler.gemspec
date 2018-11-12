@@ -15,9 +15,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency("structured_warnings")
 
   spec.add_development_dependency("test-unit")
-  spec.add_development_dependency("rake")
   spec.add_development_dependency("win32-security")
-  spec.add_development_dependency "rspec", "~>3.0"
 
   spec.description = <<-EOF
     The win32-taskscheduler library provides an interface to the MS Windows
