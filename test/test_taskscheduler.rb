@@ -306,8 +306,8 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
   test "max_run_time= works as expected" do
     setup_task
-    assert_nothing_raised { @ts.max_run_time = 20000 }
-    assert_equal(20000, @ts.max_run_time)
+    assert_nothing_raised { @ts.max_run_time = 20_000 }
+    assert_equal(20_000, @ts.max_run_time)
   end
 
   test "max_run_time= requires a numeric argument" do
@@ -339,7 +339,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
   end
 
   test "new_work_item fails if a bogus trigger key is present" do
-    assert_raise(ArgumentError) { @ts.new_work_item("test", { bogus: 1 }) }
+    assert_raise(ArgumentError) { @ts.new_work_item("test", bogus: 1) }
   end
 
   test "new_task is an alias for new_work_item" do
@@ -601,7 +601,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
   test "working_directory= works as expected" do
     setup_task
-    assert_nothing_raised { @ts.working_directory = "C:\\" }
+    assert_nothing_raised { @ts.working_directory = 'C:\\' }
   end
 
   test "working_directory= requires a string argument" do

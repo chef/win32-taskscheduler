@@ -149,6 +149,44 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
   end
 
+  describe "#check_credential_requirements" do
+    let(:password) { "ABCXYZ" }
+    let(:nil_pass) { nil }
+
+    context "System Users" do
+      let(:user_id) { "SYSTEM" }
+      it "does not require a password" do
+        expect { @ts.send(:check_credential_requirements, user_id, nil_pass) }.not_to raise_error
+      end
+      it "raises error when password is sent" do
+        expect { @ts.send(:check_credential_requirements, user_id, password) }.to raise_error(ArgumentError)
+      end
+    end
+
+    context "Non-System Users" do
+      let(:user_id) { "User" }
+      context "For Interactive tasks" do
+        before { @ts.instance_variable_set(:@interactive, true) }
+        it "does not require a password" do
+          expect { @ts.send(:check_credential_requirements, user_id, nil_pass) }.not_to raise_error
+        end
+        it "does not raises error when password is sent" do
+          expect { @ts.send(:check_credential_requirements, user_id, password) }.not_to raise_error
+        end
+      end
+
+      context "For Non-Interactive tasks" do
+        before { @ts.instance_variable_set(:@interactive, false) }
+        it "raises error when password is not sent" do
+          expect { @ts.send(:check_credential_requirements, user_id, nil_pass) }.to raise_error(ArgumentError)
+        end
+        it "require a password" do
+          expect { @ts.send(:check_credential_requirements, user_id, password) }.not_to raise_error
+        end
+      end
+    end
+  end
+
   private
 
   def load_task_variables

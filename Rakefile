@@ -63,4 +63,4 @@ task :console do
   IRB.start
 end
 
-task default: [:style, :spec]
+task default: %i{style spec}

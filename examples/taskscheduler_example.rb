@@ -25,7 +25,7 @@ trigger = {
   type: { "days_interval" => 1 },
 }
 
-unless ts.enum.grep(/foo/).length > 0
+if ts.enum.grep(/foo/).empty?
   ts.new_work_item("foo", trigger)
   ts.application_name = "notepad.exe"
   puts "Task Added"
@@ -33,7 +33,7 @@ end
 
 ts.activate("foo")
 ts.priority = TaskScheduler::IDLE
-ts.working_directory = "C:\\"
+ts.working_directory = 'C:\\'
 
 puts "App name: " + ts.application_name
 puts "Creator: " + ts.creator
