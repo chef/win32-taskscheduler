@@ -1,9 +1,11 @@
-# Documentation available at http://expeditor-docs.es.chef.io/
-
+# Documentation available at https://expeditor.chef.io/docs/getting-started/
+---
 # Slack channel in Chef Software slack to send notifications about build failures, etc
 slack:
   notify_channel: sustaining-notify
+  notify_channel: chef-notify
 
+# This publish is triggered by the `built_in:publish_rubygems` artifact_action.
 rubygems:
   - win32-taskscheduler
 
@@ -12,8 +14,6 @@ github:
   delete_branch_on_merge: true
   # The tag format to use (e.g. v1.0.0)
   version_tag_format: "win32-taskscheduler-{{version}}"
-  # The Github Team primarily responsible for handling incoming Pull Requests.
-  maintainer_group: chef/msys-developers
   release_branch:
     - master:
         version_constraint: "0.*"
