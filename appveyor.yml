@@ -37,4 +37,4 @@ before_test:
   - bundle env
 
 test_script:
-  - bundle exec rake spec
+  - bundle exec rake
