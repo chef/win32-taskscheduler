@@ -1,4 +1,4 @@
-require_relative 'helper'
+require_relative "helper"
 
 module FFI
   class Pointer
@@ -21,10 +21,10 @@ module FFI
     def wide_to_utf8(wstring)
       # ensure it is actually UTF-16LE
       # Ruby likes to mark binary data as ASCII-8BIT
-      wstring = wstring.force_encoding('UTF-16LE')
+      wstring = wstring.force_encoding("UTF-16LE")
 
       # encode it all as UTF-8 and remove trailing CRLF and NULL characters
-      wstring.encode('UTF-8').strip
+      wstring.encode("UTF-8").strip
     end
   end
 end
@@ -36,27 +36,27 @@ module Win32
       ERROR_INSUFFICIENT_BUFFER = 122
 
       def self.LocalSystem
-        from_string_sid('S-1-5-18')
+        from_string_sid("S-1-5-18")
       end
 
       def self.NtLocal
-        from_string_sid('S-1-5-19')
+        from_string_sid("S-1-5-19")
       end
 
       def self.NtNetwork
-        from_string_sid('S-1-5-20')
+        from_string_sid("S-1-5-20")
       end
 
       def self.BuiltinAdministrators
-        from_string_sid('S-1-5-32-544')
+        from_string_sid("S-1-5-32-544")
       end
 
       def self.BuiltinUsers
-        from_string_sid('S-1-5-32-545')
+        from_string_sid("S-1-5-32-545")
       end
 
       def self.Guests
-        from_string_sid('S-1-5-32-546')
+        from_string_sid("S-1-5-32-546")
       end
 
       # Converts a string-format security identifier (SID) into a valid, functional SID
@@ -77,13 +77,13 @@ module Win32
       def self.utf8_to_wide(ustring)
         # ensure it is actually UTF-8
         # Ruby likes to mark binary data as ASCII-8BIT
-        ustring = (ustring + '').force_encoding('UTF-8')
+        ustring = (ustring + "").force_encoding("UTF-8")
 
         # ensure we have the double-null termination Windows Wide likes
         ustring += "\000\000" if ustring.empty? || ustring[-1].chr != "\000"
 
         # encode it all as UTF-16LE AKA Windows Wide Character AKA Windows Unicode
-        ustring.encode('UTF-16LE')
+        ustring.encode("UTF-16LE")
       end
 
       # Accepts a security identifier (SID) as input.
@@ -97,7 +97,7 @@ module Win32
         referenced_domain_name_size = FFI::Buffer.new(:long).write_long(0)
 
         if LookupAccountSidW(nil, sid, nil, name_size, nil, referenced_domain_name_size, nil)
-          raise 'Expected ERROR_INSUFFICIENT_BUFFER from LookupAccountSid, and got no error!'
+          raise "Expected ERROR_INSUFFICIENT_BUFFER from LookupAccountSid, and got no error!"
         elsif FFI::LastError.error != ERROR_INSUFFICIENT_BUFFER
           raise FFI::LastError.error
         end

@@ -1,7 +1,7 @@
-libx = File.expand_path('lib', __dir__)
+libx = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(libx) unless $LOAD_PATH.include?(libx)
 
-require 'date'
+require "date"
 
 # In order to test some dummy task and folder, we are creating
 # 'Test' folder and consider it as 'root'.
@@ -47,7 +47,7 @@ end
 
 # Returns Win32 Service object
 def service
-  service = WIN32OLE.new('Schedule.Service')
+  service = WIN32OLE.new("Schedule.Service")
   service.Connect
   service
 end
@@ -77,8 +77,8 @@ end
 
 def task_registration
   reg_info = @task_definition.RegistrationInfo
-  reg_info.Description = 'Sample task for testing purpose'
-  reg_info.Author = 'Rspec'
+  reg_info.Description = "Sample task for testing purpose"
+  reg_info.Author = "Rspec"
 end
 
 def task_prinicipals
@@ -99,8 +99,8 @@ def task_triggers
   start_time, end_time = start_end_time
   trigger.StartBoundary = start_time
   trigger.EndBoundary = end_time
-  trigger.ExecutionTimeLimit = 'PT5M' # Five minutes
-  trigger.Id = 'TimeTriggerId'
+  trigger.ExecutionTimeLimit = "PT5M" # Five minutes
+  trigger.Id = "TimeTriggerId"
   trigger.Enabled = true
 end
 
@@ -124,8 +124,8 @@ end
 
 def start_end_time
   t = Date.new(2010)
-  start_time = t.strftime('%FT%T')
-  end_time = (t + 5).strftime('%FT%T') # 5 Days
+  start_time = t.strftime("%FT%T")
+  end_time = (t + 5).strftime("%FT%T") # 5 Days
   [start_time, end_time]
 end
 
@@ -138,8 +138,8 @@ end
 def all_triggers
   all_triggers = {}
 
-  %w[ONCE DAILY WEEKLY MONTHLYDATE MONTHLYDOW
-     ON_IDLE AT_SYSTEMSTART AT_LOGON].each do |trig_type|
+  %w{ONCE DAILY WEEKLY MONTHLYDATE MONTHLYDOW
+     ON_IDLE AT_SYSTEMSTART AT_LOGON}.each do |trig_type|
     trigger = {}
     trigger[:trigger_type] = Win32::TaskScheduler.class_eval(trig_type)
     start_end_params(trigger)
@@ -151,19 +151,19 @@ def all_triggers
 end
 
 def start_end_params(trigger)
-  %i[start_year end_year].each do |t|
-    trigger[t] = '2030'
+  %i{start_year end_year}.each do |t|
+    trigger[t] = "2030"
   end
 
-  %i[start_month start_day start_hour start_minute].each do |t|
-    trigger[t] = '02'
+  %i{start_month start_day start_hour start_minute}.each do |t|
+    trigger[t] = "02"
   end
 
-  %i[end_day end_month].each do |t|
-    trigger[t] = '03'
+  %i{end_day end_month}.each do |t|
+    trigger[t] = "03"
   end
 
-  %i[minutes_duration minutes_interval].each do |t|
+  %i{minutes_duration minutes_interval}.each do |t|
     trigger[t] = 2
   end
 end
@@ -171,38 +171,38 @@ end
 def other_trigger_params(trig_type, trigger)
   type = {}
   case trig_type
-  when 'ONCE'
+  when "ONCE"
     trigger[:type] = type
     type[:once] = nil
     trigger[:random_minutes_interval] = 2
-  when 'DAILY'
+  when "DAILY"
     trigger[:type] = type
     type[:days_interval] = 2
     trigger[:random_minutes_interval] = 2
-  when 'WEEKLY'
+  when "WEEKLY"
     trigger[:type] = type
     type[:weeks_interval] = 2
     type[:days_of_week] = sunday
     trigger[:random_minutes_interval] = 2
-  when 'MONTHLYDATE'
+  when "MONTHLYDATE"
     trigger[:type] = type
     type[:months] = january
     type[:days] = first_day
     trigger[:run_on_last_day_of_month] = false
     trigger[:random_minutes_interval] = 2
-  when 'MONTHLYDOW'
+  when "MONTHLYDOW"
     trigger[:type] = type
     type[:months] = january
     type[:days_of_week] = sunday
     type[:weeks_of_month] = first_week
     trigger[:run_on_last_week_of_month] = false
     trigger[:random_minutes_interval] = 2
-  when 'ON_IDLE'
+  when "ON_IDLE"
     trigger[:execution_time_limit] = 2
-  when 'AT_SYSTEMSTART'
+  when "AT_SYSTEMSTART"
     trigger[:delay_duration] = 2
-  when 'AT_LOGON'
-    trigger[:user_id] = 'SYSTEM'
+  when "AT_LOGON"
+    trigger[:user_id] = "SYSTEM"
     trigger[:delay_duration] = 2
   end
 end

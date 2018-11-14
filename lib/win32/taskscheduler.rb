@@ -1,12 +1,12 @@
-require_relative 'taskscheduler/sid'
-require_relative 'taskscheduler/helper'
-require_relative 'taskscheduler/time_calc_helper'
-require_relative 'taskscheduler/constants'
-require_relative 'taskscheduler/version'
-require 'win32ole'
-require 'socket'
-require 'time'
-require 'structured_warnings'
+require_relative "taskscheduler/sid"
+require_relative "taskscheduler/helper"
+require_relative "taskscheduler/time_calc_helper"
+require_relative "taskscheduler/constants"
+require_relative "taskscheduler/version"
+require "win32ole"
+require "socket"
+require "time"
+require "structured_warnings"
 
 # The Win32 module serves as a namespace only
 module Win32
@@ -117,12 +117,10 @@ module Win32
     THIRTY_FIRST = TASK_THIRTY_FIRST
     LAST = TASK_LAST
 
-
     # :startdoc:
 
     attr_accessor :password
     attr_reader :host
-
 
     def root_path(path = '\\')
       path
@@ -151,7 +149,7 @@ module Win32
       end
 
       begin
-        @service = WIN32OLE.new('Schedule.Service')
+        @service = WIN32OLE.new("Schedule.Service")
       rescue WIN32OLERuntimeError => err
         raise Error, err.inspect
       end
@@ -236,7 +234,7 @@ module Win32
         registeredTask = @root.GetTask(task)
         @task = registeredTask
       rescue WIN32OLERuntimeError => err
-        raise Error, ole_error('activate', err)
+        raise Error, ole_error("activate", err)
       end
     end
 
@@ -250,7 +248,7 @@ module Win32
         registeredTask.Enabled = 1
         @task = registeredTask
       rescue WIN32OLERuntimeError => err
-        raise Error, ole_error('activate', err)
+        raise Error, ole_error("activate", err)
       end
     end
 
@@ -262,7 +260,7 @@ module Win32
       begin
         @root.DeleteTask(task, 0)
       rescue WIN32OLERuntimeError => err
-        raise Error, ole_error('DeleteTask', err)
+        raise Error, ole_error("DeleteTask", err)
       end
     end
 
@@ -300,7 +298,7 @@ module Win32
       begin
         @service.Connect(host)
       rescue WIN32OLERuntimeError => err
-        raise Error, ole_error('Connect', err)
+        raise Error, ole_error("Connect", err)
       end
 
       @host = host
@@ -317,7 +315,7 @@ module Win32
       begin
         @service.Connect(host, user, domain, password)
       rescue WIN32OLERuntimeError => err
-        raise Error, ole_error('Connect', err)
+        raise Error, ole_error("Connect", err)
       end
 
       @host = host
@@ -465,29 +463,29 @@ module Win32
 
       case @task.Definition.Settings.Priority
         when 0
-          priority = 'critical'
+          priority = "critical"
         when 1
-          priority = 'highest'
+          priority = "highest"
         when 2
-          priority = 'above_normal_2'
+          priority = "above_normal_2"
         when 3
-          priority = 'above_normal_3'
+          priority = "above_normal_3"
         when 4
-          priority = 'normal_4'
+          priority = "normal_4"
         when 5
-          priority = 'normal_5'
+          priority = "normal_5"
         when 6
-          priority = 'normal_6'
+          priority = "normal_6"
         when 7
-          priority = 'below_normal_7'
+          priority = "below_normal_7"
         when 8
-          priority = 'below_normal_8'
+          priority = "below_normal_8"
         when 9
-          priority = 'lowest'
+          priority = "lowest"
         when 10
-          priority = 'idle'
+          priority = "idle"
         else
-          priority = 'unknown'
+          priority = "unknown"
       end
 
       priority
@@ -521,16 +519,14 @@ module Win32
       check_credential_requirements(userinfo[:user], userinfo[:password])
 
       taskDefinition = @service.NewTask(0)
-      taskDefinition.RegistrationInfo.Description = ''
-      taskDefinition.RegistrationInfo.Author = ''
+      taskDefinition.RegistrationInfo.Description = ""
+      taskDefinition.RegistrationInfo.Author = ""
       taskDefinition.Settings.StartWhenAvailable = false
-      taskDefinition.Settings.Enabled  = true
+      taskDefinition.Settings.Enabled = true
       taskDefinition.Settings.Hidden = false
 
-
-
       unless trigger.empty?
-        raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
+        raise ArgumentError, "Unknown trigger type" unless valid_trigger_option(trigger[:trigger_type])
         validate_trigger(trigger)
 
         startTime = "%04d-%02d-%02dT%02d:%02d:00" % [
@@ -549,18 +545,18 @@ module Win32
 
         trig = taskDefinition.Triggers.Create(trigger[:trigger_type].to_i)
         trig.Id = "RegistrationTriggerId#{taskDefinition.Triggers.Count}"
-        trig.StartBoundary = startTime if startTime != '0000-00-00T00:00:00'
-        trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
+        trig.StartBoundary = startTime if startTime != "0000-00-00T00:00:00"
+        trig.EndBoundary = endTime if endTime != "0000-00-00T00:00:00"
         trig.Enabled = true
 
         repetitionPattern = trig.Repetition
 
         if trigger[:minutes_duration].to_i > 0
-          repetitionPattern.Duration = "PT#{trigger[:minutes_duration]||0}M"
+          repetitionPattern.Duration = "PT#{trigger[:minutes_duration] || 0}M"
         end
 
         if trigger[:minutes_interval].to_i > 0
-          repetitionPattern.Interval = "PT#{trigger[:minutes_interval]||0}M"
+          repetitionPattern.Interval = "PT#{trigger[:minutes_interval] || 0}M"
         end
 
         tmp = trigger[:type]
@@ -576,37 +572,37 @@ module Win32
             trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
             trig.WeeksInterval = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
             if trigger[:random_minutes_interval].to_i > 0
-              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval] || 0}M"
             end
           when TASK_TIME_TRIGGER_MONTHLYDATE
             trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
             trig.DaysOfMonth = tmp[:days] if tmp && tmp[:days]
             if trigger[:random_minutes_interval].to_i > 0
-              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval] || 0}M"
             end
             trig.RunOnLastDayOfMonth = trigger[:run_on_last_day_of_month] if trigger[:run_on_last_day_of_month]
           when TASK_TIME_TRIGGER_MONTHLYDOW
             trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
             trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
             trig.WeeksOfMonth = tmp[:weeks_of_month] if tmp && tmp[:weeks_of_month]
-            if trigger[:random_minutes_interval].to_i>0
-              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            if trigger[:random_minutes_interval].to_i > 0
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval] || 0}M"
             end
             trig.RunOnLastWeekOfMonth = trigger[:run_on_last_week_of_month] if trigger[:run_on_last_week_of_month]
           when TASK_TIME_TRIGGER_ONCE
             if trigger[:random_minutes_interval].to_i > 0
-              trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+              trig.RandomDelay = "PT#{trigger[:random_minutes_interval] || 0}M"
             end
           when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
-            trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+            trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
           when TASK_EVENT_TRIGGER_AT_LOGON
             trig.UserId = trigger[:user_id] if trigger[:user_id]
-            trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+            trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
         end
       end
 
       act = taskDefinition.Actions.Create(0)
-      act.Path = 'cmd'
+      act.Path = "cmd"
 
       @password = userinfo[:password]
       @interactive = userinfo[:interactive]
@@ -634,7 +630,7 @@ module Win32
     def trigger_string(index)
       raise TypeError unless index.is_a?(Numeric)
       check_for_active_task
-      index += 1  # first item index is 1
+      index += 1 # first item index is 1
 
       begin
         trigger = @task.Definition.Triggers.Item(index)
@@ -652,7 +648,7 @@ module Win32
     def delete_trigger(index)
       raise TypeError unless index.is_a?(Numeric)
       check_for_active_task
-      index += 1  # first item index is 1
+      index += 1 # first item index is 1
 
       definition = @task.Definition
       definition.Triggers.Remove(index)
@@ -667,12 +663,12 @@ module Win32
     def trigger(index)
       raise TypeError unless index.is_a?(Numeric)
       check_for_active_task
-      index += 1  # first item index is 1
+      index += 1 # first item index is 1
 
       begin
         trig = @task.Definition.Triggers.Item(index)
       rescue WIN32OLERuntimeError => err
-        raise Error, ole_error('Item', err)
+        raise Error, ole_error("Item", err)
       end
 
       trigger = {}
@@ -717,7 +713,7 @@ module Win32
         when TASK_EVENT_TRIGGER_ON_IDLE
           trigger[:execution_time_limit] = time_in_minutes(trig.ExecutionTimeLimit)
         else
-          raise Error, 'Unknown trigger type'
+          raise Error, "Unknown trigger type"
       end
 
       trigger[:start_year], trigger[:start_month], trigger[:start_day],
@@ -759,7 +755,7 @@ module Win32
     #
     def trigger=(trigger)
       raise TypeError unless trigger.is_a?(Hash)
-      raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
+      raise ArgumentError, "Unknown trigger type" unless valid_trigger_option(trigger[:trigger_type])
 
       check_for_active_task
 
@@ -779,18 +775,18 @@ module Win32
 
       trig = definition.Triggers.Create( trigger[:trigger_type].to_i )
       trig.Id = "RegistrationTriggerId#{definition.Triggers.Count}"
-      trig.StartBoundary = startTime if startTime != '0000-00-00T00:00:00'
-      trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
+      trig.StartBoundary = startTime if startTime != "0000-00-00T00:00:00"
+      trig.EndBoundary = endTime if endTime != "0000-00-00T00:00:00"
       trig.Enabled = true
 
       repetitionPattern = trig.Repetition
 
       if trigger[:minutes_duration].to_i > 0
-        repetitionPattern.Duration = "PT#{trigger[:minutes_duration]||0}M"
+        repetitionPattern.Duration = "PT#{trigger[:minutes_duration] || 0}M"
       end
 
       if trigger[:minutes_interval].to_i > 0
-        repetitionPattern.Interval  = "PT#{trigger[:minutes_interval]||0}M"
+        repetitionPattern.Interval = "PT#{trigger[:minutes_interval] || 0}M"
       end
 
       tmp = trigger[:type]
@@ -806,13 +802,13 @@ module Win32
           trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
           trig.WeeksInterval = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
           if trigger[:random_minutes_interval].to_i > 0
-            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval] || 0}M"
           end
         when TASK_TIME_TRIGGER_MONTHLYDATE
           trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
           trig.DaysOfMonth = tmp[:days] if tmp && tmp[:days]
           if trigger[:random_minutes_interval].to_i > 0
-            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval] || 0}M"
           end
           trig.RunOnLastDayOfMonth = trigger[:run_on_last_day_of_month] if trigger[:run_on_last_day_of_month]
         when TASK_TIME_TRIGGER_MONTHLYDOW
@@ -820,22 +816,22 @@ module Win32
           trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
           trig.WeeksOfMonth = tmp[:weeks_of_month] if tmp && tmp[:weeks_of_month]
           if trigger[:random_minutes_interval].to_i > 0
-            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval] || 0}M"
           end
           trig.RunOnLastWeekOfMonth = trigger[:run_on_last_week_of_month] if trigger[:run_on_last_week_of_month]
         when TASK_TIME_TRIGGER_ONCE
           if trigger[:random_minutes_interval].to_i > 0
-            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval] || 0}M"
           end
         when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
-          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+          trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
         when TASK_EVENT_TRIGGER_AT_LOGON
           trig.UserId = trigger[:user_id] if trigger[:user_id]
-          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+          trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
         when TASK_EVENT_TRIGGER_ON_IDLE
           # for setting execution time limit Ref : https://msdn.microsoft.com/en-us/library/windows/desktop/aa380724(v=vs.85).aspx
           if trigger[:execution_time_limit].to_i > 0
-            trig.ExecutionTimeLimit = "PT#{trigger[:execution_time_limit]||0}M"
+            trig.ExecutionTimeLimit = "PT#{trigger[:execution_time_limit] || 0}M"
           end
       end
 
@@ -849,7 +845,7 @@ module Win32
     def add_trigger(index, trigger)
       raise TypeError unless index.is_a?(Numeric)
       raise TypeError unless trigger.is_a?(Hash)
-      raise ArgumentError, 'Unknown trigger type' unless valid_trigger_option(trigger[:trigger_type])
+      raise ArgumentError, "Unknown trigger type" unless valid_trigger_option(trigger[:trigger_type])
 
       check_for_active_task
 
@@ -871,18 +867,18 @@ module Win32
 
       trig = definition.Triggers.Create( trigger[:trigger_type].to_i )
       trig.Id = "RegistrationTriggerId#{definition.Triggers.Count}"
-      trig.StartBoundary = startTime if startTime != '0000-00-00T00:00:00'
-      trig.EndBoundary = endTime if endTime != '0000-00-00T00:00:00'
+      trig.StartBoundary = startTime if startTime != "0000-00-00T00:00:00"
+      trig.EndBoundary = endTime if endTime != "0000-00-00T00:00:00"
       trig.Enabled = true
 
       repetitionPattern = trig.Repetition
 
       if trigger[:minutes_duration].to_i > 0
-        repetitionPattern.Duration = "PT#{trigger[:minutes_duration]||0}M"
+        repetitionPattern.Duration = "PT#{trigger[:minutes_duration] || 0}M"
       end
 
       if trigger[:minutes_interval].to_i > 0
-        repetitionPattern.Interval  = "PT#{trigger[:minutes_interval]||0}M"
+        repetitionPattern.Interval = "PT#{trigger[:minutes_interval] || 0}M"
       end
 
       tmp = trigger[:type]
@@ -892,38 +888,38 @@ module Win32
         when TASK_TIME_TRIGGER_DAILY
           trig.DaysInterval = tmp[:days_interval] if tmp && tmp[:days_interval]
           if trigger[:random_minutes_interval].to_i > 0
-          trig.RandomDelay = "PT#{trigger[:random_minutes_interval]}M"
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]}M"
           end
         when TASK_TIME_TRIGGER_WEEKLY
           trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
           trig.WeeksInterval = tmp[:weeks_interval] if tmp && tmp[:weeks_interval]
           if trigger[:random_minutes_interval].to_i > 0
-          trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval] || 0}M"
           end
         when TASK_TIME_TRIGGER_MONTHLYDATE
           trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
           trig.DaysOfMonth = tmp[:days] if tmp && tmp[:days]
           if trigger[:random_minutes_interval].to_i > 0
-            trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval] || 0}M"
           end
           trig.RunOnLastDayOfMonth = trigger[:run_on_last_day_of_month] if trigger[:run_on_last_day_of_month]
         when TASK_TIME_TRIGGER_MONTHLYDOW
-          trig.MonthsOfYear  = tmp[:months] if tmp && tmp[:months]
-          trig.DaysOfWeek  = tmp[:days_of_week] if tmp && tmp[:days_of_week]
-          trig.WeeksOfMonth  = tmp[:weeks_of_month] if tmp && tmp[:weeks_of_month]
+          trig.MonthsOfYear = tmp[:months] if tmp && tmp[:months]
+          trig.DaysOfWeek = tmp[:days_of_week] if tmp && tmp[:days_of_week]
+          trig.WeeksOfMonth = tmp[:weeks_of_month] if tmp && tmp[:weeks_of_month]
           if trigger[:random_minutes_interval].to_i > 0
-          trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval] || 0}M"
           end
           trig.RunOnLastWeekOfMonth = trigger[:run_on_last_week_of_month] if trigger[:run_on_last_week_of_month]
         when TASK_TIME_TRIGGER_ONCE
           if trigger[:random_minutes_interval].to_i > 0
-          trig.RandomDelay = "PT#{trigger[:random_minutes_interval]||0}M"
+            trig.RandomDelay = "PT#{trigger[:random_minutes_interval] || 0}M"
           end
         when TASK_EVENT_TRIGGER_AT_SYSTEMSTART
-          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+          trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
         when TASK_EVENT_TRIGGER_AT_LOGON
           trig.UserId = trigger[:user_id] if trigger[:user_id]
-          trig.Delay = "PT#{trigger[:delay_duration]||0}M"
+          trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
       end
 
       register_task_definition(definition)
@@ -939,15 +935,15 @@ module Win32
 
       case @task.State
         when 3
-          status = 'ready'
+          status = "ready"
         when 4
-          status = 'running'
+          status = "running"
         when 2
-          status = 'queued'
+          status = "queued"
         when 1
-          status = 'not scheduled'
+          status = "not scheduled"
         else
-          status = 'unknown'
+          status = "unknown"
       end
 
       status
@@ -1083,7 +1079,7 @@ module Win32
 
       t = max_run_time
       t /= 1000
-      limit ="PT#{t}S"
+      limit = "PT#{t}S"
 
       definition = @task.Definition
       definition.Settings.ExecutionTimeLimit = limit
@@ -1096,7 +1092,7 @@ module Win32
     #
     # @see https://docs.microsoft.com/en-us/windows/desktop/TaskSchd/idlesettings#properties
     #
-    IdleSettings = %i[idle_duration restart_on_idle stop_on_idle_end wait_timeout]
+    IdleSettings = %i{idle_duration restart_on_idle stop_on_idle_end wait_timeout}.freeze
 
     # Configures tasks settings
     #
@@ -1145,7 +1141,7 @@ module Win32
 
       # Conversion of few settings
       hash[:execution_time_limit] = hash[:max_run_time] unless hash[:max_run_time].nil?
-      %i[execution_time_limit idle_duration restart_interval wait_timeout].each do |setting|
+      %i{execution_time_limit idle_duration restart_interval wait_timeout}.each do |setting|
         hash[setting] = "PT#{hash[setting]}M" unless hash[setting].nil?
       end
 
@@ -1164,7 +1160,7 @@ module Win32
       end
 
       # XML settings are not to be configured
-      %i[xml_text xml].map { |x| hash.delete(x) }
+      %i{xml_text xml}.map { |x| hash.delete(x) }
 
       hash.each do |setting, value|
         setting = camelize(setting.to_s)
@@ -1313,7 +1309,7 @@ module Win32
     # @return [String] In camel case format
     #
     def camelize(str)
-      str.split('_').map(&:capitalize).join
+      str.split("_").map(&:capitalize).join
     end
 
     # Converts all the keys of a hash to underscored-symbol format
@@ -1330,9 +1326,9 @@ module Win32
     end
 
     def validate_trigger(hash)
-      [:start_year, :start_month, :start_day].each{ |key|
+      [:start_year, :start_month, :start_day].each do |key|
         raise ArgumentError, "#{key} must be set" unless hash[key]
-      }
+      end
     end
 
     # Configurable settings options
@@ -1345,17 +1341,17 @@ module Win32
     # @return [Array]
     #
     def valid_settings_options
-      %i[allow_demand_start allow_hard_terminate compatibility delete_expired_task_after
+      %i{allow_demand_start allow_hard_terminate compatibility delete_expired_task_after
          disallow_start_if_on_batteries disallow_start_on_remote_app_session enabled
          execution_time_limit hidden idle_duration maintenance_settings max_run_time
          multiple_instances network_settings priority restart_count restart_interval
          restart_on_idle run_only_if_idle run_only_if_network_available
          start_when_available stop_if_going_on_batteries stop_on_idle_end
-         use_unified_scheduling_engine volatile wait_timeout wake_to_run xml xml_text]
+         use_unified_scheduling_engine volatile wait_timeout wake_to_run xml xml_text}
     end
 
     def check_for_active_task
-      raise Error, 'No currently active task' if @task.nil?
+      raise Error, "No currently active task" if @task.nil?
     end
 
     # Checks if the user belongs to service accounts category
@@ -1397,11 +1393,11 @@ module Win32
       # Password will be required for non-system users
       if password.empty?
         unless system_user?(user_id)
-          raise Error, 'Password is required for non-system users'
+          raise Error, "Password is required for non-system users"
         end
       else
         if system_user?(user_id)
-          raise Error, 'Password is not required for system users'
+          raise Error, "Password is not required for system users"
         end
       end
     end

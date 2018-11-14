@@ -1,1 +1,1 @@
-require_relative 'win32/taskscheduler'
+require_relative "win32/taskscheduler"

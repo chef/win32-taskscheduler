@@ -22,7 +22,7 @@ trigger = {
   start_hour: 7,
   start_minute: 14,
   trigger_type: TaskScheduler::DAILY,
-  type: { "days_interval" => 1 }
+  type: { "days_interval" => 1 },
 }
 
 unless ts.enum.grep(/foo/).length > 0

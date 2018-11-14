@@ -1,6 +1,7 @@
 # win32-taskscheduler gem
 
 [![Gem Version](https://badge.fury.io/rb/win32-taskscheduler.svg)](https://badge.fury.io/rb/win32-taskscheduler)
+[![Build status](https://ci.appveyor.com/api/projects/status/3bh741beu9bl9g87/branch/ole?svg=true)](https://ci.appveyor.com/project/chef/win32-taskscheduler/branch/ole)
 
 The win32-taskscheduler library is a Ruby interface to the MS Windows Task Scheduler. It is analogous to the Unix cron daemon.
 

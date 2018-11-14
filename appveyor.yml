@@ -1,6 +1,6 @@
 version: "ole-{build}"
 
-os: Windows server 2012
+os: Windows Server 2012 R2
 platform:
   - x64
 
@@ -9,6 +9,15 @@ cache:
 
 clone_folder: c:\projects\win32-taskscheduler
 clone_depth: 1
+
+skip_commits:
+  # version bumps by Expeditor happen as a separate commit after the merge, we can skip
+  author: Chef Expeditor
+  # if ONLY the files listed below are changed in a commit, skip
+  files:
+    - CHANGELOG.md
+
+skip_tags: true
 branches:
   only:
     - ole
@@ -37,4 +46,4 @@ before_test:
   - bundle env
 
 test_script:
-  - bundle exec rake spec
+  - bundle exec rake
