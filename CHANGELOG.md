@@ -4,10 +4,18 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release -->
+<!-- latest_release 2.0.2 -->
+## [win32-taskscheduler-2.0.2](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-2.0.2) (2018-11-14)
+
+#### Merged Pull Requests
+- Slim the gem files down and apply chefstyle [#77](https://github.com/chef/win32-taskscheduler/pull/77) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=2.0.1 -->
+### Changes not yet released to rubygems.org
+
+#### Merged Pull Requests
+- Slim the gem files down and apply chefstyle [#77](https://github.com/chef/win32-taskscheduler/pull/77) ([tas50](https://github.com/tas50)) <!-- 2.0.2 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
