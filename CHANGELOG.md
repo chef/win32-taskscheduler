@@ -4,27 +4,24 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release 2.0.4 -->
+<!-- latest_release -->
+<!-- latest_release -->
+
+<!-- release_rollup -->
+<!-- release_rollup -->
+
+<!-- latest_stable_release -->
 ## [win32-taskscheduler-2.0.4](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-2.0.4) (2019-01-04)
 
 #### Merged Pull Requests
 - fix version 2.0.3 and expeditor script [#78](https://github.com/chef/win32-taskscheduler/pull/78) ([btm](https://github.com/btm))
-<!-- latest_release -->
-
-<!-- release_rollup since=2.0.1 -->
-### Changes not yet released to rubygems.org
-
-#### Merged Pull Requests
-- fix version 2.0.3 and expeditor script [#78](https://github.com/chef/win32-taskscheduler/pull/78) ([btm](https://github.com/btm)) <!-- 2.0.4 -->
-<!-- release_rollup -->
-
 <!-- latest_stable_release -->
+
 ## [win32-taskscheduler-2.0.3](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-2.0.3) (2019-01-04)
 
 #### Merged Pull Requests
 - Slim the gem files down and apply chefstyle [#77](https://github.com/chef/win32-taskscheduler/pull/77) ([tas50](https://github.com/tas50))
 - Allow non-system users to create/update an interactive task without password [#76](https://github.com/chef/win32-taskscheduler/pull/76) ([Nimesh-Msys](https://github.com/Nimesh-Msys))
-<!-- latest_stable_release -->
 
 ## [win32-taskscheduler-2.0.1](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-2.0.1) (2018-11-01)
 
