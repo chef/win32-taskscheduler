@@ -21,7 +21,7 @@ github:
 release_branches:
   - master:
       version_constraint: "0.*"
-  - ole:
+  - main:
       version_constraint: "2.*"
 
 changelog:
