@@ -3,9 +3,6 @@ require_relative "taskscheduler/helper"
 require_relative "taskscheduler/time_calc_helper"
 require_relative "taskscheduler/constants"
 require_relative "taskscheduler/version"
-require "win32ole"
-require "socket"
-require "time"
 require "structured_warnings"
 
 # The Win32 module serves as a namespace only
@@ -122,7 +119,7 @@ module Win32
     attr_accessor :password
     attr_reader :host
 
-    def root_path(path = '\\')
+    def root_path(path = "\\")
       path
     end
 
@@ -142,7 +139,7 @@ module Win32
       @task     = nil
       @password = nil
 
-      raise ArgumentError, "invalid folder" unless folder.include?('\\')
+      raise ArgumentError, "invalid folder" unless folder.include?("\\")
 
       unless [TrueClass, FalseClass].include?(force.class)
         raise TypeError, "invalid force value"
@@ -197,28 +194,25 @@ module Win32
       path = nil
       task_name = nil
 
-      if full_task_path.include?('\\')
-        *path, task_name = full_task_path.split('\\')
+      if full_task_path.include?("\\")
+        *path, task_name = full_task_path.split("\\")
       else
         task_name = full_task_path
       end
 
-      folder = path.nil? ? root_path : path.join('\\')
+      folder = path.nil? ? root_path : path.join("\\")
 
       begin
         root = @service.GetFolder(folder)
       rescue WIN32OLERuntimeError => err
-        return false
       end
 
       if root.nil?
-        return false
       else
         begin
           task = root.GetTask(task_name)
-          return task && task.Name == task_name
+          task.Name == task_name
         rescue WIN32OLERuntimeError => err
-          return false
         end
       end
     end
@@ -372,6 +366,7 @@ module Win32
     #
     def application_name=(app)
       raise TypeError unless app.is_a?(String)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -407,6 +402,7 @@ module Win32
     #
     def parameters=(param)
       raise TypeError unless param.is_a?(String)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -440,6 +436,7 @@ module Win32
     #
     def working_directory=(dir)
       raise TypeError unless dir.is_a?(String)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -495,6 +492,7 @@ module Win32
     #
     def priority=(priority)
       raise TypeError unless priority.is_a?(Numeric)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -528,6 +526,7 @@ module Win32
 
       unless trigger.empty?
         raise ArgumentError, "Unknown trigger type" unless valid_trigger_option(trigger[:trigger_type])
+
         validate_trigger(trigger)
 
         startTime = format("%04d-%02d-%02dT%02d:%02d:00", trigger[:start_year], trigger[:start_month], trigger[:start_day], trigger[:start_hour], trigger[:start_minute])
@@ -626,6 +625,7 @@ module Win32
     #
     def trigger_string(index)
       raise TypeError unless index.is_a?(Numeric)
+
       check_for_active_task
       index += 1 # first item index is 1
 
@@ -644,6 +644,7 @@ module Win32
     #
     def delete_trigger(index)
       raise TypeError unless index.is_a?(Numeric)
+
       check_for_active_task
       index += 1 # first item index is 1
 
@@ -659,6 +660,7 @@ module Win32
     #
     def trigger(index)
       raise TypeError unless index.is_a?(Numeric)
+
       check_for_active_task
       index += 1 # first item index is 1
 
@@ -974,6 +976,7 @@ module Win32
     #
     def comment=(comment)
       raise TypeError unless comment.is_a?(String)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -998,6 +1001,7 @@ module Win32
     #
     def creator=(creator)
       raise TypeError unless creator.is_a?(String)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -1074,6 +1078,7 @@ module Win32
     #
     def max_run_time=(max_run_time)
       raise TypeError unless max_run_time.is_a?(Numeric)
+
       check_for_active_task
 
       t = max_run_time
@@ -1133,7 +1138,7 @@ module Win32
 
       # Check for invalid setting
       invalid_settings = settings_hash.keys - valid_settings_options
-      raise TypeError, "Invalid setting passed: #{invalid_settings.join(', ')}" unless invalid_settings.empty?
+      raise TypeError, "Invalid setting passed: #{invalid_settings.join(", ")}" unless invalid_settings.empty?
 
       # Some modification is required in user input
       hash = settings_hash.dup
@@ -1151,6 +1156,7 @@ module Win32
         idle_settings = task_settings.IdleSettings
         IdleSettings.each do |setting|
           next if hash[setting].nil?
+
           idle_settings.setproperty(camelize(setting.to_s), hash[setting])
           # This setting is not required to be configured now
           hash.delete(setting)
@@ -1188,6 +1194,7 @@ module Win32
     #
     def configure_registration_info(hash)
       raise TypeError unless hash.is_a?(Hash)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -1223,6 +1230,7 @@ module Win32
     #
     def configure_principals(principals)
       raise TypeError unless principals.is_a?(Hash)
+
       check_for_active_task
       definition = @task.Definition
       definition.Principal.Id = principals[:id] if principals[:id].to_s != ""
@@ -1252,6 +1260,7 @@ module Win32
       settings_hash = {}
       @task.Definition.Settings.ole_get_methods.each do |setting|
         next if setting.name == "XmlText" # not needed
+
         settings_hash[setting.name] = @task.Definition.Settings._getproperty(setting.dispid, [], [])
       end
 

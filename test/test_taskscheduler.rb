@@ -601,7 +601,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
 
   test "working_directory= works as expected" do
     setup_task
-    assert_nothing_raised { @ts.working_directory = 'C:\\' }
+    assert_nothing_raised { @ts.working_directory = "C:\\" }
   end
 
   test "working_directory= requires a string argument" do
