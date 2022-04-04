@@ -72,20 +72,20 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
       end
 
       it "Does not require root to be appended" do
-        task = @test_path + @folder + '\\' + @task
+        task = @test_path + @folder + "\\" + @task
         expect(@ts.exists?(task)).to be_falsey
       end
     end
 
     context "At Nested folder" do
       it "Returns false for non existing folder" do
-        task = folder + '\\' + @task
+        task = folder + "\\" + @task
         expect(@ts.exists?(task)).to be_falsey
       end
 
       it "Returns true for existing folder" do
         @ts = Win32::TaskScheduler.new(@task, @trigger, folder, force)
-        task = @test_path + folder + '\\' + @task
+        task = @test_path + folder + "\\" + @task
         expect(@ts.exists?(task)).to be_truthy
       end
     end

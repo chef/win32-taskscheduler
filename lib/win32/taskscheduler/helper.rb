@@ -1,5 +1,3 @@
-require "ffi"
-
 module Win32
   class TaskScheduler
     module Helper
