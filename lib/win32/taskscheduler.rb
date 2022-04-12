@@ -3,6 +3,8 @@ require_relative "taskscheduler/helper"
 require_relative "taskscheduler/time_calc_helper"
 require_relative "taskscheduler/constants"
 require_relative "taskscheduler/version"
+require "win32ole" unless defined?(WIN32OLE)
+require "time" unless defined?(Time.zone_offset)
 require "socket" unless defined?(Socket)
 require "structured_warnings"
 
