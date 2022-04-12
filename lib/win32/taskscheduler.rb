@@ -3,7 +3,7 @@ require_relative "taskscheduler/helper"
 require_relative "taskscheduler/time_calc_helper"
 require_relative "taskscheduler/constants"
 require_relative "taskscheduler/version"
-require 'socket'
+require "socket" unless defined?(Socket)
 require "structured_warnings"
 
 # The Win32 module serves as a namespace only
