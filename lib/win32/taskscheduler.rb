@@ -208,14 +208,17 @@ module Win32
       begin
         root = @service.GetFolder(folder)
       rescue WIN32OLERuntimeError => err
+        return false
       end
 
       if root.nil?
+        false
       else
         begin
           task = root.GetTask(task_name)
-          task.Name == task_name
+          task && task.Name == task_name
         rescue WIN32OLERuntimeError => err
+          false
         end
       end
     end
