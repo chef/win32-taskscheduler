@@ -128,6 +128,7 @@ module Win32
       #
       def time_details(time_str)
         raise TypeError.new("TypeError: Inccorrect Type please pass input value as a String.") unless time_str.is_a? String
+
         tm_detail = {}
         if time_str.to_s != ""
           # time_str will be like "PxxYxxMxxDTxxHxxMxxS"
