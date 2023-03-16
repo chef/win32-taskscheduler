@@ -38,6 +38,7 @@ module Win32
       # Trigger is set to run the task when a user logs on
       TASK_EVENT_TRIGGER_AT_LOGON = 9
 
+      # Trigger is set to run on login/logoff via Console/RDP
       TASK_TRIGGER_SESSION_STATE_CHANGE = 11
 
       # Daily Tasks
@@ -197,6 +198,21 @@ module Win32
       TASK_LOGON_SERVICE_ACCOUNT                = 5
       # Not in use; currently identical to TASK_LOGON_PASSWORD
       TASK_LOGON_INTERACTIVE_TOKEN_OR_PASSWORD  = 6
+
+      # Session State State Changes
+      # https://learn.microsoft.com/en-us/windows/win32/taskschd/sessionstatechangetrigger-statechange
+      # When user connects to local computer like switching users
+      TASK_CONSOLE_CONNECT = 1
+      # When user disconnects to local computer like switching users
+      TASK_CONSOLE_DISCONNECT = 2 
+      # When remote user connects to computer (e.g. RDP)
+      TASK_REMOTE_CONNECT = 3
+      # When remote user disconnects to computer (e.g. RDP)
+      TASK_REMOTE_DISCONNECT = 4
+      # When a user locks the computer
+      TASK_SESSION_LOCK = 7
+      # When a user unlocks the computer
+      TASK_SESSION_UNLOCK = 8
 
       TASK_MAX_RUN_TIMES = 1440
       TASKS_TO_RETRIEVE  = 5
