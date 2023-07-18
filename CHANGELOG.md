@@ -4,17 +4,18 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release 2.0.6 -->
-## [win32-taskscheduler-2.0.6](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-2.0.6) (2023-07-18)
+<!-- latest_release 2.0.7 -->
+## [win32-taskscheduler-2.0.7](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-2.0.7) (2023-07-18)
 
 #### Merged Pull Requests
-- Lint Test [#89](https://github.com/chef/win32-taskscheduler/pull/89) ([HeyItsGilbert](https://github.com/HeyItsGilbert))
+- Add support for Session State Change [#90](https://github.com/chef/win32-taskscheduler/pull/90) ([HeyItsGilbert](https://github.com/HeyItsGilbert))
 <!-- latest_release -->
 
 <!-- release_rollup since=2.0.4 -->
 ### Changes not yet released to rubygems.org
 
 #### Merged Pull Requests
+- Add support for Session State Change [#90](https://github.com/chef/win32-taskscheduler/pull/90) ([HeyItsGilbert](https://github.com/HeyItsGilbert)) <!-- 2.0.7 -->
 - Lint Test [#89](https://github.com/chef/win32-taskscheduler/pull/89) ([HeyItsGilbert](https://github.com/HeyItsGilbert)) <!-- 2.0.6 -->
 - Upgrade to GitHub-native Dependabot [#81](https://github.com/chef/win32-taskscheduler/pull/81) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 2.0.5 -->
 <!-- release_rollup -->
