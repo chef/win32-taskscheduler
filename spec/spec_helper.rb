@@ -12,8 +12,8 @@ require "date"
 # Creating folder 'Test'; This will be treated as root
 def create_test_folder
   @service ||= service
-  @root_path = '\\'
-  @test_path = '\\Test'
+  @root_path = "\\"
+  @test_path = "\\Test"
   @root_folder = @service.GetFolder(@root_path)
   @test_folder = @root_folder.CreateFolder(@test_path)
   @ts.instance_variable_set(:@root, @test_folder) if @ts
@@ -66,6 +66,7 @@ end
 # the related functionalities over a task in RSpecs
 def create_task
   return nil unless @service
+
   @task_definition = @service.NewTask(0)
   task_registration
   task_prinicipals
@@ -138,8 +139,7 @@ end
 def all_triggers
   all_triggers = {}
 
-  %w{ONCE DAILY WEEKLY MONTHLYDATE MONTHLYDOW
-     ON_IDLE AT_SYSTEMSTART AT_LOGON}.each do |trig_type|
+  %w{ONCE DAILY WEEKLY MONTHLYDATE MONTHLYDOW ON_IDLE AT_SYSTEMSTART AT_LOGON}.each do |trig_type|
     trigger = {}
     trigger[:trigger_type] = Win32::TaskScheduler.class_eval(trig_type)
     start_end_params(trigger)

@@ -110,7 +110,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
       it "at nested folder" do
         @ts = Win32::TaskScheduler.new(@task, @trigger, folder, force)
-        task = @test_path + folder + '\\' + @task
+        task = @test_path + folder + "\\" + @task
         expect(@ts.exists?(task)).to be_truthy
       end
     end
@@ -122,7 +122,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
       it "at nested folder" do
         @ts = Win32::TaskScheduler.new(@task, @trigger, folder, force)
-        task = folder + '\\' + "invalid"
+        task = folder + "\\" + "invalid"
         expect(@ts.exists?(task)).to be_falsy
       end
     end
@@ -670,8 +670,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
   describe "#trigger_string" do
     before { create_task }
-    it "Returns a string that describes the current trigger at "\
-       "the specified index for the active task" do
+    it "Returns a string that describes the current trigger at the specified index for the active task" do
       expect(@ts.trigger_string(0)).to be_a(String)
     end
 
@@ -842,8 +841,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
   describe "#trigger" do
     before { create_task }
 
-    it "Returns a hash that describes the trigger "\
-       "at the given index for the current task" do
+    it "Returns a hash that describes the trigger at the given index for the current task" do
       trigger = @ts.trigger(0)
       expect(trigger).to be_a(Hash)
       expect(trigger).not_to be_empty

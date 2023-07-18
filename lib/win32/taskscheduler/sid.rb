@@ -68,6 +68,7 @@ module Win32
         unless ConvertStringSidToSidW(utf8_to_wide(string_sid), result)
           raise FFI::LastError.error
         end
+
         result_pointer = result.read_pointer
         domain, name, use = account(result_pointer)
         LocalFree(result_pointer)
@@ -108,6 +109,7 @@ module Win32
         unless LookupAccountSidW(nil, sid, name, name_size, referenced_domain_name, referenced_domain_name_size, use)
           raise FFI::LastError.error
         end
+
         [referenced_domain_name.read_wstring(referenced_domain_name_size.read_long), name.read_wstring(name_size.read_long), use.read_long]
       end
 

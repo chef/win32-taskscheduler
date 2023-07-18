@@ -33,7 +33,7 @@ end
 
 ts.activate("foo")
 ts.priority = TaskScheduler::IDLE
-ts.working_directory = 'C:\\'
+ts.working_directory = "C:\\"
 
 puts "App name: " + ts.application_name
 puts "Creator: " + ts.creator
