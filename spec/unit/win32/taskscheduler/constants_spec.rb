@@ -12,7 +12,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
 
     describe "to handle other types" do
-      %i{AT_LOGON AT_SYSTEMSTART ON_IDLE}.each do |const|
+      %i{AT_LOGON AT_SYSTEMSTART ON_IDLE ON_SESSION_STATE_CHANGE}.each do |const|
         it { should be_const_defined(const) }
       end
     end

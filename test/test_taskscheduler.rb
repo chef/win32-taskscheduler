@@ -646,6 +646,7 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_not_nil(TaskScheduler::ON_IDLE)
     assert_not_nil(TaskScheduler::AT_SYSTEMSTART)
     assert_not_nil(TaskScheduler::AT_LOGON)
+    assert_not_nil(TaskScheduler::ON_SESSION_STATE_CHANGE)
   end
 
   test "expected flag constants are defined" do
@@ -672,6 +673,15 @@ class TC_TaskScheduler < Test::Unit::TestCase
     assert_not_nil(TaskScheduler::REALTIME)
     assert_not_nil(TaskScheduler::ABOVE_NORMAL)
     assert_not_nil(TaskScheduler::BELOW_NORMAL)
+  end
+
+  test "expected session state constants are defined" do
+    assert_not_nil(TaskScheduler::TASK_CONSOLE_CONNECT)
+    assert_not_nil(TaskScheduler::TASK_CONSOLE_DISCONNECT)
+    assert_not_nil(TaskScheduler::TASK_REMOTE_CONNECT)
+    assert_not_nil(TaskScheduler::TASK_REMOTE_DISCONNECT)
+    assert_not_nil(TaskScheduler::TASK_SESSION_LOCK)
+    assert_not_nil(TaskScheduler::TASK_SESSION_UNLOCK)
   end
 
   def teardown

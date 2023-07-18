@@ -38,6 +38,7 @@ module Win32
     ON_IDLE = TASK_EVENT_TRIGGER_ON_IDLE
     AT_SYSTEMSTART = TASK_EVENT_TRIGGER_AT_SYSTEMSTART
     AT_LOGON = TASK_EVENT_TRIGGER_AT_LOGON
+    ON_SESSION_STATE_CHANGE = TASK_TRIGGER_SESSION_STATE_CHANGE
     FIRST_WEEK = TASK_FIRST_WEEK
     SECOND_WEEK = TASK_SECOND_WEEK
     THIRD_WEEK = TASK_THIRD_WEEK
@@ -593,6 +594,10 @@ module Win32
         when TASK_EVENT_TRIGGER_AT_LOGON
           trig.UserId = trigger[:user_id] if trigger[:user_id]
           trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
+        when TASK_TRIGGER_SESSION_STATE_CHANGE
+          trig.UserId = trigger[:user_id] if trigger[:user_id]
+          trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
+          trig.StateChange = trigger[:state_change]
         end
       end
 
@@ -704,6 +709,10 @@ module Win32
         trigger[:delay_duration] = time_in_minutes(trig.Delay)
       when TASK_EVENT_TRIGGER_ON_IDLE
         trigger[:execution_time_limit] = time_in_minutes(trig.ExecutionTimeLimit)
+      when TASK_TRIGGER_SESSION_STATE_CHANGE
+        trigger[:user_id] = trig.UserId if trig.UserId.to_s != ""
+        trigger[:delay_duration] = time_in_minutes(trig.Delay)
+        trigger[:state_change] = trig.SessionState
       else
         raise Error, "Unknown trigger type"
       end
@@ -815,6 +824,10 @@ module Win32
       when TASK_EVENT_TRIGGER_AT_LOGON
         trig.UserId = trigger[:user_id] if trigger[:user_id]
         trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
+      when TASK_EVENT_TRIGGER_AT_LOGON
+        trig.UserId = trigger[:user_id] if trigger[:user_id]
+        trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
+        trig.SessionState = trigger[:session_state]
       when TASK_EVENT_TRIGGER_ON_IDLE
         # for setting execution time limit Ref : https://msdn.microsoft.com/en-us/library/windows/desktop/aa380724(v=vs.85).aspx
         if trigger[:execution_time_limit].to_i > 0
@@ -902,6 +915,10 @@ module Win32
       when TASK_EVENT_TRIGGER_AT_LOGON
         trig.UserId = trigger[:user_id] if trigger[:user_id]
         trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
+      when TASK_TRIGGER_SESSION_STATE_CHANGE
+        trig.UserId = trigger[:user_id] if trigger[:user_id]
+        trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
+        trig.SessionState = trigger[:session_state]
       end
 
       register_task_definition(definition)
@@ -1303,7 +1320,8 @@ module Win32
     def valid_trigger_option(trigger_type)
       [TASK_TIME_TRIGGER_ONCE, TASK_TIME_TRIGGER_DAILY, TASK_TIME_TRIGGER_WEEKLY,
        TASK_TIME_TRIGGER_MONTHLYDATE, TASK_TIME_TRIGGER_MONTHLYDOW, TASK_EVENT_TRIGGER_ON_IDLE,
-       TASK_EVENT_TRIGGER_AT_SYSTEMSTART, TASK_EVENT_TRIGGER_AT_LOGON].include?(trigger_type.to_i)
+       TASK_EVENT_TRIGGER_AT_SYSTEMSTART, TASK_EVENT_TRIGGER_AT_LOGON,
+       TASK_TRIGGER_SESSION_STATE_CHANGE].include?(trigger_type.to_i)
     end
 
     def validate_trigger(hash)
