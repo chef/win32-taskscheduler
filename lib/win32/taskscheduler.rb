@@ -832,9 +832,6 @@ module Win32
       when TASK_EVENT_TRIGGER_AT_LOGON
         trig.UserId = trigger[:user_id] if trigger[:user_id]
         trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
-      when TASK_EVENT_TRIGGER_AT_LOGON
-        trig.UserId = trigger[:user_id] if trigger[:user_id]
-        trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
         trig.SessionState = trigger[:session_state]
       when TASK_EVENT_TRIGGER_ON_IDLE
         # for setting execution time limit Ref : https://msdn.microsoft.com/en-us/library/windows/desktop/aa380724(v=vs.85).aspx
