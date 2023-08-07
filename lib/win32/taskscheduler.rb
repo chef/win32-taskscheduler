@@ -720,7 +720,7 @@ module Win32
       when TASK_TRIGGER_SESSION_STATE_CHANGE
         trigger[:user_id] = trig.UserId if trig.UserId.to_s != ""
         trigger[:delay_duration] = time_in_minutes(trig.Delay)
-        trigger[:state_change] = trig.SessionState
+        # trigger[:state_change] = trig.SessionState
       else
         raise Error, "Unknown trigger type"
       end
