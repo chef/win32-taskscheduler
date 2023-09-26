@@ -6,9 +6,9 @@
 #
 # Modify as you see fit.
 #######################################################################
-require "win32/taskscheduler"
-require "fileutils"
-require "pp"
+require "win32/taskscheduler" unless defined?(Win32::TaskScheduler)
+require "fileutils" unless defined?(FileUtils)
+require "pp" unless defined?(PP)
 include Win32
 
 puts "VERSION: " + TaskScheduler::VERSION

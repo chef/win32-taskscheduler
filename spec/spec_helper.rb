@@ -66,6 +66,7 @@ end
 # the related functionalities over a task in RSpecs
 def create_task
   return nil unless @service
+
   @task_definition = @service.NewTask(0)
   task_registration
   task_prinicipals
@@ -138,8 +139,16 @@ end
 def all_triggers
   all_triggers = {}
 
-  %w{ONCE DAILY WEEKLY MONTHLYDATE MONTHLYDOW
-     ON_IDLE AT_SYSTEMSTART AT_LOGON}.each do |trig_type|
+  %w{
+    ONCE
+    DAILY
+    WEEKLY
+    MONTHLYDATE
+    MONTHLYDOW
+    ON_IDLE
+    AT_SYSTEMSTART
+    AT_LOGON
+  }.each do |trig_type|
     trigger = {}
     trigger[:trigger_type] = Win32::TaskScheduler.class_eval(trig_type)
     start_end_params(trigger)

@@ -29,3 +29,7 @@ Style/NumericPredicate:
   Exclude:
     - 'spec/**/*'
     - 'lib/win32/taskscheduler/time_calc_helper.rb'
+
+# Lot's of Windows backslash escaping
+Style/StringLiterals:
+  Enabled: false

@@ -103,6 +103,7 @@ module Win32
         loop do
           days -= days_in_month(mth, yr)
           break if days <= 0
+
           mth += 1
           if mth > 12
             mth = 1; yr += 1
