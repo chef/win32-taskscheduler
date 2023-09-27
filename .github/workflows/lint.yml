@@ -22,3 +22,9 @@ jobs:
     - run: |
         gem install chefstyle
         chefstyle -c .rubocop.yml
+
+  spellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: streetsidesoftware/cspell-action@v2.12.0
