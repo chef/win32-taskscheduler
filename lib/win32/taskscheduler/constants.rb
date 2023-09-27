@@ -204,7 +204,7 @@ module Win32
       # When user connects to local computer like switching users
       TASK_CONSOLE_CONNECT = 1
       # When user disconnects to local computer like switching users
-      TASK_CONSOLE_DISCONNECT = 2 
+      TASK_CONSOLE_DISCONNECT = 2
       # When remote user connects to computer (e.g. RDP)
       TASK_REMOTE_CONNECT = 3
       # When remote user disconnects to computer (e.g. RDP)

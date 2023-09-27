@@ -103,6 +103,7 @@ module Win32
         loop do
           days -= days_in_month(mth, yr)
           break if days <= 0
+
           mth += 1
           if mth > 12
             mth = 1; yr += 1
@@ -127,7 +128,12 @@ module Win32
       #
       def time_details(time_str)
         tm_detail = {}
+
+        raise TypeError.new("TypeError: Inccorrect Type please pass input value as a String.") unless time_str.is_a? String
+
         if time_str.to_s != ""
+          # raising exception if time is not a string
+
           # time_str will be like "PxxYxxMxxDTxxHxxMxxS"
           # Ignoring 'P' and extracting date and time
           dt, tm = time_str[1..-1].split("T")
