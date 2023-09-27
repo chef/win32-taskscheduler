@@ -223,7 +223,7 @@ module Win32
       end
     end
 
-    # Return the sepcified task if exist
+    # Return the specified task if exist
     #
     def get_task(task)
       raise TypeError unless task.is_a?(String)
@@ -1310,7 +1310,7 @@ module Win32
 
     private
 
-    # Returns a camle-case string to its underscore format
+    # Returns a camel-case string to its underscore format
     def underscore(string)
       string.gsub(/([a-z\d])([A-Z])/, '\1_\2'.freeze).downcase
     end

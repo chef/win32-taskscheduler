@@ -1562,7 +1562,22 @@
     "metaparameter",
     "igroups",
     "errorhandler",
-    "IPACK"
+    "IPACK",
+    "DONT",
+    "NINETH",
+    "THIRTYETH",
+    "startdoc",
+    "setproperty",
+    "getproperty",
+    "dispid",
+    "stopdoc",
+    "CLSCTX",
+    "INPROC",
+    "CLSID",
+    "LSSC",
+    "MAKELANGID",
+    "SUBLANG",
+    "divmod"
   ],
   // flagWords - list of words to be always considered incorrect
   // This is useful for offensive words and common spelling errors.
