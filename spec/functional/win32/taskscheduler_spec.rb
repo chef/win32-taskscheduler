@@ -672,8 +672,8 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     before { create_task }
     it "Returns a string that describes the current trigger at "\
        "the specified index for the active task" do
-      expect(@ts.trigger_string(0)).to be_a(String)
-    end
+         expect(@ts.trigger_string(0)).to be_a(String)
+       end
 
     it "Raises an error if trigger is not found at the given index" do
       expect { @ts.trigger_string(1) }.to raise_error(tasksch_err)
@@ -844,10 +844,10 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
     it "Returns a hash that describes the trigger "\
        "at the given index for the current task" do
-      trigger = @ts.trigger(0)
-      expect(trigger).to be_a(Hash)
-      expect(trigger).not_to be_empty
-    end
+         trigger = @ts.trigger(0)
+         expect(trigger).to be_a(Hash)
+         expect(trigger).not_to be_empty
+       end
 
     it "Raises an error if trigger is not found at the given index" do
       expect { @ts.trigger(1) }.to raise_error(tasksch_err)

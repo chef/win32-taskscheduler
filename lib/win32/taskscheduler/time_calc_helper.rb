@@ -58,7 +58,7 @@ module Win32
         future_hr, future_day = extra_time(future_hr, future_day, 24)
 
         # explicit method to calculate overloaded days;
-        # They may stretch upto years; heance leap year & months are into consideration
+        # They may stretch upto years; hence leap year & months are into consideration
         future_day, future_month, future_year = extra_days(future_day, future_month, future_year, curr_time.month, curr_time.year)
 
         future_month, future_year = extra_months(future_month, future_year, curr_time.month, curr_time.year)
@@ -95,7 +95,7 @@ module Win32
       # Adjusts the overlapping years and months and returns actual days, month and year
       #
       def extra_days(days_count, month_count, year_count, init_month, init_year)
-        # Will keep increamenting them with surplus days
+        # Will keep incrementing them with surplus days
         days = days_count
         mth = init_month
         yr = init_year
@@ -103,6 +103,7 @@ module Win32
         loop do
           days -= days_in_month(mth, yr)
           break if days <= 0
+
           mth += 1
           if mth > 12
             mth = 1; yr += 1

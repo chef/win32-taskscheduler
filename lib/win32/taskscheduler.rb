@@ -3,9 +3,9 @@ require_relative "taskscheduler/helper"
 require_relative "taskscheduler/time_calc_helper"
 require_relative "taskscheduler/constants"
 require_relative "taskscheduler/version"
-require "win32ole"
-require "socket"
-require "time"
+require "win32ole" unless defined?(WIN32OLE)
+require "socket" unless defined?(Socket)
+require "time" unless defined?(Time)
 require "structured_warnings"
 
 # The Win32 module serves as a namespace only
@@ -212,18 +212,18 @@ module Win32
       end
 
       if root.nil?
-        return false
+        false
       else
         begin
           task = root.GetTask(task_name)
-          return task && task.Name == task_name
+          task && task.Name == task_name
         rescue WIN32OLERuntimeError => err
-          return false
+          false
         end
       end
     end
 
-    # Return the sepcified task if exist
+    # Return the specified task if exist
     #
     def get_task(task)
       raise TypeError unless task.is_a?(String)
@@ -372,6 +372,7 @@ module Win32
     #
     def application_name=(app)
       raise TypeError unless app.is_a?(String)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -407,6 +408,7 @@ module Win32
     #
     def parameters=(param)
       raise TypeError unless param.is_a?(String)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -440,6 +442,7 @@ module Win32
     #
     def working_directory=(dir)
       raise TypeError unless dir.is_a?(String)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -495,6 +498,7 @@ module Win32
     #
     def priority=(priority)
       raise TypeError unless priority.is_a?(Numeric)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -528,6 +532,7 @@ module Win32
 
       unless trigger.empty?
         raise ArgumentError, "Unknown trigger type" unless valid_trigger_option(trigger[:trigger_type])
+
         validate_trigger(trigger)
 
         startTime = format("%04d-%02d-%02dT%02d:%02d:00", trigger[:start_year], trigger[:start_month], trigger[:start_day], trigger[:start_hour], trigger[:start_minute])
@@ -626,6 +631,7 @@ module Win32
     #
     def trigger_string(index)
       raise TypeError unless index.is_a?(Numeric)
+
       check_for_active_task
       index += 1 # first item index is 1
 
@@ -644,6 +650,7 @@ module Win32
     #
     def delete_trigger(index)
       raise TypeError unless index.is_a?(Numeric)
+
       check_for_active_task
       index += 1 # first item index is 1
 
@@ -659,6 +666,7 @@ module Win32
     #
     def trigger(index)
       raise TypeError unless index.is_a?(Numeric)
+
       check_for_active_task
       index += 1 # first item index is 1
 
@@ -824,7 +832,7 @@ module Win32
       when TASK_EVENT_TRIGGER_AT_LOGON
         trig.UserId = trigger[:user_id] if trigger[:user_id]
         trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
-      when TASK_EVENT_TRIGGER_AT_LOGON
+      when TASK_TRIGGER_SESSION_STATE_CHANGE
         trig.UserId = trigger[:user_id] if trigger[:user_id]
         trig.Delay = "PT#{trigger[:delay_duration] || 0}M"
         trig.SessionState = trigger[:session_state]
@@ -974,6 +982,7 @@ module Win32
     #
     def comment=(comment)
       raise TypeError unless comment.is_a?(String)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -998,6 +1007,7 @@ module Win32
     #
     def creator=(creator)
       raise TypeError unless creator.is_a?(String)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -1074,6 +1084,7 @@ module Win32
     #
     def max_run_time=(max_run_time)
       raise TypeError unless max_run_time.is_a?(Numeric)
+
       check_for_active_task
 
       t = max_run_time
@@ -1133,7 +1144,7 @@ module Win32
 
       # Check for invalid setting
       invalid_settings = settings_hash.keys - valid_settings_options
-      raise TypeError, "Invalid setting passed: #{invalid_settings.join(', ')}" unless invalid_settings.empty?
+      raise TypeError, "Invalid setting passed: #{invalid_settings.join(", ")}" unless invalid_settings.empty?
 
       # Some modification is required in user input
       hash = settings_hash.dup
@@ -1151,6 +1162,7 @@ module Win32
         idle_settings = task_settings.IdleSettings
         IdleSettings.each do |setting|
           next if hash[setting].nil?
+
           idle_settings.setproperty(camelize(setting.to_s), hash[setting])
           # This setting is not required to be configured now
           hash.delete(setting)
@@ -1188,6 +1200,7 @@ module Win32
     #
     def configure_registration_info(hash)
       raise TypeError unless hash.is_a?(Hash)
+
       check_for_active_task
 
       definition = @task.Definition
@@ -1223,6 +1236,7 @@ module Win32
     #
     def configure_principals(principals)
       raise TypeError unless principals.is_a?(Hash)
+
       check_for_active_task
       definition = @task.Definition
       definition.Principal.Id = principals[:id] if principals[:id].to_s != ""
@@ -1252,6 +1266,7 @@ module Win32
       settings_hash = {}
       @task.Definition.Settings.ole_get_methods.each do |setting|
         next if setting.name == "XmlText" # not needed
+
         settings_hash[setting.name] = @task.Definition.Settings._getproperty(setting.dispid, [], [])
       end
 
@@ -1295,7 +1310,7 @@ module Win32
 
     private
 
-    # Returns a camle-case string to its underscore format
+    # Returns a camel-case string to its underscore format
     def underscore(string)
       string.gsub(/([a-z\d])([A-Z])/, '\1_\2'.freeze).downcase
     end
