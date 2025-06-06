@@ -180,7 +180,13 @@ module Win32
       # Get the task folder that contains the tasks.
       taskCollection = @root.GetTasks(0)
 
-      taskCollection.map(&:Name)
+      array = []
+
+      taskCollection.each do |registeredTask| # rubocop:disable Style/MapIntoArray
+        array << registeredTask.Name
+      end
+
+      array
     end
 
     alias tasks enum
