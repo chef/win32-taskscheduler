@@ -15,6 +15,7 @@ steps:
       executor:
         docker:
           image: rubydistros/windows-2019:3.1
+          privileged: true
           host_os: windows
           shell: ["powershell", "-Command"]
 
@@ -25,5 +26,6 @@ steps:
       executor:
         docker:
           image: rubydistros/windows-2019:3.4
+          privileged: true
           host_os: windows
           shell: ["powershell", "-Command"]
