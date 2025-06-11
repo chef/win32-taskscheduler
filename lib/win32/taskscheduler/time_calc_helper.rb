@@ -127,6 +127,8 @@ module Win32
       #   time_details("PT3S") #=> {sec: 3}
       #
       def time_details(time_str)
+        raise TypeError unless time_str.is_a?(String) || time_str.nil?
+
         tm_detail = {}
         if time_str.to_s != ""
           # time_str will be like "PxxYxxMxxDTxxHxxMxxS"
