@@ -14,5 +14,5 @@ Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
 if (-not $?) { throw "Could not download ruby with devkit from https://github.com/oneclick/rubyinstaller2" }
 
 Write-Output "Running Ruby installer..."
-Start-Process -FilePath $installerPath -ArgumentList "/verysilent","/tasks=modpath" -Wait
+Start-Process -FilePath $installerPath -ArgumentList "/verysilent","/tasks=modpath", "/currentuser" -Wait
 if (-not $?) { throw "Failed to install Ruby." }
