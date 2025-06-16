@@ -5,7 +5,7 @@ expeditor:
       retry:
         automatic:
           limit: 1
-      timeout_in_minutes: 90
+      timeout_in_minutes: 60
 
 steps:
   - label: run-specs-ruby-3.1
@@ -19,7 +19,7 @@ steps:
           environment:
             - BUILDKITE
           host_os: windows
-          #shell: ["powershell", "-Command"]
+          shell: ["powershell", "-Command"]
           image: rubydistros/windows-2019:3.1
           user: 'NT AUTHORITY\SYSTEM'
 
@@ -34,6 +34,6 @@ steps:
           environment:
             - BUILDKITE
           host_os: windows
-          #shell: ["powershell", "-Command"]
+          shell: ["powershell", "-Command"]
           image: rubydistros/windows-2019:3.4
           user: 'NT AUTHORITY\SYSTEM'
