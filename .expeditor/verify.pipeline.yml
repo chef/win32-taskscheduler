@@ -19,7 +19,7 @@ steps:
           environment:
             - BUILDKITE
           host_os: windows
-          shell: ["powershell", "-Command"]
+          #shell: ["powershell", "-Command"]
           image: rubydistros/windows-2019:3.1
           user: 'NT AUTHORITY\SYSTEM'
 
@@ -34,6 +34,6 @@ steps:
           environment:
             - BUILDKITE
           host_os: windows
-          shell: ["powershell", "-Command"]
+          #shell: ["powershell", "-Command"]
           image: rubydistros/windows-2019:3.4
           user: 'NT AUTHORITY\SYSTEM'
