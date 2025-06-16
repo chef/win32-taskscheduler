@@ -116,8 +116,8 @@ def register_task
     @task, # Name of the task
     @task_definition, # Definition
     6, # Flag: TASK_CREATE_OR_UPDATE
-    'SYSTEM', # Explicit user name for service context
-    nil, # Password
+    'User', # Explicit user name for service context
+    Password, # Password
     3
   )
   @ts.instance_variable_set(:@task, @current_task) if @ts
