@@ -116,7 +116,7 @@ def register_task
     @task, # Name of the task
     @task_definition, # Definition
     6, # Flag: TASK_CREATE_OR_UPDATE
-    nil, # UserId
+    'SYSTEM', # Explicit user name for service context
     nil, # Password
     3
   )
