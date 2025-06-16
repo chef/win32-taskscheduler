@@ -7,20 +7,6 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
   after { clear_them }
   before { load_task_variables }
 
-  # Helper method to register task with specific user and password
-  def register_task(user = 'SYSTEM', password = nil)
-    # Make sure @test_folder and @task_definition are initialized in load_task_variables
-    @current_task = @test_folder.RegisterTaskDefinition(
-      @task,             # Task name
-      @task_definition,  # Task definition
-      6,                 # TASK_CREATE_OR_UPDATE flag
-      user,              # User to run task as
-      password,          # Password (nil if system user)
-      3                  # Flags, as per your original code
-    )
-    @ts.instance_variable_set(:@task, @current_task) if @ts
-  end
-
   describe "#Constructor" do
     let(:ts) { Win32::TaskScheduler }
     context "no of arguments" do
@@ -140,7 +126,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
       end
 
       it "Returns SERVICE_ACCOUNT flag for service-account users" do
-        user_id = "SYSTEM"
+        user_id = "System"
         expect(@ts.send(:logon_type, user_id, password)).to eq(Win32::TaskScheduler::TASK_LOGON_SERVICE_ACCOUNT)
       end
     end
@@ -157,7 +143,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
       end
 
       it "Returns SERVICE_ACCOUNT flag for service-account users" do
-        user_id = "SYSTEM"
+        user_id = "System"
         expect(@ts.send(:logon_type, user_id, password)).to eq(Win32::TaskScheduler::TASK_LOGON_SERVICE_ACCOUNT)
       end
     end
@@ -201,26 +187,11 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     end
   end
 
-  # ** Added this block with the fix for your failing test **
-  describe "#account_information" do
-    context "Non-system users when task is Non-Interactive Require a password" do
-      let(:user) { "ContainerAdministrator" }
-      let(:password) { "nill" }
-      before do
-        register_task(user, password)
-        @ts.instance_variable_set(:@interactive, false)
-      end
-
-      it "returns account information including user" do
-        expect(@ts.account_information).to include(user)
-      end
-    end
-  end
-
   private
 
   def load_task_variables
     time = Time.now
+    # Ensuring root path will be test path
     allow_any_instance_of(Win32::TaskScheduler).to receive(:root_path).and_return(@test_path)
     @app = "notepad.exe"
     @task = "test_task"
@@ -229,14 +200,8 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
     @trigger = { start_year: time.year, start_month: time.month,
                  start_day: time.day, start_hour: time.hour,
                  start_minute: time.min,
+                 # Will update this in test cases when required
                  trigger_type: Win32::TaskScheduler::ONCE }
     @ts = Win32::TaskScheduler.new
-
-    # Initialize these so register_task works correctly
-    # Make sure the COM objects are available and these paths are correct for your environment
-    scheduler = WIN32OLE.new('Schedule.Service')
-    scheduler.Connect
-    @test_folder ||= scheduler.GetFolder(@test_path)
-    @task_definition ||= scheduler.NewTask(0)
   end
 end
