@@ -205,11 +205,10 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
   describe "#account_information" do
     context "Non-system users when task is Non-Interactive Require a password" do
       let(:user) { "ContainerAdministrator" }
-      let(:password) { "DummyPassword123" }  # Replace with a real password if needed
-
+      let(:password) { "nill" }
       before do
-        register_task(user, password)   # Register the task as ContainerAdministrator
-        @ts.instance_variable_set(:@interactive, false)  # Make sure the task is non-interactive
+        register_task(user, password)
+        @ts.instance_variable_set(:@interactive, false)
       end
 
       it "returns account information including user" do
