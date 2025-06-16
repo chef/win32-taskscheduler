@@ -19,8 +19,10 @@ steps:
           shell: [ "powershell", "-Command" ]
           image: rubydistros/windows-2019:3.1
           environment:
+            - BUILDKITE
             - CHEF_LICENSE=accept-no-persist
             - CHEF_LICENSE_SERVER=http://hosted-license-service-lb-8000-606952349.us-west-2.elb.amazonaws.com:8000/
+            - user: 'NT AUTHORITY\SYSTEM'
 
 
   - label: run-specs-ruby-3.4
@@ -34,5 +36,7 @@ steps:
           shell: [ "powershell", "-Command" ]
           image: rubydistros/windows-2019:3.4
           environment:
+            - BUILDKITE
             - CHEF_LICENSE=accept-no-persist
             - CHEF_LICENSE_SERVER=http://hosted-license-service-lb-8000-606952349.us-west-2.elb.amazonaws.com:8000/
+            - user: 'NT AUTHORITY\SYSTEM'
