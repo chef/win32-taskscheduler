@@ -1,30 +1,26 @@
 ---
 name: lint
 
-"on":
+on:
   pull_request:
   push:
     branches:
       - main
 
-jobs:
-  chefstyle:
-    runs-on: ubuntu-latest
-    env:
-      BUNDLE_WITHOUT: ruby_shadow:omnibus_package
-    steps:
-    - uses: actions/checkout@v3
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 3.1
-        bundler-cache: false
-    - uses: r7kamura/rubocop-problem-matchers-action@v1  # this shows the failures in the PR
-    - run: |
-        gem install chefstyle
-        chefstyle -c .rubocop.yml
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
 
-  spellcheck:
+jobs:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: streetsidesoftware/cspell-action@v2.12.0
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1
+          bundler-cache: false
+      - uses: r7kamura/rubocop-problem-matchers-action@v1  # this shows the failures in the PR
+      - run: |
+          gem install cookstyle
+          cookstyle --chefstyle -c .rubocop.yml

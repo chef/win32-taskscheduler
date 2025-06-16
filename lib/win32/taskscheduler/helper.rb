@@ -12,7 +12,7 @@ module Win32
       ffi_lib :kernel32, :advapi32
 
       attach_function :FormatMessage, :FormatMessageA,
-                      %i{ulong pointer ulong ulong pointer ulong pointer}, :ulong
+        %i{ulong pointer ulong ulong pointer ulong pointer}, :ulong
 
       attach_function :ConvertStringSidToSidW, %i{pointer pointer}, :bool
       attach_function :LookupAccountSidW, %i{pointer pointer pointer pointer pointer pointer pointer}, :bool
