@@ -182,7 +182,7 @@ module Win32
 
       array = []
 
-      taskCollection.each do |registeredTask|
+      taskCollection.each do |registeredTask| # rubocop:disable Style/MapIntoArray
         array << registeredTask.Name
       end
 
