@@ -111,13 +111,13 @@ def task_action
 end
 
 # Registering(Creating) a task in test folder
-def register_task
+def register_task(user = 'SYSTEM', password = nil)
   @current_task = @test_folder.RegisterTaskDefinition(
-    @task, # Name of the task
-    @task_definition, # Definition
-    6, # Flag: TASK_CREATE_OR_UPDATE
-    'User', # Explicit user name for service context
-    Password, # Password
+    @task,
+    @task_definition,
+    6,
+    user,
+    password,
     3
   )
   @ts.instance_variable_set(:@task, @current_task) if @ts

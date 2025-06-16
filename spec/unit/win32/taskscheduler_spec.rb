@@ -124,9 +124,9 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
         user_id = "Guests"
         expect(@ts.send(:logon_type, user_id, password)).to eq(Win32::TaskScheduler::TASK_LOGON_GROUP)
       end
-
+      
       it "Returns SERVICE_ACCOUNT flag for service-account users" do
-        user_id = "System"
+        user_id = "SYSTEM"
         expect(@ts.send(:logon_type, user_id, password)).to eq(Win32::TaskScheduler::TASK_LOGON_SERVICE_ACCOUNT)
       end
     end
@@ -143,7 +143,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
       end
 
       it "Returns SERVICE_ACCOUNT flag for service-account users" do
-        user_id = "System"
+        user_id = "SYSTEM"
         expect(@ts.send(:logon_type, user_id, password)).to eq(Win32::TaskScheduler::TASK_LOGON_SERVICE_ACCOUNT)
       end
     end
