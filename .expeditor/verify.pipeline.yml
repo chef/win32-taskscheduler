@@ -16,8 +16,8 @@ steps:
       secrets: true
       executor:
         docker:
-          environment:
-            - BUILDKITE
+          # environment:
+          #   - BUILDKITE
           host_os: windows
           shell: ["powershell", "-Command"]
           image: rubydistros/windows-2019:3.1
@@ -31,8 +31,8 @@ steps:
       secrets: true
       executor:
         docker:
-          environment:
-            - BUILDKITE
+          # environment:
+          #   - BUILDKITE
           host_os: windows
           shell: ["powershell", "-Command"]
           image: rubydistros/windows-2019:3.4
