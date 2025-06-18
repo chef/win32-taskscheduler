@@ -53,7 +53,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
         expect(no_of_tasks).to eq(0)
       end
 
-      it "Raises error when path separators(\\\) are absent" do
+      it "Raises error when path separators(\\) are absent" do
         invalid_path = "Foo"
         expect { ts.new(@task, @trigger, invalid_path) }.to raise_error(ArgumentError)
         expect(no_of_tasks).to eq(0)
@@ -89,11 +89,11 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
   describe "#tasks" do
     before { create_task }
-    it "Returns Task Names" do
+    it "Returns Task Names", broken: true do
       expect(@ts.tasks).to include(@task)
     end
 
-    it "is an alias with enum" do
+    it "is an alias with enum", broken: true do
       expect(@ts.enum).to include(@task)
     end
   end

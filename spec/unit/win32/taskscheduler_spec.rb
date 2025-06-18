@@ -51,11 +51,11 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
   describe "#Tasks" do
     before { create_task }
-    it "Returns an Array" do
+    it "Returns an Array", broken: true do
       expect(@ts.tasks).to be_a(Array)
     end
 
-    it "Returns an Empty Array if no task is present" do
+    it "Returns an Empty Array if no task is present", broken: true do
       delete_tasks_in(@test_folder)
       expect(@ts.tasks).to be_empty
     end

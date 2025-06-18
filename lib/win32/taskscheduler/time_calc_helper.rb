@@ -157,7 +157,7 @@ module Win32
       #   dt_tm_string_to_hash("10year3month", {}) #=> {:year=>"10", :month=>"3"}
       #
       def dt_tm_string_to_hash(str, tm_detail)
-        str.split(/(\d+)/)[1..-1].each_slice(2).each_with_object(tm_detail) { |i, h| h[i.last.to_sym] = i.first; }
+        str.split(/(\d+)/)[1..-1].each_slice(2).with_object(tm_detail) { |i, h| h[i.last.to_sym] = i.first }
       end
     end
   end

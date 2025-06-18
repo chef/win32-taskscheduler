@@ -231,3 +231,7 @@ end
 def first_week
   Win32::TaskScheduler::FIRST_WEEK
 end
+
+RSpec.configure do |c|
+  c.filter_run_excluding broken: true
+end

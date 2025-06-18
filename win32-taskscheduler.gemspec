@@ -8,11 +8,16 @@ Gem::Specification.new do |spec|
   spec.email      = "djberg96@gmail.com"
   spec.homepage   = "https://github.com/chef/win32-taskscheduler"
   spec.summary    = "A library for the Windows task scheduler"
-  spec.test_files = Dir["test/*, spec/**/*"]
   spec.files      = Dir["lib/**/*"]
 
   spec.add_dependency("ffi")
   spec.add_dependency("structured_warnings")
+  # below gems moved from Ruby System as of 3.5.0
+  spec.add_dependency("fiddle")
+  spec.add_dependency("ostruct")
+  spec.add_dependency("base64")
+  spec.add_dependency("reline")
+  spec.add_dependency("irb")
 
   spec.add_development_dependency("test-unit")
   spec.add_development_dependency("win32-security")

@@ -180,13 +180,7 @@ module Win32
       # Get the task folder that contains the tasks.
       taskCollection = @root.GetTasks(0)
 
-      array = []
-
-      taskCollection.each do |registeredTask|
-        array << registeredTask.Name
-      end
-
-      array
+      array = taskCollection.map(&:Name)
     end
 
     alias tasks enum
