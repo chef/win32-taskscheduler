@@ -4,17 +4,18 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release 2.0.8 -->
-## [win32-taskscheduler-2.0.8](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-2.0.8) (2023-09-27)
+<!-- latest_release 2.0.9 -->
+## [win32-taskscheduler-2.0.9](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-2.0.9) (2025-06-20)
 
 #### Merged Pull Requests
-- Fix cookstyle lints + Fix Spellcheck [#93](https://github.com/chef/win32-taskscheduler/pull/93) ([HeyItsGilbert](https://github.com/HeyItsGilbert))
+- set up verify pipeline, fix tests [#96](https://github.com/chef/win32-taskscheduler/pull/96) ([rishichawda](https://github.com/rishichawda))
 <!-- latest_release -->
 
 <!-- release_rollup since=2.0.4 -->
 ### Changes not yet released to rubygems.org
 
 #### Merged Pull Requests
+- set up verify pipeline, fix tests [#96](https://github.com/chef/win32-taskscheduler/pull/96) ([rishichawda](https://github.com/rishichawda)) <!-- 2.0.9 -->
 - Fix cookstyle lints + Fix Spellcheck [#93](https://github.com/chef/win32-taskscheduler/pull/93) ([HeyItsGilbert](https://github.com/HeyItsGilbert)) <!-- 2.0.8 -->
 - Add support for Session State Change [#90](https://github.com/chef/win32-taskscheduler/pull/90) ([HeyItsGilbert](https://github.com/HeyItsGilbert)) <!-- 2.0.7 -->
 - Lint Test [#89](https://github.com/chef/win32-taskscheduler/pull/89) ([HeyItsGilbert](https://github.com/HeyItsGilbert)) <!-- 2.0.6 -->
