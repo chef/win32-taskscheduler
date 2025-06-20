@@ -8,7 +8,6 @@ Gem::Specification.new do |spec|
   spec.email      = "djberg96@gmail.com"
   spec.homepage   = "https://github.com/chef/win32-taskscheduler"
   spec.summary    = "A library for the Windows task scheduler"
-  spec.test_files = Dir["test/*, spec/**/*"]
   spec.files      = Dir["lib/**/*"]
 
   spec.add_dependency("ffi")

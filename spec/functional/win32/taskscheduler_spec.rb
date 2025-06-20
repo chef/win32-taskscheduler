@@ -53,7 +53,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
         expect(no_of_tasks).to eq(0)
       end
 
-      it "Raises error when path separators(\\\) are absent" do
+      it "Raises error when path separators(\\) are absent" do
         invalid_path = "Foo"
         expect { ts.new(@task, @trigger, invalid_path) }.to raise_error(ArgumentError)
         expect(no_of_tasks).to eq(0)
@@ -670,7 +670,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
 
   describe "#trigger_string" do
     before { create_task }
-    it "Returns a string that describes the current trigger at "\
+    it "Returns a string that describes the current trigger at " \
        "the specified index for the active task" do
          expect(@ts.trigger_string(0)).to be_a(String)
        end
@@ -842,7 +842,7 @@ RSpec.describe Win32::TaskScheduler, :windows_only do
   describe "#trigger" do
     before { create_task }
 
-    it "Returns a hash that describes the trigger "\
+    it "Returns a hash that describes the trigger " \
        "at the given index for the current task" do
          trigger = @ts.trigger(0)
          expect(trigger).to be_a(Hash)

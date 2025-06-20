@@ -25,6 +25,16 @@ task :example do
   ruby "-Iib examples/taskscheduler_example.rb"
 end
 
+desc "Check the code for linting/styling errors"
+task :style do
+  require "rubocop/rake_task"
+
+  system("bundle exec cookstyle --chefstyle -c .rubocop.yml")
+rescue LoadError => e
+  puts "rubocop/cookstyle gem is not installed. Run `bundle install` first to make sure all dependencies are installed."
+  puts e.message
+end
+
 begin
   require "rspec/core/rake_task"
 
@@ -36,17 +46,6 @@ rescue LoadError
   task :spec do
     abort "rspec is not installed. bundle install first to make sure all dependencies are installed."
   end
-end
-
-begin
-  require "chefstyle"
-  require "rubocop/rake_task"
-  desc "Run Chefstyle tests"
-  RuboCop::RakeTask.new(:style) do |task|
-    task.options += ["--display-cop-names", "--no-color"]
-  end
-rescue LoadError
-  puts "chefstyle gem is not installed. bundle install first to make sure all dependencies are installed."
 end
 
 begin
