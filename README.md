@@ -64,10 +64,6 @@ Please submit any bug reports to the project page at:
 
 <http://github.com/chef/win32-taskscheduler>
 
-# Copyright
-
-- (C) 2003-2017 Daniel J. Berger All Rights Reserved
-- (C) 2018 Chef Software, Inc. All Rights Reserved
 
 # License
 
@@ -77,3 +73,7 @@ Artistic 2.0
 
 - Park Heesob
 - Daniel Berger
+
+# Copyright
+
+See [COPYRIGHT.md](./COPYRIGHT.md).
