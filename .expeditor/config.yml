@@ -27,10 +27,9 @@ release_branches:
 changelog:
   rollup_header: Changes not yet released to rubygems.org
 
-pipelines:
-  - verify:
-      description: Pull Request validation tests
-      public: true
+# The Windows verify pipeline previously ran on Buildkite (see
+# .expeditor/verify.pipeline.yml, now removed). It has been migrated to
+# GitHub Actions; see .github/workflows/windows-verify.yml.
 
 subscriptions:
   # These actions are taken, in order they are specified, anytime a Pull Request is merged.
