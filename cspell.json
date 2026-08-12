@@ -485,6 +485,7 @@
     "HCURSOR",
     "HDDEDATA",
     "HDESK",
+    "hcs",
     "hdidutil",
     "HDROP",
     "HDWP",

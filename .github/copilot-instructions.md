@@ -221,7 +221,7 @@ The repository uses GitHub Actions for continuous integration:
   regardless of repo content, so deleting that file causes existing
   Buildkite builds to fail outright (`ENOENT`) rather than being
   retired. Both pipelines run in parallel until a Chef sustaining-team
-  member deregisters/decommissions the Buildkite pipeline and removes
+  member decommissions the Buildkite pipeline and removes
   it as a required status check in branch protection — only then
   should the `.expeditor/verify.pipeline.yml` file, its scripts, and
   the `pipelines:` entry be deleted.
