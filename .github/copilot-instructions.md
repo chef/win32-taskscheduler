@@ -207,12 +207,24 @@ The repository uses GitHub Actions for continuous integration:
   Task Scheduler COM APIs)
 - **Migration note**: this workflow replaces the pull-request validation
   previously run on Buildkite (`chef-win32-taskscheduler-main-verify`,
-  driven by the now-removed `.expeditor/verify.pipeline.yml` and
+  driven by `.expeditor/verify.pipeline.yml` and
   `.expeditor/scripts/install_ruby.ps1` / `run_windows_tests.ps1`, which
   installed Ruby via Chocolatey on self-hosted Windows agents). GitHub's
   `windows-latest` runners come with Ruby pre-installed and are used here
   via `ruby/setup-ruby` instead, removing the need for a custom Ruby
   install step and the self-hosted Buildkite queue.
+  The Buildkite pipeline/scripts and the `pipelines: - verify` entry in
+  `.expeditor/config.yml` are intentionally **kept in place** for now:
+  the Buildkite pipeline is registered externally on buildkite.com, and
+  its build step unconditionally runs
+  `expeditor buildkite trigger-pipeline .expeditor/verify.pipeline.yml`
+  regardless of repo content, so deleting that file causes existing
+  Buildkite builds to fail outright (`ENOENT`) rather than being
+  retired. Both pipelines run in parallel until a Chef sustaining-team
+  member deregisters/decommissions the Buildkite pipeline and removes
+  it as a required status check in branch protection — only then
+  should the `.expeditor/verify.pipeline.yml` file, its scripts, and
+  the `pipelines:` entry be deleted.
 
 ### Validating Windows-Specific Changes Locally with Docker
 
