@@ -1,0 +1,4 @@
+# Ensure consistent LF line endings for all text files regardless of the
+# platform or local git config (e.g. core.autocrlf) used to check them out.
+# This keeps chefstyle's Layout/EndOfLine cop happy on Windows CI runners.
+* text=auto eol=lf
