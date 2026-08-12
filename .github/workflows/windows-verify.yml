@@ -7,6 +7,9 @@ name: windows verify
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   run-specs:
     runs-on: windows-latest
