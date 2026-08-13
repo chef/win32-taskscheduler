@@ -27,6 +27,14 @@ release_branches:
 changelog:
   rollup_header: Changes not yet released to rubygems.org
 
+# NOTE: pull request verification has been migrated to GitHub Actions
+# (see .github/workflows/windows-verify.yml). The 'pipelines: - verify'
+# registration below still drives the existing Buildkite pipeline
+# (chef-win32-taskscheduler-main-verify); it is intentionally left in
+# place until that Buildkite pipeline is deregistered/decommissioned by
+# the Chef sustaining team and its required status check is removed
+# from branch protection, otherwise Buildkite builds fail outright
+# (missing .expeditor/verify.pipeline.yml) instead of being retired.
 pipelines:
   - verify:
       description: Pull Request validation tests

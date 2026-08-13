@@ -1,23 +1,19 @@
 ---
+# This Buildkite pipeline has been migrated to GitHub Actions
+# (.github/workflows/windows-verify.yml). It is kept as a no-op here
+# because the Buildkite pipeline itself is registered externally and
+# unconditionally invokes this file; deleting it breaks the build with
+# ENOENT instead of retiring it. This file can be removed once a Chef
+# sustaining-team member decommissions the Buildkite pipeline and
+# removes it from required branch-protection checks.
 expeditor:
   defaults:
     buildkite:
-      retry:
-        automatic:
-          limit: 1
-      timeout_in_minutes: 60
+      timeout_in_minutes: 5
 
 steps:
-  - label: run-specs-ruby-3.1
+  - label: "no-op (migrated to GitHub Actions)"
     command:
-      - .expeditor/scripts/install_ruby.ps1 -RubyVersion "3.1.6.1"
-      - .expeditor/scripts/run_windows_tests.ps1
-    agents:
-      queue: default-windows-2019-privileged
-
-  - label: run-specs-ruby-3.4
-    command:
-      - .expeditor/scripts/install_ruby.ps1 -RubyVersion "3.4.4.2"
-      - .expeditor/scripts/run_windows_tests.ps1
+      - echo "This pipeline has been migrated to GitHub Actions. See .github/workflows/windows-verify.yml"
     agents:
       queue: default-windows-2019-privileged

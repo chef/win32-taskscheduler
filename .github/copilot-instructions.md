@@ -12,7 +12,8 @@ The `win32-taskscheduler` is a Ruby library that provides an interface to the MS
 win32-taskscheduler/
 ├── .github/                      # GitHub configuration and templates
 │   ├── workflows/                # GitHub Actions workflows
-│   │   └── lint.yml             # Linting and spellcheck workflow
+│   │   ├── lint.yml              # Linting and spellcheck workflow
+│   │   └── windows-verify.yml    # Windows Ruby build/test verify workflow
 │   ├── CODEOWNERS               # Code ownership definitions
 │   ├── ISSUE_TEMPLATE.md        # Issue template
 │   ├── PULL_REQUEST_TEMPLATE.md # PR template
@@ -195,6 +196,78 @@ The repository uses GitHub Actions for continuous integration:
   - **Spellcheck**: Documentation spellcheck using `cspell`
 - **Ruby Version**: 3.1
 - **Platform**: Ubuntu Latest
+
+#### Windows Verify Workflow (`.github/workflows/windows-verify.yml`)
+- **Triggers**: Pull requests and pushes to main branch
+- **Jobs**: `run-specs` — matrix build across Ruby 3.1.6 and 3.4.4
+- **Platform**: `windows-latest` (GitHub-hosted runner)
+- **Steps**: checkout → `ruby/setup-ruby` (installs Ruby + bundler cache) →
+  install/run `cookstyle --chefstyle` → `bundle exec rake` (style + full
+  RSpec suite, including functional specs that exercise the real Windows
+  Task Scheduler COM APIs)
+- **Migration note**: this workflow replaces the pull-request validation
+  previously run on Buildkite (`chef-win32-taskscheduler-main-verify`,
+  driven by `.expeditor/verify.pipeline.yml` and
+  `.expeditor/scripts/install_ruby.ps1` / `run_windows_tests.ps1`, which
+  installed Ruby via Chocolatey on self-hosted Windows agents). GitHub's
+  `windows-latest` runners come with Ruby pre-installed and are used here
+  via `ruby/setup-ruby` instead, removing the need for a custom Ruby
+  install step and the self-hosted Buildkite queue.
+  The Buildkite pipeline is registered externally on buildkite.com, and
+  its build step unconditionally runs
+  `expeditor buildkite trigger-pipeline .expeditor/verify.pipeline.yml`
+  regardless of repo content, so deleting that file causes existing
+  Buildkite builds to fail outright (`ENOENT`) rather than being
+  retired. Instead, `.expeditor/verify.pipeline.yml` has been reduced to
+  a **no-op step** (a single `echo` command) that runs quickly and
+  always succeeds, pointing to this GitHub Actions workflow as the
+  replacement. `install_ruby.ps1` and `run_windows_tests.ps1` are no
+  longer invoked by the pipeline but are kept in place for reference.
+  Once a Chef sustaining-team member decommissions the Buildkite
+  pipeline and removes it as a required status check in branch
+  protection, the `.expeditor/verify.pipeline.yml` file, its scripts,
+  and the `pipelines:` entry in `.expeditor/config.yml` can be deleted.
+
+### Validating Windows-Specific Changes Locally with Docker
+
+Because this gem's functional specs call into the real Windows Task
+Scheduler COM API, changes to Windows-only code, CI scripts, or the
+Windows workflow should be validated in a Windows environment before
+pushing, rather than relying solely on a CI round-trip. If Docker
+Desktop is running in **Windows container mode**, you can validate most
+of the CI steps locally:
+
+```powershell
+# Confirm Docker is in Windows container mode
+docker info --format '{{.OSType}}'   # should print "windows"
+
+# Pick a Windows base image whose build matches your host OS build to
+# avoid "hcs::CreateComputeSystem ... unrecognized format" errors, e.g.:
+[System.Environment]::OSVersion.Version   # compare Build number
+docker pull mcr.microsoft.com/windows/servercore:ltsc2025   # or ltsc2019/ltsc2022
+
+# If the image build doesn't match the host, try Hyper-V isolation instead:
+docker run --rm --isolation=hyperv mcr.microsoft.com/windows/servercore:ltsc2019 ...
+
+# Mount the repo and run a script the same way CI would, e.g. to test a
+# Ruby install script and the bundle/cookstyle/rake pipeline end-to-end:
+docker run --rm -v "${PWD}:C:\repo" -w C:\repo `
+  mcr.microsoft.com/windows/servercore:ltsc2025 `
+  powershell -NoProfile -Command "ruby --version; bundle install; cookstyle --chefstyle -c .rubocop.yml; bundle exec rake"
+```
+
+Notes:
+- Windows Server Core containers do **not** run the Task Scheduler
+  service by default, so functional specs that create/register real
+  scheduled tasks (`Access is denied` / COM `RegisterTaskDefinition`
+  failures) are expected to fail inside a plain container — this is a
+  container limitation, not a regression. Use this technique to validate
+  install/build/lint steps (Ruby install, `bundle install`, native
+  extension compilation, `cookstyle`), not full functional test parity.
+- Prefer testing in a scratch/temp copy or an isolated branch checkout
+  when a script mutates the working tree (e.g. line-ending
+  normalization tests), and clean up any temporary files/images
+  afterward.
 
 ### Build System Integration
 
