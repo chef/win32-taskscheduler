@@ -4,17 +4,18 @@ Note: this log contains only changes from win32-taskscheduler release 0.4.0 and 
 -- it does not contain the changes from prior releases. To view change history
 prior to release 0.4.0, please visit the [source repository](https://github.com/chef/win32-taskscheduler/commits).
 
-<!-- latest_release 2.0.10 -->
-## [win32-taskscheduler-2.0.10](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-2.0.10) (2025-11-18)
+<!-- latest_release 2.0.11 -->
+## [win32-taskscheduler-2.0.11](https://github.com/chef/win32-taskscheduler/tree/win32-taskscheduler-2.0.11) (2026-08-13)
 
 #### Merged Pull Requests
-- set up ai assisted development workflow [#103](https://github.com/chef/win32-taskscheduler/pull/103) ([rishichawda](https://github.com/rishichawda))
+- CHEF-27685 Update and standardize copyright notices to Progress Software Corporation - copyright_update [#105](https://github.com/chef/win32-taskscheduler/pull/105) ([clintoncwolfe](https://github.com/clintoncwolfe))
 <!-- latest_release -->
 
 <!-- release_rollup since=2.0.4 -->
 ### Changes not yet released to rubygems.org
 
 #### Merged Pull Requests
+- CHEF-27685 Update and standardize copyright notices to Progress Software Corporation - copyright_update [#105](https://github.com/chef/win32-taskscheduler/pull/105) ([clintoncwolfe](https://github.com/clintoncwolfe)) <!-- 2.0.11 -->
 - set up ai assisted development workflow [#103](https://github.com/chef/win32-taskscheduler/pull/103) ([rishichawda](https://github.com/rishichawda)) <!-- 2.0.10 -->
 - set up verify pipeline, fix tests [#96](https://github.com/chef/win32-taskscheduler/pull/96) ([rishichawda](https://github.com/rishichawda)) <!-- 2.0.9 -->
 - Fix cookstyle lints + Fix Spellcheck [#93](https://github.com/chef/win32-taskscheduler/pull/93) ([HeyItsGilbert](https://github.com/HeyItsGilbert)) <!-- 2.0.8 -->
